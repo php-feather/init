@@ -1,0 +1,17 @@
+{
+    "name": "fcarbah/feather",
+    "description": "Feather Init - Lightweight PHP Routing Engine",
+    "type":"library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Francis Carbah",
+            "email": "afrounit@hotmail.com.com"
+        }
+    ],
+    "autoload":{
+        "psr-4":{
+            "Feather\\Init\\":"src/"
+        }
+    }
+}
