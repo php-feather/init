@@ -103,14 +103,7 @@ abstract class Controller {
     public function defaultAction(){
         return $this->defaultAction;
     }
-   
-    protected function isLoggedIn(){
-        
-        $this->user = $this->retrieveFromSession(AUTH_USER_KEY, false);
-        
-        return $this->user? true : false;
-    }
-    
+
     public function runMiddleware(){
         
         foreach($this->middlewares as $key=>$mw){
@@ -127,7 +120,7 @@ abstract class Controller {
         return true;
     }
     
-    private function populateOldInput(){
+    protected function populateOldInput(){
         if($this->oldData){
             $get = isset($this->oldData['get'])? $this->oldData['get'] : array();
             $post = isset($this->oldData['post'])? $this->oldData['post'] : array();
@@ -135,11 +128,11 @@ abstract class Controller {
         }
     }
     
-    private function retrieveFromSession($key = REDIRECT_DATA_KEY,$remove = true){
+    protected function retrieveFromSession($key = REDIRECT_DATA_KEY,$remove = true){
         return Session::get($key, $remove);
     }
     
-    private function saveSession($data,$key = REDIRECT_DATA_KEY){
+    protected function saveSession($data,$key = REDIRECT_DATA_KEY){
         Session::save($data, $key);  
     }
 
