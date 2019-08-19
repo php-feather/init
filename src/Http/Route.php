@@ -62,7 +62,7 @@ class Route {
             }
             
             if($this->isCallBack){
-                return call_user_func($this->controller,$this->paramValues);
+                return call_user_func_array($this->controller,$this->paramValues);
             }
 
             if(method_exists($this->controller, $this->method)){
