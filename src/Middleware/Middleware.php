@@ -45,14 +45,14 @@ abstract class Middleware {
         
         ob_flush();
         
-        $res = \Feather\Objects\Response::error($this->errorMessage);
+        $res = \Feather\Init\Objects\Response::error($this->errorMessage);
         
         if($this->request->isAjax){
             return $this->response->renderJSON($res->toArray(), [], $this->errorCode);
         }
         
         else{
-            \Feather\Http\Session::save(['data'=>$res->toArray()], REDIRECT_DATA_KEY);
+            \Feather\Init\Http\Session::save(['data'=>$res->toArray()], REDIRECT_DATA_KEY);
             return $this->response->redirect($this->rediretUri);
         }
         
