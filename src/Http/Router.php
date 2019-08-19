@@ -176,9 +176,11 @@ class Router {
     }
     
     protected function cleanUri(&$uri){
-        $matches = [];
+
         $uri = preg_replace('/(\/)(\?)(.*)/','$1',
                 preg_replace('/\/(.*?)\.php(.*?)\/?/','/',$uri));
+        
+        $uri = preg_replace('/\?.*/','',$uri);
     }
     
     protected function cleanUriParts(array &$parts){
