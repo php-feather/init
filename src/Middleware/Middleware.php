@@ -5,10 +5,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-namespace Feather\Middleware;
-use Feather\Http\Request;
-use Feather\Http\Response;
-use Feather\Http\Input;
+namespace Feather\Init\Middleware;
+use Feather\Init\Http\Request;
+use Feather\Init\Http\Response;
+use Feather\Init\Http\Input;
 /**
  * Description of Middleware
  *
