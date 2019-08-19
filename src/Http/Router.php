@@ -234,7 +234,23 @@ class Router {
         
         return $count;
     }
-
+    
+    protected function getParamsArgs($uri){
+        
+        $uriParts = explode('/',$uri);
+        $params = array();
+        
+        foreach($uriParts as $part){
+            $matches = [];
+            if(preg_match('/{(.*?)}/',$part,$matches)){
+                $params[] = $matches[1];
+            }
+        }
+        
+        return $params;
+        
+    }
+    
     protected function getParamsFromUri($requestUri,$routeUri){
         
         $params = array();
@@ -304,7 +320,22 @@ class Router {
         
     }
     
+    protected function setClosureRoute($method,$uri,$callback,array $middleware = array()){
+        
+        $params = $this->getParamsArgs($uri);
+        
+        $route = new ClosureRoute($callback,$params);
+        
+        $route->setMiddleware($middleware);
+        
+        $this->routes[$method.'_'.$uri] = $route;
+    }
+    
     protected function setRoute($method,$uri,$callback,array $middleware = array()){
+        
+        if($callback instanceof \Closure){
+            return $this->setClosureRoute($method, $uri, $callback,$middleware);
+        }
         
         $parts = explode('@',$callback);
         
@@ -314,16 +345,7 @@ class Router {
         
         $cAction = $action== null? $controller->defaultAction() : $action;
         
-        $uriParts = explode('/',$uri);
-        
-        $params = array();
-        
-        foreach($uriParts as $part){
-            $matches = [];
-            if(preg_match('/{(.*?)}/',$part,$matches)){
-                $params[] = $matches[1];
-            }
-        }
+        $params = $this->getParamsArgs($uri);
         
         $route = new Route($controller, $cAction, $params);
         $route->setMiddleware($middleware);

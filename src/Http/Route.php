@@ -27,9 +27,7 @@ class Route {
     protected $failedMiddleware;
     
     public function __construct($controller,$method=null,$params=array()) {
-        
-        $this->isCallBack = is_callable($controller)? TRUE : FALSE;
-        
+
         $this->controller = $controller;
         
         if(!$this->isCallBack){
