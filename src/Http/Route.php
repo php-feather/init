@@ -69,7 +69,7 @@ class Route {
 
             if(method_exists($this->controller, $this->method)){
                 
-                if($this->controller->runMiddleware() === true){
+                if($this->controller->runMiddleware($this->method) === true){
                     return call_user_func_array(array($this->controller,$this->method), $this->paramValues);
                 }
             }
