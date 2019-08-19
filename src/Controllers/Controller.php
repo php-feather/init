@@ -108,7 +108,8 @@ abstract class Controller {
         
         foreach($this->middlewares as $key=>$mw){
             
-            if(in_array($method,$this->bypass[$key])){
+            if(isset($this->bypass[$key]) && ( strcasecmp($this->bypass[$key],$method) == 0 ||  
+               (is_array($this->bypass[$key] && in_array($method,$this->bypass[$key])))){
                 return true;
             }
             
