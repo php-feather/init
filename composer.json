@@ -1,5 +1,5 @@
 {
-    "name": "fcarbah/feather",
+    "name": "php-feather/init",
     "description": "Feather Init - Lightweight PHP Routing Engine",
     "type":"library",
     "license": "MIT",
