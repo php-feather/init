@@ -104,9 +104,13 @@ abstract class Controller {
         return $this->defaultAction;
     }
 
-    public function runMiddleware(){
+    public function runMiddleware($method){
         
         foreach($this->middlewares as $key=>$mw){
+            
+            if(in_array($method,$this->bypass[$key])){
+                return true;
+            }
             
             $mw->run();
             $error = $mw->errorCode();
