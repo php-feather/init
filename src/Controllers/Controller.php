@@ -110,7 +110,7 @@ abstract class Controller {
             
             if(isset($this->bypass[$key]) && ( ( !is_array($this->bypass[$key]) && strcasecmp($this->bypass[$key],$method) == 0) ||  
                (is_array($this->bypass[$key]) && preg_grep("/$method/i",$this->bypass[$key])))){
-                return true;
+                continue;
             }
             
             $mw->run();
