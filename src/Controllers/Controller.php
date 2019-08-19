@@ -105,11 +105,11 @@ abstract class Controller {
     }
 
     public function runMiddleware($method){
-        
+       
         foreach($this->middlewares as $key=>$mw){
             
             if(isset($this->bypass[$key]) && ( ( !is_array($this->bypass[$key]) && strcasecmp($this->bypass[$key],$method) == 0) ||  
-               (is_array($this->bypass[$key]) && in_array($method,$this->bypass[$key])))){
+               (is_array($this->bypass[$key]) && preg_grep("/$method/i",$this->bypass[$key])))){
                 return true;
             }
             
