@@ -131,7 +131,7 @@ class Router {
             return new $class();
         }
         
-        return $this->defaultController? new $this->defaultController : null;
+        return null;
         
     }
     protected function autoRunRoute($uri){
@@ -148,8 +148,14 @@ class Router {
         
         $controller = $this->autoDetectController($parts[0]);
         
-        if($controller == NULL){
-            return FALSE;
+        if($controller == NULL ){
+            
+            if($this->defaultController){
+                $controller = new $this->defaultController;
+                array_unshift($parts,$parts[0]);
+            }else{
+                return FALSE;
+            }
         }
         
         if($count == 1){
