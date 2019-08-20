@@ -89,8 +89,8 @@ class Route {
     
     protected function checkMethodRequestType(){
 
-        $path = dirname(__FILE__, 2).'/storage/annotations';
-        $reader = Reader(new Parser,new FileCache($path));
+        $path = dirname(__FILE__, 2).'/storage/';
+        $reader = new Reader(new Parser,new FileCache($path));
         $annotations = $reader->getMethodAnnotations(get_class($this->controller),$this->method);
         $req = Request::getInstance();
         $get = $annotations->get('get');
