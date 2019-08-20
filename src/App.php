@@ -48,7 +48,7 @@ register_shutdown_function(function(){
 });
 
 
-require '../../vendor/autoload.php';
+require dirname(__FILE__, 3).'/vendor/autoload.php';
 
 /**
  * Description of App
