@@ -48,6 +48,7 @@ register_shutdown_function(function(){
 });
 
 
+require 'vendor/autoload.php';
 
 /**
  * Description of App
