@@ -153,6 +153,7 @@ class Router {
             if($this->defaultController){
                 $controller = new $this->defaultController;
                 array_unshift($parts,$parts[0]);
+                $count++;
             }else{
                 return FALSE;
             }
