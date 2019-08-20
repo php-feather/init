@@ -73,7 +73,7 @@ class Route {
 
             if(method_exists($this->controller, $this->method)){
                 
-                if($this->controller->validateAnnotations && !$this->validateRequestType()){
+                if($this->requestMethod == Request::getInstance()->method && $this->controller->validateAnnotations && !$this->validateRequestType()){
                     throw new \Exception('Invalid Request',405);
                 }
                 
