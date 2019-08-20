@@ -16,7 +16,7 @@ use Feather\Init\Http\Session;
 
 function myErrorHandler($code,$message,$file,$line){
     
-    error_log("ERR CODE: $code\nMESSAGE:$message\nFILE:$file || $line");
+    error_log("ERR CODE: $code\nMESSAGE:$message\nFILE:$file || $line",3,STORAGE_PATH.'/app_log');
 
     $app = \Feather\Init\App::getInstance();
 
@@ -38,7 +38,7 @@ function fatalErrorHandler(){
     }else{
         $code = $last_error['type'];$message = $last_error['message'];$file=$last_error['file'];
         $line = $last_error['line'];
-        error_log("ERR CODE: $code\nMESSAGE:$message\nFILE:$file || $line");
+        error_log("ERR CODE: $code\nMESSAGE:$message\nFILE:$file || $line",3,STORAGE_PATH.'/app_log');
         return true;
     }
 }
