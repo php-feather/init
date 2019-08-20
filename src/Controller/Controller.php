@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-namespace Feather\Init\Controllers;
+namespace Feather\Init\Controller;
 
 use Feather\Init\Http\Session;
 use Feather\Init\Http\Input;
@@ -27,6 +27,7 @@ abstract class Controller {
     protected $user;
     protected $middlewares=array();
     protected $bypass =array();
+    public $validateAnnotations=true;
     private $failedMiddleware;
 
     

@@ -323,7 +323,7 @@ class Router {
         $action = isset($parts[1])? $parts[1] : null;
         $params = isset($parts[2])? array_slice($parts, 2) : array();
         
-        $route = new Route($controller,$action,$params);
+        $route = new Route($method,$controller,$action,$params);
         $route->setMiddleware($middleware);
         $this->routes[$method.'_'.$uri] = $route;
         
@@ -333,7 +333,7 @@ class Router {
         
         $params = $this->getParamsArgs($uri);
         
-        $route = new ClosureRoute($callback,$params);
+        $route = new ClosureRoute($method,$callback,$params);
         
         $route->setMiddleware($middleware);
         
@@ -356,7 +356,7 @@ class Router {
         
         $params = $this->getParamsArgs($uri);
         
-        $route = new Route($controller, $cAction, $params);
+        $route = new Route($method,$controller, $cAction, $params);
         $route->setMiddleware($middleware);
         $this->routes[$method.'_'.$uri] = $route;
     }

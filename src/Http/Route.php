@@ -13,6 +13,7 @@ use Minime\Annotations\Reader;
 use Minime\Annotations\Parser;
 use Minime\Annotations\Cache\FileCache;
 
+define('A_STORAGE',dirname(__FILE__, 2).'/storage/');
 /**
  * Description of Route
  *
@@ -28,9 +29,11 @@ class Route {
     protected $isCallBack = false;
     protected $middleWare = array();
     protected $failedMiddleware;
+    protected $requestMethod;
     
-    public function __construct($controller,$method=null,$params=array()) {
-
+    public function __construct($requestMethod,$controller,$method=null,$params=array()) {
+        
+        $this->requestMethod = $requestMethod;
         $this->controller = $controller;
         
         if(!$this->isCallBack){
@@ -70,7 +73,7 @@ class Route {
 
             if(method_exists($this->controller, $this->method)){
                 
-                if(!$this->checkMethodRequestType()){
+                if($this->controller->validateAnnotations && !$this->validateRequestType()){
                     throw new \Exception('Invalid Request',405);
                 }
                 
@@ -87,10 +90,9 @@ class Route {
         }
     }
     
-    protected function checkMethodRequestType(){
-
-        $path = dirname(__FILE__, 2).'/storage/';
-        $reader = new Reader(new Parser,new FileCache($path));
+    protected function validateRequestType(){
+        
+        $reader = new Reader(new Parser,new FileCache(A_STORAGE));
         $annotations = $reader->getMethodAnnotations(get_class($this->controller),$this->method);
         $req = Request::getInstance();
         $get = $annotations->get('get');
