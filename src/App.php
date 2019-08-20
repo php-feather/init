@@ -47,9 +47,6 @@ register_shutdown_function(function(){
     fatalErrorHandler();   
 });
 
-
-require dirname(__FILE__, 3).'/vendor/autoload.php';
-
 /**
  * Description of App
  *
