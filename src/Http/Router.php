@@ -131,7 +131,7 @@ class Router {
             return new $class();
         }
         
-        return null;
+        return $this->defaultController? new $this->defaultController : null;
         
     }
     protected function autoRunRoute($uri){
