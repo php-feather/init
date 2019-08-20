@@ -9,6 +9,9 @@
 namespace Feather\Init\Http;
 
 use Feather\Init\Controllers\Controller;
+use Minime\Annotations\Reader;
+use Minime\Annotations\Parser;
+use Minime\Annotations\Cache\FileCache;
 
 /**
  * Description of Route
@@ -87,7 +90,7 @@ class Route {
     protected function checkMethodRequestType(){
 
         $path = dirname(__FILE__, 2).'/storage/annotations';
-        $reader = \Minime\Annotations\Reader(new \Minime\Annotations\Parser,new \Minime\Annotations\Cache\FileCache($path));
+        $reader = Reader(new Parser,new FileCache($path));
         $annotations = $reader->getMethodAnnotations(get_class($this->controller),$this->method);
         $req = Request::getInstance();
         $get = $annotations->get('get');
