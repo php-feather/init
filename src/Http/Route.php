@@ -67,6 +67,10 @@ class Route {
 
             if(method_exists($this->controller, $this->method)){
                 
+                if(!$this->checkMethodRequestType()){
+                    throw new \Exception('Invalid Request',405);
+                }
+                
                 if($this->controller->runMiddleware($this->method) === true){
                     return call_user_func_array(array($this->controller,$this->method), $this->paramValues);
                 }
@@ -75,9 +79,30 @@ class Route {
             throw new \Exception('Method Does Not Exist',400);
         }
         catch(\Exception $e){
-            die($e->getMessage());
+            //die($e->getMessage());
             throw new \Exception('Method Does Not Exist',400);
         }
+    }
+    
+    protected function checkMethodRequestType(){
+
+        $path = dirname(__FILE__, 2).'/storage/annotations';
+        $reader = \Minime\Annotations\Reader(new \Minime\Annotations\Parser,new \Minime\Annotations\Cache\FileCache($path));
+        $annotations = $reader->getMethodAnnotations(get_class($this->controller),$this->method);
+        $req = Request::getInstance();
+        $get = $annotations->get('get');
+        $post = $annotations->get('post');
+
+        if($get && strcasecmp($req->method,'get')!=0){
+            return FALSE;
+        }
+
+        if($post && strcasecmp($req->method,'post')!=0){
+            return FALSE;
+        }
+
+        return true;
+
     }
     
     protected function passMiddlewares(){

@@ -14,5 +14,7 @@
             "Feather\\Init\\":"src/"
         }
     },
-    "minimum-stability": "dev"
+    "require": {
+        "minime/annotations": "^3.1"
+    }
 }
