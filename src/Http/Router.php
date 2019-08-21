@@ -83,7 +83,7 @@ class Router {
             return $route->run();
         }
         
-        if(!$this->autoRunRoute($uri)){
+        if(!$this->autoRunRoute($uri,$method)){
             throw new \Exception('Route not found',404);
         }
     }
@@ -134,7 +134,7 @@ class Router {
         return null;
         
     }
-    protected function autoRunRoute($uri){
+    protected function autoRunRoute($uri,$reqMethod){
         
         $parts = preg_split('/\s*\/\s*/', $uri);
         
@@ -160,7 +160,7 @@ class Router {
         }
         
         if($count == 1){
-            $route = new Route($controller, $controller->defaultAction());
+            $route = new Route($reqMethod,$controller, $controller->defaultAction());
             $route->run();
             return TRUE;
         }
@@ -168,7 +168,7 @@ class Router {
         $method = $parts[1];
         
         if(!method_exists($controller, $method)){
-            $route = new Route($controller, $controller->defaultAction());
+            $route = new Route($reqMethod,$controller, $controller->defaultAction());
             $params = $count > 1? array_slice($parts, 1) : array();
             $route->setParamValues($params);
             $route->run();
@@ -176,7 +176,7 @@ class Router {
         }
         
         $params = $count >2? array_slice($parts,2) : array();
-        $route = new Route($controller, $method);
+        $route = new Route($reqMethod,$controller, $method);
         $route->setParamValues($params);
         $route->run();
         return true;
