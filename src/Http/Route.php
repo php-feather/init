@@ -30,6 +30,7 @@ class Route {
     protected $middleWare = array();
     protected $failedMiddleware;
     protected $requestMethod;
+    protected $fallBack = false;
     
     public function __construct($requestMethod,$controller,$method=null,$params=array()) {
         
@@ -44,6 +45,10 @@ class Route {
     
     public function getParams (){
         
+    }
+    
+    public function setFallback(bool $val){
+        $this->fallBack = $val;
     }
     
     public function setMiddleware(array $middleWares = array(0)){
@@ -74,7 +79,7 @@ class Route {
             if(method_exists($this->controller, $this->method)){
                 
                 if(strcasecmp($this->requestMethod,Request::getInstance()->method) != 0 || ($this->controller->validateAnnotations && !$this->validateRequestType())){
-                    throw new \Exception('Invalid Request',405);
+                    throw new \Exception('Invalid Request. MEthod Not Allowed',405);
                 }
                 $middleWare = $this->controller->runMiddleware($this->method);
                 
@@ -84,11 +89,13 @@ class Route {
                 
                 return $middleWare->redirect();
             }
-        
-            throw new \Exception('Method Does Not Exist',400);
+            
+            if($this->fallBack){
+                throw new \Exception('Request Resource Not Found',404);
+            }
+            throw new \Exception('Bad Request',400);
         }
         catch(\Exception $e){
-            //die($e->getMessage());
             throw new \Exception($e->getMessage(),$e->getCode());
         }
     }

@@ -84,7 +84,7 @@ class Router {
         }
         
         if(!$this->autoRunRoute($uri,$method)){
-            throw new \Exception('Route not found',404);
+            throw new \Exception('Requested Resource Not Found',404);
         }
     }
     
@@ -147,12 +147,13 @@ class Router {
         }
         
         $controller = $this->autoDetectController($parts[0]);
-        
+        $fallback = false;
         if($controller == NULL ){
             
             if($this->defaultController){
                 $controller = new $this->defaultController;
                 array_unshift($parts,$parts[0]);
+                $fallback = true;
                 $count++;
             }else{
                 return FALSE;
@@ -161,6 +162,7 @@ class Router {
         
         if($count == 1){
             $route = new Route($reqMethod,$controller, $controller->defaultAction());
+            $route->setFallback($fallback);
             $route->run();
             return TRUE;
         }
@@ -170,6 +172,7 @@ class Router {
         $params = $count >2? array_slice($parts,2) : array();
         $route = new Route($reqMethod,$controller, $method);
         $route->setParamValues($params);
+        $route->setFallback($fallback);
         $route->run();
         return true;
     }

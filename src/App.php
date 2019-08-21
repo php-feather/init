@@ -23,7 +23,7 @@ function myErrorHandler($code,$message,$file,$line){
     $app->log($msg);
 
     if(preg_match('/(.*?)Controllers(.*?)\'\snot\sfound/i',$message)){
-        return $app->errorResponse('Route Not Found',404);
+        return $app->errorResponse('Page Not Found',404);
     }
     $app->errorResponse('Internal Server Error'.PHP_EOL.$message,500);
 }
