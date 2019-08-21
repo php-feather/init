@@ -16,9 +16,11 @@ use Feather\Init\Http\Session;
 
 function myErrorHandler($code,$message,$file,$line){
     
-    error_log("ERR CODE: $code\nMESSAGE:$message\nFILE:$file || $line",3,STORAGE_PATH.'/app_log');
+    $msg ="ERR CODE: $code\nMESSAGE:$message\nFILE:$file || $line";
 
     $app = \Feather\Init\App::getInstance();
+    
+    $app->log($msg);
 
     if(preg_match('/(.*?)Controllers(.*?)\'\snot\sfound/i',$message)){
         return $app->errorResponse('Route Not Found',404);
@@ -38,7 +40,7 @@ function fatalErrorHandler(){
     }else{
         $code = $last_error['type'];$message = $last_error['message'];$file=$last_error['file'];
         $line = $last_error['line'];
-        error_log("ERR CODE: $code\nMESSAGE:$message\nFILE:$file || $line",3,STORAGE_PATH.'/app_log');
+        App::log("ERR CODE: $code\nMESSAGE:$message\nFILE:$file || $line");
         return true;
     }
 }
@@ -84,6 +86,10 @@ class App {
         $this->router->setDefaultController('Feather\Init\Controllers\HomeController');
     }
     
+    public static function log($msg,$filePath=STORAGE_PATH.'/app_log'){
+        error_log($msg,3,$filePath);
+    }
+    
     public function run(){
 
         try{
@@ -111,6 +117,10 @@ class App {
 
     }
     
+    public function setCustomErrorHandler(\Closure $errorhandler){
+        $this->errorHandler = $errorhandler;
+    }
+    
     public function setErrorPage($page){
         
         if(stripos($page,'/') > 0){
@@ -132,10 +142,6 @@ class App {
         else{
             setcookie(session_name(),session_id(),time()+SESSION_LIFETIME);
         }
-        
-    }
-    
-    public function customErrorHandler(){
         
     }
     
