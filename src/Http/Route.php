@@ -76,10 +76,13 @@ class Route {
                 if(strcasecmp($this->requestMethod,Request::getInstance()->method) != 0 || ($this->controller->validateAnnotations && !$this->validateRequestType())){
                     throw new \Exception('Invalid Request',405);
                 }
+                $middleWare = $this->controller->runMiddleware($this->method);
                 
-                if($this->controller->runMiddleware($this->method) === true){
+                if($middleWare === true){
                     return call_user_func_array(array($this->controller,$this->method), $this->paramValues);
                 }
+                
+                return $middleWare->redirect();
             }
         
             throw new \Exception('Method Does Not Exist',400);

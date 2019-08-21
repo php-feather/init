@@ -119,7 +119,7 @@ abstract class Controller {
             
             if($error != 0){
                 $this->failedMiddleware = $key;
-                return $mw->redirect();
+                return $mw;
             }
         }
         
