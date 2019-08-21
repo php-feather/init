@@ -86,7 +86,7 @@ class Route {
         }
         catch(\Exception $e){
             //die($e->getMessage());
-            throw new \Exception('Method Does Not Exist',400);
+            throw new \Exception($e->getMessage(),$e->getCode());
         }
     }
     
