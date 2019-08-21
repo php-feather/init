@@ -166,15 +166,7 @@ class Router {
         }
         
         $method = $parts[1];
-        
-        if(!method_exists($controller, $method)){
-            $route = new Route($reqMethod,$controller, $controller->defaultAction());
-            $params = $count > 1? array_slice($parts, 1) : array();
-            $route->setParamValues($params);
-            $route->run();
-            return TRUE;
-        }
-        
+
         $params = $count >2? array_slice($parts,2) : array();
         $route = new Route($reqMethod,$controller, $method);
         $route->setParamValues($params);
