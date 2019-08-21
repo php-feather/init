@@ -1,4 +1,4 @@
 /nbproject/private/
 nbproject/
 vendor/
-src/storage/*
+/src/storage/*
