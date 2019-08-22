@@ -1,4 +1,5 @@
 /nbproject/private/
 nbproject/
 vendor/
-/src/storage/*
+src/storage/*
+!src/storage/.gitkeep
