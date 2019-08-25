@@ -7,7 +7,9 @@
  */
 
 namespace Feather\Init\Http;
-
+use Feather\Session\Session;
+define('CUR_REQ_KEY','cur_req');
+define('PREV_REQ_KEY','prev_req');
 /**
  * Description of Request
  *

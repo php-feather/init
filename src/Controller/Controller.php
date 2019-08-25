@@ -8,10 +8,12 @@
 
 namespace Feather\Init\Controller;
 
-use Feather\Init\Http\Session;
+use Feather\Session\Session;
 use Feather\Init\Http\Input;
 use Feather\Init\Http\Request;
 use Feather\Init\Http\Response;
+
+define('REDIRECT_DATA_KEY' ,'redirect_data');
 /**
  * Description of Controller
  *
@@ -27,6 +29,7 @@ abstract class Controller {
     protected $user;
     protected $middlewares=array();
     protected $bypass =array();
+    protected $viewPath ='';
     public $validateAnnotations=true;
     private $failedMiddleware;
 
@@ -80,7 +83,7 @@ abstract class Controller {
     
     public function renderWrappedView($view,array $data=array()){
         
-        $filename = VIEWS_PATH.'/temp_wrapper_view.php';
+        $filename = $this->viewPath.'temp_wrapper_view.php';
         $file = fopen($filename, 'w');
         
         fwrite($file, "<?php include_once 'header.php';\n");

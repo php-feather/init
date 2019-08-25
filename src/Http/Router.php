@@ -22,6 +22,8 @@ class Router {
     protected $response;
     protected $getRoutes = array();
     protected $postRoutes = array();
+    protected $ctrlNamespace = "Feather\\Init\\Controllers\\";
+    protected $ctrlPath = '';
     private static $self;
     
     
@@ -88,6 +90,14 @@ class Router {
         }
     }
     
+    public function setControllerNamespace($ctrlNamespace){
+        $this->ctrlNamespace = $ctrlNamespace;
+    }
+    
+    public function setControllerPath($path){
+        $this->ctrlPath = strripos($path,'/') === strlen($path)-1? $path : $path.'/';
+    }
+    
     public function setDefaultController($defaultController){
         $this->defaultController = $defaultController;
         return $this;
@@ -110,18 +120,18 @@ class Router {
         
         foreach($ctrl as $c){
             
-            $fullPath = ABS_PATH.'/Controllers/'.$c.'.php';
-            $fullPath2 = ABS_PATH.'/Controllers/'.$c.'Controller.php';
+            $fullPath = $this->ctrlPath.$c.'.php';
+            $fullPath2 = $this->ctrlPath.$c.'Controller.php';
             
             if(file_exists($fullPath) && basename($fullPath) == $c.'.php'){
                 $fileExist = true;
-                $class = CTRL_NAMESPACE.$c;
+                $class = $this->ctrlNamespace.$c;
                 break;
             }
             
             if(file_exists($fullPath2) && basename($fullPath2) == $c.'Controller.php'){
                 $fileExist = true;
-                $class = CTRL_NAMESPACE.$c.'Controller';
+                $class = $this->ctrlNamespace.$c.'Controller';
                 break;
             }
             

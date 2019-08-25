@@ -11,7 +11,7 @@ namespace Feather\Init;
 use Feather\Init\Http\Router;
 use Feather\Init\Http\Request;
 use Feather\Init\Http\Response;
-use Feather\Init\Http\Session;
+use Feather\Session\Session;
 
 
 function myErrorHandler($code,$message,$file,$line){

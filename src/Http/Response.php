@@ -15,6 +15,7 @@ namespace Feather\Init\Http;
  */
 class Response {
     
+    protected $viewPath='';
     private static $self;
     
     private function __construct() {
@@ -42,7 +43,7 @@ class Response {
             ${$key} = $val;
         }
 
-        $viewPath = VIEWS_PATH.'/'.$view;
+        $viewPath = $this->viewPath.$view;
         
         $filename = $this->setTemplates(array_keys($data), $viewPath);
         
@@ -109,6 +110,10 @@ class Response {
             header($header);
         }
     }
+    
+    public function setViewPath($path){
+        $this->viewPath = strripos($path,'/') === strlen($path)-1? $path : $path.'/';
+    }
 
     protected function __init(){
         $this->oldData = $this->retrieveFromSession();
@@ -131,7 +136,7 @@ class Response {
         fclose($viewFile);
         
         
-        $filepath = VIEWS_PATH.'/temp_view.php';
+        $filepath = $this->viewPath.'temp_view.php';
         $file = fopen($filepath, 'w');
         
         if($file){

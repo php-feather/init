@@ -52,7 +52,7 @@ abstract class Middleware {
         }
         
         else{
-            \Feather\Init\Http\Session::save(['data'=>$res->toArray()], REDIRECT_DATA_KEY);
+            \Feather\Session\Session::save(['data'=>$res->toArray()], REDIRECT_DATA_KEY);
             return $this->response->redirect($this->rediretUri);
         }
         
