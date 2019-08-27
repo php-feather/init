@@ -66,13 +66,6 @@ abstract class Controller {
 
         $this->__init();
 
-        if(!isset($data['msg'])){
-            $data = array_merge($data,\Feather\Init\Objects\Response::success()->toArray());
-        }
-        if(!isset($data['user'])){
-            $data['user'] = $this->user;
-        }
-        
         if($this->oldData){
             $data = array_merge($data,$this->oldData['data']);
         }
