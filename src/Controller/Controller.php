@@ -73,21 +73,7 @@ abstract class Controller {
        $this->response->renderView($view,$data);
         
     }
-    
-    public function renderWrappedView($view,array $data=array()){
-        
-        $filename = $this->viewPath.'temp_wrapper_view.php';
-        $file = fopen($filename, 'w');
-        
-        fwrite($file, "<?php include_once 'header.php';\n");
-        fwrite($file, "include_once '$view';\n");
-        fwrite($file, "include_once 'footer.php';\n");
-        
-        fclose($file);
-        
-        return $this->renderView('temp_wrapper_view.php', $data);
-    }
-    
+
     public function renderJSON($data,$headers=array(),$httpCode=200){
         return $this->response->renderJson($data,$headers,$httpCode);
     }
