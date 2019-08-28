@@ -22,6 +22,8 @@ class Router {
     protected $response;
     protected $getRoutes = array();
     protected $postRoutes = array();
+    protected $putRoutes = array();
+    protected $deleteRoutes = array();
     protected $ctrlNamespace = "Feather\\Init\\Controllers\\";
     protected $ctrlPath = '';
     private static $self;
@@ -38,15 +40,24 @@ class Router {
         return self::$self;       
     }
     
+    public function delete($uri,$callback=null,array $middleware=array()){
+
+        $this->deleteRoutes[$uri] = $uri; 
+        
+        $route = $this->buildRoute(RequestMethod::DELETE, $uri, $callback, $middleware);
+        
+        $this->routes[RequestMethod::DELETE.'_'.$uri] = $route;
+        
+        return $this;
+    }
+    
     public function get($uri,$callback=null,array $middleware=array()){
 
         $this->getRoutes[$uri] = $uri; 
         
-        if($callback == NULL){
-            $this->parseUri($uri,'post',$middleware);
-        }else{
-            $this->setRoute('get',$uri, $callback,$middleware);
-        }
+        $route = $this->buildRoute(RequestMethod::GET, $uri, $callback, $middleware);
+        
+        $this->routes[RequestMethod::GET.'_'.$uri] = $route;
         
         return $this;
     }
@@ -55,11 +66,20 @@ class Router {
         
         $this->postRoutes[$uri] = $uri; 
         
-        if($callback == NULL){
-            $this->parseUri($uri,'post',$middleware);
-        }else{
-            $this->setRoute('post',$uri, $callback,$middleware);
-        }
+        $route = $this->buildRoute(RequestMethod::POST, $uri, $callback, $middleware);
+        
+        $this->routes[RequestMethod::POST.'_'.$uri] = $route;
+        
+        return $this;
+    }
+    
+    public function put($uri,$callback=null,array $middleware=array()){
+
+        $this->putRoutes[$uri] = $uri; 
+        
+        $route = $this->buildRoute(RequestMethod::PUT, $uri, $callback, $middleware);
+        
+        $this->routes[RequestMethod::PUT.'_'.$uri] = $route;
         
         return $this;
     }
@@ -103,6 +123,15 @@ class Router {
         return $this;
     }
     
+    protected function buildRoute($reqMethod,$uri,$callback=null,array $middleware=array()){
+
+        if($callback == NULL){
+            return $this->parseUri($uri,$reqMethod,$middleware);
+        }else{
+            return $this->setRoute($reqMethod,$uri, $callback,$middleware);
+        }
+        
+    }
     
     protected function autoDetectController($controller){
         
@@ -144,6 +173,7 @@ class Router {
         return null;
         
     }
+    
     protected function autoRunRoute($uri,$reqMethod){
         
         $parts = preg_split('/\s*\/\s*/', $uri);
@@ -320,8 +350,8 @@ class Router {
         $parts = explode('/',$uri);
         
         if(empty($parts) || $parts[0]=='/'){
-            $this->routes[$method.'_/'] = $this->defaultRoute();
-            return;
+            //$this->routes[$method.'_/'] = $this->defaultRoute();
+            return $this->deleteRoute();
         }
         
         $controller = new $parts[0];
@@ -330,7 +360,8 @@ class Router {
         
         $route = new Route($method,$controller,$action,$params);
         $route->setMiddleware($middleware);
-        $this->routes[$method.'_'.$uri] = $route;
+        //$this->routes[$method.'_'.$uri] = $route;
+        return $route;
         
     }
     
@@ -342,7 +373,8 @@ class Router {
         
         $route->setMiddleware($middleware);
         
-        $this->routes[$method.'_'.$uri] = $route;
+        return $route;
+        //$this->routes[$method.'_'.$uri] = $route;
     }
     
     protected function setRoute($method,$uri,$callback,array $middleware = array()){
@@ -363,7 +395,8 @@ class Router {
         
         $route = new Route($method,$controller, $cAction, $params);
         $route->setMiddleware($middleware);
-        $this->routes[$method.'_'.$uri] = $route;
+        //$this->routes[$method.'_'.$uri] = $route;
+        return $route;
     }
     
 }
