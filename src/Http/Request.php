@@ -74,7 +74,9 @@ class Request {
     
     protected function setPreviousRequest(){
         
-        $prev = Session::get(CUR_REQ_KEY);
+        $referrer = isset($_SERVER['HTTP_REFERER'])? preg_replace('/(http\:\/\/)(.*?)(\/.*)/i','$3',$_SERVER['HTTP_REFERER']) : null;
+        
+        $prev = $referrer== null? Session::get(CUR_REQ_KEY) : $referrer;
         
         if($prev == null){
             $prev= '';

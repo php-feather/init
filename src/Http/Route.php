@@ -31,6 +31,7 @@ class Route {
     protected $failedMiddleware;
     protected $requestMethod;
     protected $fallBack = false;
+    protected $request;
     
     public function __construct($requestMethod,$controller,$method=null,$params=array()) {
         
@@ -41,6 +42,7 @@ class Route {
             $this->method = $method=='null'? $this->controller->defaultAction() : $method;
         }
         $this->params = is_array($params)? $params : array($params);
+        $this->request = Request::getInstance();
     }
     
     public function getParams (){
@@ -111,20 +113,18 @@ class Route {
         
         $reader = new Reader(new Parser,new FileCache(A_STORAGE));
         $annotations = $reader->getMethodAnnotations(get_class($this->controller),$this->method);
-        $req = Request::getInstance();
-        $get = $annotations->get('get');
-        $post = $annotations->get('post');
-
-        if($get && strcasecmp($req->method,'get')!=0){
-            return FALSE;
-        }
-
-        if($post && strcasecmp($req->method,'post')!=0){
-            return FALSE;
+        
+        $methods = RequestMethod::methods();
+        
+        foreach($methods as $method){
+            
+            if(($annotations->get(strtolower($method)) || $annotations->get($method)) && !in_array($this->request->method,$methods)){
+                return FALSE;
+            }
         }
 
         return true;
-
+        
     }
     
     protected function passMiddlewares(){

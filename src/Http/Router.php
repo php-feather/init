@@ -46,38 +46,34 @@ class Router {
         
         $route = $this->buildRoute($methods[0], $uri, $callback, $middleware);
         
-        foreach(RequestMethod::methods() as $method){
-            switch($method){
-                case RequestMethod::DELETE:
-                    $this->deleteRoutes[$uri] = $uri;
-                    $newRoute = clone $route;
-                    $newRoute->setRequestMethod(RequestMethod::DELETE);
-                    break;
-                case RequestMethod::GET:
-                    $this->getRoutes[$uri] = $uri;
-                    $newRoute = clone $route;
-                    $newRoute->setRequestMethod(RequestMethod::GET);
-                    break;
-                case RequestMethod::POST:
-                     $this->postRoutes[$uri] = $uri;
-                    $newRoute = clone $route;
-                    $newRoute->setRequestMethod(RequestMethod::POST);
-                    break;
-                case RequestMethod::PUT:
-                    $this->putRoutes[$uri] = $uri;
-                    $newRoute = clone $route;
-                    $newRoute->setRequestMethod(RequestMethod::PUT);
-                    break;
-                default:
-                    break;
-            }
-            
-            if(isset($newRoute)){
-                $this->routes[$method.'_'.$uri] = $newRoute;
-            }
-            
-        }
+        $this->addMethodRoutes($uri, $route, $methods);
+        
         return $this;
+    }
+    
+    public function except(array $exclude,$uri,$callback=null,array $middleware=array()){
+        
+        $methods = RequestMethod::methods();
+        
+        foreach($exclude as $method){
+            $indx = array_search(strtoupper($method),$methods);
+            if($indx >= 0){
+                unset($methods[$indx]);
+            }
+        }
+        
+        if(!empty($methods)){
+            
+            $methods = array_values($methods);
+        
+            $route = $this->buildRoute($methods[0], $uri, $callback, $middleware);
+
+            $this->addMethodRoutes($uri, $route, $methods);
+        }
+        
+        return $this;
+        
+            
     }
     
     public function delete($uri,$callback=null,array $middleware=array()){
@@ -170,6 +166,40 @@ class Router {
     public function setDefaultController($defaultController){
         $this->defaultController = $defaultController;
         return $this;
+    }
+    
+    protected function addMethodRoutes($uri,$route,$methods){
+        
+        foreach($methods as $method){
+            switch($method){
+                case RequestMethod::DELETE:
+                    $this->deleteRoutes[$uri] = $uri;
+                    $newRoute = clone $route;
+                    $newRoute->setRequestMethod(RequestMethod::DELETE);
+                    break;
+                case RequestMethod::GET:
+                    $this->getRoutes[$uri] = $uri;
+                    $newRoute = clone $route;
+                    $newRoute->setRequestMethod(RequestMethod::GET);
+                    break;
+                case RequestMethod::POST:
+                     $this->postRoutes[$uri] = $uri;
+                    $newRoute = clone $route;
+                    $newRoute->setRequestMethod(RequestMethod::POST);
+                    break;
+                case RequestMethod::PUT:
+                    $this->putRoutes[$uri] = $uri;
+                    $newRoute = clone $route;
+                    $newRoute->setRequestMethod(RequestMethod::PUT);
+                    break;
+                default:
+                    break;
+            }
+            
+            if(isset($newRoute)){
+                $this->routes[$method.'_'.$uri] = $newRoute;
+            }
+        }
     }
     
     protected function buildRoute($reqMethod,$uri,$callback=null,array $middleware=array()){
