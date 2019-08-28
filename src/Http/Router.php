@@ -40,6 +40,46 @@ class Router {
         return self::$self;       
     }
     
+    public function any($uri,$callback=null,array $middleware=array()){
+        
+        $methods = RequestMethod::methods();
+        
+        $route = $this->buildRoute($methods[0], $uri, $callback, $middleware);
+        
+        foreach(RequestMethod::methods() as $method){
+            switch($method){
+                case RequestMethod::DELETE:
+                    $this->deleteRoutes[$uri] = $uri;
+                    $newRoute = clone $route;
+                    $newRoute->setRequestMethod(RequestMethod::DELETE);
+                    break;
+                case RequestMethod::GET:
+                    $this->getRoutes[$uri] = $uri;
+                    $newRoute = clone $route;
+                    $newRoute->setRequestMethod(RequestMethod::GET);
+                    break;
+                case RequestMethod::POST:
+                     $this->postRoutes[$uri] = $uri;
+                    $newRoute = clone $route;
+                    $newRoute->setRequestMethod(RequestMethod::POST);
+                    break;
+                case RequestMethod::PUT:
+                    $this->putRoutes[$uri] = $uri;
+                    $newRoute = clone $route;
+                    $newRoute->setRequestMethod(RequestMethod::PUT);
+                    break;
+                default:
+                    break;
+            }
+            
+            if(isset($newRoute)){
+                $this->routes[$method.'_'.$uri] = $newRoute;
+            }
+            
+        }
+        return $this;
+    }
+    
     public function delete($uri,$callback=null,array $middleware=array()){
 
         $this->deleteRoutes[$uri] = $uri; 
@@ -88,14 +128,23 @@ class Router {
         
         $this->cleanUri($uri);
         
-        $methodType = strtolower($method);
-        $key = null;
+        $methodType = strtoupper($method);
         
-        if($methodType=='get'){
-            $key = $this->matches($uri, $this->getRoutes);
-        }
-        else if($methodType=='post'){
-            $key = $this->matches($uri, $this->postRoutes);
+        switch($methodType){
+            case RequestMethod::DELETE:
+                $key = $this->matches($uri, $this->deleteRoutes);
+                break;
+            case RequestMethod::GET:
+                $key = $this->matches($uri, $this->getRoutes);
+                break;
+            case RequestMethod::POST:
+                $key = $this->matches($uri, $this->postRoutes);
+                break;
+            case RequestMethod::PUT:
+                $key = $this->matches($uri, $this->putRoutes);
+                break;
+            default:
+                throw new \Exception('Bad Request',405);
         }
         
         if($key){

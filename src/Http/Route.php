@@ -49,6 +49,7 @@ class Route {
     
     public function setFallback(bool $val){
         $this->fallBack = $val;
+        return $this;
     }
     
     public function setMiddleware(array $middleWares = array(0)){
@@ -63,6 +64,12 @@ class Route {
     
     public function setParamValues(array $params = array()){
         $this->paramValues = $params;
+        return $this;
+    }
+    
+    public function setRequestMethod($reqMethod){
+        $this->requestMethod = $reqMethod;
+        return $this;
     }
     
     public function run(){

@@ -29,13 +29,17 @@ class Request {
     protected $isAjax;
     protected $cookie;
     protected $queryStr;
+    protected $input;
     private static $self;
     
     private function __construct() {
         //var_dump($_SERVER);die;
+        $this->input = Input::getInstance();
+        $method = $this->input->post('__method');
+        
         $this->host = $_SERVER['HTTP_HOST'];
         $this->uri = $_SERVER['REQUEST_URI'];
-        $this->method = $_SERVER['REQUEST_METHOD'];
+        $this->method = $method? strtoupper($method) : $_SERVER['REQUEST_METHOD'];
         $this->userAgent = $_SERVER['HTTP_USER_AGENT'];
         $this->serverIp = $_SERVER['SERVER_ADDR'];
         $this->remoteIp = $_SERVER['REMOTE_ADDR'];
@@ -45,6 +49,7 @@ class Request {
         $this->isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'? TRUE : FALSE;
         $this->cookie = isset($_SERVER['HTTP_COOKIE'])? $_SERVER['HTTP_COOKIE']: null;
         $this->queryStr = $_SERVER['QUERY_STRING'];
+        
         
         $this->setPreviousRequest();
     }
