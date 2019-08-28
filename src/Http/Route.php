@@ -118,7 +118,7 @@ class Route {
         
         foreach($methods as $method){
             
-            if(($annotations->get(strtolower($method)) || $annotations->get($method)) && !in_array($this->request->method,$methods)){
+            if(($annotations->get(strtolower($method)) || $annotations->get($method)) && $this->request->method != $method){
                 return FALSE;
             }
         }
