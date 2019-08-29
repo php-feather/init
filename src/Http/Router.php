@@ -256,8 +256,10 @@ class Router {
         
         $count = count($parts);
 
-        if($count <1){
+        if($count <1 && $uri != '/'){
             return FALSE;
+        }else{
+            $parts = [''];
         }
         
         $controller = $this->autoDetectController($parts[0]);
