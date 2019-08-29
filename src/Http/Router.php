@@ -17,6 +17,7 @@ use Feather\Init\Controllers\Controller;
 class Router {
     
     protected $routes = array();
+    protected $registeredRoutes = array();
     protected $defaultController;
     protected $request;
     protected $response;
@@ -149,6 +150,10 @@ class Router {
             $route->setParamValues($params);
             return $route->run();
         }
+
+        if($this->isRegisteredRoute($uri)){
+            throw new \Exception('Bad Request! Method Not Allowed',405);
+        }
         
         if(!$this->autoRunRoute($uri,$method)){
             throw new \Exception('Requested Resource Not Found',404);
@@ -203,11 +208,15 @@ class Router {
     }
     
     protected function buildRoute($reqMethod,$uri,$callback=null,array $middleware=array()){
-
+        
+        $routeUri = strtolower($uri);
+        
+        $this->registeredRoutes[$routeUri] = $this->buildPattern($routeUri);
+        
         if($callback == NULL){
-            return $this->parseUri($uri,$reqMethod,$middleware);
+            return $this->parseUri($routeUri,$reqMethod,$middleware);
         }else{
-            return $this->setRoute($reqMethod,$uri, $callback,$middleware);
+            return $this->setRoute($reqMethod,$routeUri, $callback,$middleware);
         }
         
     }
@@ -296,12 +305,46 @@ class Router {
         return true;
     }
     
+    protected function buildPattern($uri){
+        
+        $pattern = '';
+        $fixed = preg_replace('/(.*?)(\{.*)/i', '$1', $uri);
+        $defined =  preg_replace('/(.*?)(\{.*)/i', '$2', $uri);
+        
+        foreach(explode('/', $fixed) as $part){
+            if($part != null){
+                $pattern .= '\/'.$part;
+            }
+        }
+        
+        $required = explode('/',preg_replace('/(.*?)(\{\:.*)/i', '$1', $defined));
+        $optional = explode('/',preg_replace('/(.*?)(\{\:.*)/i', '$2', $defined));
+        
+        foreach($required as $part){
+            if($part != null){
+                $pattern .= "(\/\w+)";
+            }
+        }
+        
+        foreach($optional as $part){
+            if($part != null){
+                $pattern .= "(\/\w+)?";
+            }
+        }
+        
+        if($pattern==''){
+            $pattern = '\/';
+        }
+        
+        return $pattern;
+    }
+    
     protected function cleanUri(&$uri){
 
         $uri = preg_replace('/(\/)(\?)(.*)/','$1',
                 preg_replace('/\/(.*?)\.php(.*?)\/?/','/',$uri));
         
-        $uri = preg_replace('/\?.*/','',$uri);
+        $uri = strtolower(preg_replace('/\?.*/','',$uri));
     }
     
     protected function cleanUriParts(array &$parts){
@@ -398,6 +441,26 @@ class Router {
         }
         
         return $params;
+    }
+    
+    protected function isRegisteredRoute($uri){
+        
+        if(isset($this->registeredRoutes[$uri])){
+            return true;
+        }
+        
+        foreach($this->registeredRoutes as $pattern){
+            
+            $matches = [];
+            
+            if(preg_match("/$pattern/i",$uri,$matches) && in_array($uri, $matches)){
+                return true;
+            }
+            
+        }
+        
+        return false;
+        
     }
     
     protected function matches($uri,$routes){

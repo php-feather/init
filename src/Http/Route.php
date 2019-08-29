@@ -88,7 +88,7 @@ class Route {
             if(method_exists($this->controller, $this->method)){
                 
                 if(strcasecmp($this->requestMethod,Request::getInstance()->method) != 0 || ($this->controller->validateAnnotations && !$this->validateRequestType())){
-                    throw new \Exception('Invalid Request. Method Not Allowed',405);
+                    throw new \Exception('Bad Request! Method Not Allowed',405);
                 }
                 $middleWare = $this->controller->runMiddleware($this->method);
                 
