@@ -207,20 +207,6 @@ class Router {
         }
     }
     
-    protected function buildRoute($reqMethod,$uri,$callback=null,array $middleware=array()){
-        
-        $routeUri = strtolower($uri);
-        
-        $this->registeredRoutes[$routeUri] = $this->buildPattern($routeUri);
-        
-        if($callback == NULL){
-            return $this->parseUri($routeUri,$reqMethod,$middleware);
-        }else{
-            return $this->setRoute($reqMethod,$routeUri, $callback,$middleware);
-        }
-        
-    }
-    
     protected function autoDetectController($controller){
         
         $ctrl = array(strtolower($controller));
@@ -280,7 +266,9 @@ class Router {
             
             if($this->defaultController){
                 $controller = new $this->defaultController;
-                array_unshift($parts,$parts[0]);
+                if($count <2){
+                    array_unshift($parts,$parts[0]);
+                }
                 $fallback = true;
                 $count++;
             }else{
@@ -337,6 +325,20 @@ class Router {
         }
         
         return $pattern;
+    }
+    
+    protected function buildRoute($reqMethod,$uri,$callback=null,array $middleware=array()){
+        
+        $routeUri = strtolower($uri);
+        
+        $this->registeredRoutes[$routeUri] = $this->buildPattern($routeUri);
+        
+        if($callback == NULL){
+            return $this->parseUri($routeUri,$reqMethod,$middleware);
+        }else{
+            return $this->setRoute($reqMethod,$routeUri, $callback,$middleware);
+        }
+        
     }
     
     protected function cleanUri(&$uri){
@@ -492,7 +494,6 @@ class Router {
         $parts = explode('/',$uri);
         
         if(empty($parts) || $parts[0]=='/'){
-            //$this->routes[$method.'_/'] = $this->defaultRoute();
             return $this->deleteRoute();
         }
         
@@ -502,7 +503,7 @@ class Router {
         
         $route = new Route($method,$controller,$action,$params);
         $route->setMiddleware($middleware);
-        //$this->routes[$method.'_'.$uri] = $route;
+
         return $route;
         
     }
@@ -516,7 +517,7 @@ class Router {
         $route->setMiddleware($middleware);
         
         return $route;
-        //$this->routes[$method.'_'.$uri] = $route;
+
     }
     
     protected function setRoute($method,$uri,$callback,array $middleware = array()){
@@ -537,7 +538,7 @@ class Router {
         
         $route = new Route($method,$controller, $cAction, $params);
         $route->setMiddleware($middleware);
-        //$this->routes[$method.'_'.$uri] = $route;
+
         return $route;
     }
     
