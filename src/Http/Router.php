@@ -328,6 +328,12 @@ class Router {
     }
     
     protected function buildRoute($reqMethod,$uri,$callback=null,array $middleware=array()){
+                
+        $len = strlen($uri); 
+        
+        if($len > 1 && strripos($uri,'/') == $len-1){
+            $uri = substr($uri, 0,$len-1);
+        }
         
         $routeUri = strtolower($uri);
         
@@ -347,6 +353,12 @@ class Router {
                 preg_replace('/\/(.*?)\.php(.*?)\/?/','/',$uri));
         
         $uri = strtolower(preg_replace('/\?.*/','',$uri));
+                
+        $len = strlen($uri); 
+        
+        if($len > 1 && strripos($uri,'/') == $len-1){
+            $uri = substr($uri, 0,$len-1);
+        }
     }
     
     protected function cleanUriParts(array &$parts){
