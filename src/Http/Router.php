@@ -268,9 +268,7 @@ class Router {
             
             if($this->defaultController){
                 $controller = new $this->defaultController;
-                if($count <2){
-                    array_unshift($parts,$parts[0]);
-                }
+                array_unshift($parts,$parts[0]);
                 $fallback = true;
                 $count++;
             }else{
