@@ -258,7 +258,7 @@ class Router {
 
         if($count <1 && $uri != '/'){
             return FALSE;
-        }else{
+        }elseif($uri == '/'){
             $parts = [''];
         }
         
