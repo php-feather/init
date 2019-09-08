@@ -15,6 +15,7 @@
         }
     },
     "require": {
+        "php": ">=7.0",
         "php-feather/session": "dev-master",
         "minime/annotations": "^3.1"
     }
