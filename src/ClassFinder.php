@@ -46,12 +46,10 @@ class ClassFinder {
     protected function getClassName($classes,$namespaces){
         
         $basename = basename($this->inFilePath);
-        
-        $ext = substr($basename,strrpos($basename,'.'));
-        
+
         foreach($classes as $class){
             if(preg_match("/$class/i",$basename)){
-                return ($this->withNamespace && !empty($namespaces))? '\\'.$namespaces[0].'\\'.$class.$ext : $class.$ext;
+                return ($this->withNamespace && !empty($namespaces))? '\\'.$namespaces[0].'\\'.$class : $class;
             }
         }
         
