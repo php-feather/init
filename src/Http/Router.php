@@ -284,6 +284,14 @@ class Router {
         }
         
         $method = $parts[1];
+        
+        if(!is_callable(array($controller,$method))){
+            $route = new Route($reqMethod,$controller, $controller->defaultAction());
+            $route->setParamValues(array_slice($parts,1));
+            $route->setFallback($fallback);
+            $route->run();
+            return TRUE;
+        }
 
         $params = $count >2? array_slice($parts,2) : array();
         $route = new Route($reqMethod,$controller, $method);
