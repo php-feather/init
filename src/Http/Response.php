@@ -16,6 +16,7 @@ namespace Feather\Init\Http;
 class Response {
     
     protected $viewPath='';
+    protected $tempViewPath='';
     private static $self;
     
     private function __construct() {
@@ -110,9 +111,15 @@ class Response {
             header($header);
         }
     }
-    
-    public function setViewPath($path){
+
+    public function setViewPath($path,$tempPath=''){
         $this->viewPath = strripos($path,'/') === strlen($path)-1? $path : $path.'/';
+        
+        if($this->tempViewPath == null){
+            $this->tempViewPath = $this->viewPath;
+        }else{
+            $this->tempViewPath = strripos($tempPath,'/') === strlen($tempPath)-1? $tempPath : $tempPath.'/';
+        }
     }
 
     protected function __init(){
@@ -135,8 +142,14 @@ class Response {
         $contents = fread($viewFile, filesize($view));
         fclose($viewFile);
         
+        $tempname = hash('sha256',$contents.implode('_',$keys));
         
-        $filepath = $this->viewPath.'temp_view.php';
+        $filepath = $this->tempViewPath."$tempname.php";
+        
+        if(file_exists($filepath)){
+            return $filepath;
+        }
+
         $file = fopen($filepath, 'w');
         
         if($file){
