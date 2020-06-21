@@ -115,7 +115,7 @@ class Response {
     public function setViewPath($path,$tempPath=''){
         $this->viewPath = strripos($path,'/') === strlen($path)-1? $path : $path.'/';
         
-        if($this->tempViewPath == null){
+        if($tempPath == null){
             $this->tempViewPath = $this->viewPath;
         }else{
             $this->tempViewPath = strripos($tempPath,'/') === strlen($tempPath)-1? $tempPath : $tempPath.'/';
