@@ -277,6 +277,11 @@ class Router {
         }
         
         if($count == 1){
+             
+            if(!$controller || !method_exists($controller,$controller->defaultAction())){
+                return false;
+            }
+            
             $route = new Route($reqMethod,$controller, $controller->defaultAction());
             $route->setFallback($fallback);
             $route->run();
