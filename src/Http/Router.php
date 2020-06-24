@@ -289,12 +289,12 @@ class Router {
         }
         
         $method = $parts[1];
+        $params = $count >2? array_slice($parts,2) : array();
         
-        if(!is_callable(array($controller,$method))){
+        if(!is_callable(array($controller,$method)) || !$this->shouldRunControllerMethod($controller, $method, $params)){
             return false;
         }
-
-        $params = $count >2? array_slice($parts,2) : array();
+        
         $route = new Route($reqMethod,$controller, $method);
         $route->setParamValues($params);
         $route->setFallback($fallback);
@@ -561,6 +561,13 @@ class Router {
         $route->setMiddleware($middleware);
 
         return $route;
+    }
+    
+    public function shouldRunControllerMethod(\Feather\Init\Controller\Controller $controller,$methodName,array $params){
+        
+        $func = new \ReflectionMethod($controller,$methodName);
+        
+        return $func && count($func->getParameters()) >= count($params);
     }
     
     protected function shouldRunDefaultController(array $uriParts){
