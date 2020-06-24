@@ -266,7 +266,7 @@ class Router {
         $fallback = false;
         if($controller == NULL ){
             
-            if($this->defaultController){
+            if($this->defaultController && $this->shouldRunDefaultController($parts)){
                 $controller = new $this->defaultController;
                 array_unshift($parts,$parts[0]);
                 $fallback = true;
@@ -286,11 +286,7 @@ class Router {
         $method = $parts[1];
         
         if(!is_callable(array($controller,$method))){
-            $route = new Route($reqMethod,$controller, $controller->defaultAction());
-            $route->setParamValues(array_slice($parts,1));
-            $route->setFallback($fallback);
-            $route->run();
-            return TRUE;
+            return false;
         }
 
         $params = $count >2? array_slice($parts,2) : array();
@@ -302,10 +298,10 @@ class Router {
     }
     
     protected function buildPattern($uri){
-        
+
         $pattern = '';
         $fixed = preg_replace('/(.*?)(\{.*)/i', '$1', $uri);
-        $defined =  preg_replace('/(.*?)(\{.*)/i', '$2', $uri);
+        $defined =  preg_match('/\{/',$uri)? preg_replace('/(.*?)(\{.*)/i', '$2', $uri) : '';
         
         foreach(explode('/', $fixed) as $part){
             if($part != null){
@@ -314,7 +310,7 @@ class Router {
         }
         
         $required = explode('/',preg_replace('/(.*?)(\{\:.*)/i', '$1', $defined));
-        $optional = explode('/',preg_replace('/(.*?)(\{\:.*)/i', '$2', $defined));
+        $optional = preg_match('/\{:/',$defined)? explode('/',preg_replace('/(.*?)(\{\:.*)/i', '$2', $defined)) : [];
         
         foreach($required as $part){
             if($part != null){
@@ -476,7 +472,7 @@ class Router {
             $matches = [];
             
             if(preg_match("/$pattern/i",$uri,$matches) && in_array($uri, $matches)){
-                return true;
+               return preg_replace("/$pattern/i",'',$uri) == '';
             }
             
         }
@@ -561,5 +557,16 @@ class Router {
 
         return $route;
     }
+    
+    protected function shouldRunDefaultController(array $uriParts){
+        
+        $uriControllerName = strtolower($uriParts[0]);
+        
+        $defControllerName = strtolower(preg_replace('/(controller)$/i','',$this->defaultController));
+        
+        return $uriControllerName == $defControllerName;
+        
+    }
+    
     
 }
