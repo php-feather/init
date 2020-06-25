@@ -115,15 +115,19 @@ class Route {
         $annotations = $reader->getMethodAnnotations(get_class($this->controller),$this->method);
         
         $methods = RequestMethod::methods();
+        $isValid = true;
         
         foreach($methods as $method){
-            
+
             if(($annotations->get(strtolower($method)) || $annotations->get($method)) && $this->request->method != $method){
-                return FALSE;
+                $isValid = false;
+            }
+            else if(($annotations->get(strtolower($method)) || $annotations->get($method)) && $this->request->method == $method){
+                return true;
             }
         }
-
-        return true;
+        
+        return $isValid;
         
     }
     
