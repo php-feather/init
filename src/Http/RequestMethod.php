@@ -18,11 +18,13 @@ class RequestMethod {
     const GET = 'GET';
     const PUT = 'PUT';
     const DELETE = 'DELETE';
+    const PATCH = 'PATCH';
     
     public static function methods(){
         return [
             RequestMethod::DELETE,
             RequestMethod::GET,
+            RequestMethod::PATCH,
             RequestMethod::POST,
             RequestMethod::PUT
         ];

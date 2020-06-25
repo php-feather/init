@@ -22,6 +22,7 @@ class Router {
     protected $request;
     protected $response;
     protected $getRoutes = array();
+    protected $patchRoutes = array();
     protected $postRoutes = array();
     protected $putRoutes = array();
     protected $deleteRoutes = array();
@@ -95,6 +96,17 @@ class Router {
         $route = $this->buildRoute(RequestMethod::GET, $uri, $callback, $middleware);
         
         $this->routes[RequestMethod::GET.'_'.$uri] = $route;
+        
+        return $this;
+    }
+    
+    public function patch($uri,$callback=null, array$middleware=array()){
+        
+        $this->patchRoutes[$uri] = $uri; 
+        
+        $route = $this->buildRoute(RequestMethod::PATCH, $uri, $callback, $middleware);
+        
+        $this->routes[RequestMethod::PATCH.'_'.$uri] = $route;
         
         return $this;
     }
@@ -186,6 +198,11 @@ class Router {
                     $this->getRoutes[$uri] = $uri;
                     $newRoute = clone $route;
                     $newRoute->setRequestMethod(RequestMethod::GET);
+                    break;
+                case RequestMethod::PATCH:
+                    $this->patchRoutes[$uri] = $uri;
+                    $newRoute = clone $route;
+                    $newRoute->setRequestMethod(RequestMethod::PATCH);
                     break;
                 case RequestMethod::POST:
                      $this->postRoutes[$uri] = $uri;
