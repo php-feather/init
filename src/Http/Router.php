@@ -468,10 +468,6 @@ class Router {
         $method = $parts[1];
         $params = $count >2? array_slice($parts,2) : array();
         
-        if(!is_callable(array($controller,$method)) || !$this->shouldRunControllerMethod($controller, $method, $params)){
-            return false;
-        }
-        
         return $this->executeAutoRunRoute($parts[0],$reqMethod, $controller, $method, $params, $fallback);
 
     }
@@ -486,6 +482,11 @@ class Router {
      */
     protected function executeAutoRunRoute($uri,$reqMethod,$controller,$method,array $params=[],$fallback=false){
         $this->cacheAutoRoute($uri, $reqMethod, $controller, $method, $fallback);
+        
+        if(!is_callable(array($controller,$method)) || !$this->shouldRunControllerMethod($controller, $method, $params)){
+            return false;
+        }
+        
         $route = new Route($reqMethod,$controller, $method);
         $route->setParamValues($params);
         $route->setFallback($fallback);
