@@ -33,7 +33,7 @@ class Request {
     private static $self;
     
     private function __construct() {
-        //var_dump($_SERVER);die;
+        
         $this->input = Input::getInstance();
         $method = $this->input->post('__method');
         
@@ -49,7 +49,6 @@ class Request {
         $this->isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'? TRUE : FALSE;
         $this->cookie = isset($_SERVER['HTTP_COOKIE'])? $_SERVER['HTTP_COOKIE']: null;
         $this->queryStr = $_SERVER['QUERY_STRING'];
-        
         
         $this->setPreviousRequest();
     }

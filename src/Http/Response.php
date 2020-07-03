@@ -15,12 +15,14 @@ namespace Feather\Init\Http;
  */
 class Response {
     
-    protected $viewPath='';
-    protected $tempViewPath='';
     private static $self;
+    protected $content;
+    protected $headers = [];
+    protected $cookies = [];
+    protected $statusCode;
     
     private function __construct() {
-        ;
+        
     }
     
     public static function getInstance(){
@@ -35,139 +37,129 @@ class Response {
         header('Location: '.$location);
     }
     
-    public function renderTemplate($view,$data=array()){
-        
-        $this->startViewRender();
-
-        foreach($data as $key=>$val){
-            //global ${$key};
-            ${$key} = $val;
-        }
-
-        $viewPath = $this->viewPath.$view;
-        
-        $filename = $this->setTemplates(array_keys($data), $viewPath);
-        
-        if($filename == NULL){
-        
-            $filename = set_variables(array_keys($data));
-        
-            if(file_exists($filename)){
-                require $filename;
-            }
-
-            include_view($view);
-        }
-        else{
-            include_once $filename;
-        }
-
-        return $this->endViewRender();
-        
+    public function getContent(){
+        return $this->content;
     }
-
-    public function renderView($view,$data=array(),$httpCode = 200,$headers=array()){
+    
+    public function getCookies(){
+        return $this->cookies;
+    }
+    
+    public function getHeaders(){
+        return $this->headers;
+    }
+    
+    public function getStatusCode(){
+        return $this->statusCode;
+    }
+    
+    public function render($content,array $headers=[],$statusCode=200){
         
-        $html = $this->renderTemplate($view, $data);
-        
-        header('Content-Type: text/html');
-        
-        foreach($headers as $h){
-            header($h);
+        if(is_array($content) || is_object($content)){
+            $this->renderJson($content, $headers, $statusCode);
+        }else{
+            $this->renderView($content, $headers, $statusCode);
         }
-        
-        http_response_code($httpCode);
-        echo $html;
         
     }
     
-    public function renderJSON($data,$headers=array(),$httpCode=200){
-        $default = array(
-            "Content-Type: application/json"
-        );
-        
-        http_response_code($httpCode);
-        
-        $allheaders = array_merge($headers,$default);
-        
-        $this->setHeaders($allheaders);
-        
-        echo json_encode($data);
+    public function renderJson($data,array $headers=[],$statusCode=200){
+        $defaultHeaders = ['Content-Type'=>'application/json'];
+        $this->originalContent = $data;
+        $this->content = json_encode($data); 
+        $this->headers->add(array_merge($defaultHeaders,$headers));
+        $this->statusCode = $statusCode;
+        return $this;
     }
     
+    public function renderView($content,array $headers=[],$statusCode=200){
+        $defaultHeaders = ['Content-Type'=>'text/html'];
+        $this->originalContent = $content;
+        $this->content = $content;
+        $this->headers->add(array_merge($defaultHeaders,$headers));
+        $this->statusCode = $statusCode;
+        return $this;
+    }
+
     public function rawOutput($data,$responseCode=200, array $headers=array()){
         ob_clean();
         $this->setHeaders($headers);
-        http_response_code($responseCode);
-        echo $data;
+        $this->content = $data;
+        return $this;
     }
     
-    public function setCookie($name,$value,$expires){
-        setcookie($name, $value, $expires, '/');
+    public function send(){
+        $this->sendCookies();
+        http_response_code($this->statusCode);
+        $this->sendHeaders();
+        $this>$this->sendBody();
     }
     
-    public function setHeaders($headers){
-        foreach($headers as $header){
-            header($header);
+    public function sendHeadersOnly(){
+        $this->sendCookies();
+        http_response_code($this->statusCode);
+        $this->sendHeaders();
+    }
+    
+    public function setCookie($name,$value,$expires,$path='/',$secure=false){
+        $this->cookies[] = [
+            'name'=>$name,'value'=>$value,'expires'=>$expires,'path'=>$path,'secure'=>$secure
+        ];
+    }
+    
+    public function setHeader($header,$value,$replace=true){
+        $key = $this->reformatHeaderKey($header);
+        if(!$replace && isset($this->headers[$key])){
+            return;
         }
-    }
-
-    public function setViewPath($path,$tempPath=''){
-        $this->viewPath = strripos($path,'/') === strlen($path)-1? $path : $path.'/';
-        
-        if($tempPath == null){
-            $this->tempViewPath = $this->viewPath;
-        }else{
-            $this->tempViewPath = strripos($tempPath,'/') === strlen($tempPath)-1? $tempPath : $tempPath.'/';
-        }
-    }
-
-    protected function __init(){
-        $this->oldData = $this->retrieveFromSession();
-        $this->populateOldInput();
+        $this->headers[$key] = $value;
     }
     
-    protected function endViewRender(){
-        return ob_get_clean();
-    }
-    
-    protected function startViewRender(){
-        ob_start();
-    }
-    
-    
-    private function setTemplates($keys,$view){
-
-        $viewFile = fopen($view, 'r');
-        $contents = fread($viewFile, filesize($view));
-        fclose($viewFile);
+    public function setHeaders($headers,$replace=true){
         
-        $tempname = hash('sha256',$contents.implode('_',$keys));
-        
-        $filepath = $this->tempViewPath."$tempname.php";
-        
-        if(file_exists($filepath)){
-            return $filepath;
-        }
-
-        $file = fopen($filepath, 'w');
-        
-        if($file){
-            fwrite($file, "<?php \n");
-            
-            foreach($keys as $key){
-                fwrite($file,"$$key;\n");
+        foreach($headers as $key=>$val){
+                
+            if(is_int($key)){
+                
+                if(($pos = stripos($val,':')) !== false){
+                    $key = strtolower(substr($val,0,$pos));
+                    $value = substr($val, $pos+1);
+                    $this->setHeader($key, $value,$replace);
+                }else{
+                    $this->setHeader(strtolower($val), '',$replace);
+                }
+            }else{
+                $this->setHeader(strtolower($key),$val,$replace);
             }
-            fwrite($file,"?>\n\n");
-            fwrite($file,$contents);
-
-            return $filepath;
+            
         }
-        return null;
+    }
+
+    protected function reformatHeaderKey($key){
+        $keyParts = explode('-',$key);
+        
+        if(count($keyParts) >1){
+            return ucfirst($keyParts[0]).'-'.ucfirst($keyParts[1]);
+        }
+        
+        return ucfirst($keyParts[0]);
+        
     }
     
-    private function setVariables(array $data){
-        
+    protected function sendBody(){
+        echo $this->content;
+    }
+    
+    protected function sendCookies(){
+        foreach($this->cookies as $cookie){
+            $this->setCookie($cookie['name'], $cookie['value'], $cookie['expires'], $cookie['path'], $cookie['secure']);
+        }
+    }
+    
+    protected  function sendHeaders(){
+        foreach($this->headers as $key=>$value){
+            header("$key:$value");
+        }
     }
 
 }

@@ -29,7 +29,6 @@ abstract class Controller {
     protected $user;
     protected $middlewares=array();
     protected $bypass =array();
-    protected $viewPath ='';
     public $validateAnnotations=true;
     private $failedMiddleware;
 
@@ -62,22 +61,17 @@ abstract class Controller {
         return $this->redirect($this->request->uri,$data,$withInput);
     }
 
-    public function renderView($view,$data=array()){
+    protected function appendData($data=array()){
 
         $this->__init();
 
         if($this->oldData){
             $data = array_merge($data,$this->oldData['data']);
         }
-
-       $this->response->renderView($view,$data);
+        return $data;
         
     }
 
-    public function renderJSON($data,$headers=array(),$httpCode=200){
-        return $this->response->renderJson($data,$headers,$httpCode);
-    }
-    
     protected function __init(){
         $this->oldData = $this->retrieveFromSession();
         $this->populateOldInput();
