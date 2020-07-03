@@ -393,6 +393,10 @@ class Router {
             return false;
         }
         
+        $parts = preg_split('/\s*\/\s*/', $uri);
+        
+        $this->cleanUriParts($parts);
+        
         $cacheInfo = null;
         $cacheUri = null;
         
@@ -405,7 +409,7 @@ class Router {
             }
         }
         
-        if(!$cinfo){
+        if(!$cacheInfo){
             return false;
         }
         
@@ -413,7 +417,7 @@ class Router {
         
         $params = explode('/',$newUri);
         
-        return $this->executeAutoRunRoute($cacheUri, $reqMethod, new $cacheInfo['controller'], $cacheInfo['method'], $params, $cacheInfo['fallback']);
+        return $this->executeAutoRunRoute($parts, $reqMethod, new $cacheInfo['controller'], $cacheInfo['method'], $params, $cacheInfo['fallback']);
         
     }
     
@@ -424,7 +428,7 @@ class Router {
      * @return boolean
      */
     protected function autoRunRoute($uri,$reqMethod){
-        
+
         if(($res = $this->autoRunCacheRoute($uri, $reqMethod)) !== false){
             return true;
         }
@@ -461,7 +465,7 @@ class Router {
                 return false;
             }
             
-            return $this->executeAutoRunRoute($parts[0],$reqMethod, $controller, $controller->defaultAction(),[], $fallback);
+            return $this->executeAutoRunRoute($parts,$reqMethod, $controller, $controller->defaultAction(),[], $fallback);
 
         }
         
@@ -472,19 +476,19 @@ class Router {
             return false;
         }
         
-        return $this->executeAutoRunRoute($parts[0],$reqMethod, $controller, $method, $params, $fallback);
+        return $this->executeAutoRunRoute($parts,$reqMethod, $controller, $method, $params, $fallback);
 
     }
     
     /**
-     * 
+     * @param array $uriParts
      * @param string $reqMethod
      * @param \Feather\Init\Controller\Controller $controller
      * @param string $method
      * @param array $params
      * @return boolean
      */
-    protected function executeAutoRunRoute($uri,$reqMethod,$controller,$method,array $params=[],$fallback=false){
+    protected function executeAutoRunRoute(array $uriParts,$reqMethod,$controller,$method,array $params=[],$fallback=false){
         $this->cacheAutoRoute($uri, $reqMethod, $controller, $method, $fallback);
         $route = new Route($reqMethod,$controller, $method);
         $route->setParamValues($params);
@@ -495,17 +499,21 @@ class Router {
     
     /**
      * 
+     * @param array $uriParts
      * @param string $reqMethod
      * @param \Feather\Init\Controller\Controller $controller
      * @param string $method
      * @param array $params
      * @return boolean
      */
-    protected function cacheAutoRoute($uri,$reqMethod,$controller,$method,$fallback=false){
+    protected function cacheAutoRoute(array $uriParts,$reqMethod,$controller,$method,$fallback=false){
         
         if(!$this->cache){
             return false;
         }
+        
+        $uri = implode('/', array_slice($uriParts, 0, 2));
+        
         $info = [
             'controller'=> get_class($controller),
             'method'=>$method,
