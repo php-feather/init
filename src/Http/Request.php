@@ -53,7 +53,7 @@ class Request {
     
     /**
      * 
-     * @return type Feather\Init\Http\Request
+     * @return type \Feather\Init\Http\Request
      */
     public static function getInstance(){
         if(self::$self == NULL){

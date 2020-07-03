@@ -60,7 +60,7 @@ class Router {
     
     /**
      * 
-     * @return Feather\Init\Http\Router
+     * @return \Feather\Init\Http\Router
      */
     public static function getInstance(){
         if(self::$self == NULL){

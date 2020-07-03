@@ -27,7 +27,7 @@ class Response {
     
     /**
      * 
-     * @return Feather\Init\Http\Response
+     * @return \Feather\Init\Http\Response
      */
     public static function getInstance(){
         if(self::$self == NULL){

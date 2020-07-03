@@ -40,7 +40,7 @@ class Input {
     }
     /**
      * 
-     * @return Feather\Init\Http\Input
+     * @return \Feather\Init\Http\Input
      */
     public static function getInstance(){
         
