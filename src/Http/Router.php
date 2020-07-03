@@ -412,8 +412,8 @@ class Router {
         if(!$cacheInfo){
             return false;
         }
-        
-        $newUri = preg_replace('(^\/)|(\/$)','',preg_replace("/$cacheUri/i",'',$uri));
+
+        $newUri = preg_replace('/(^\/)|(\/$)/','',preg_replace("/$cacheUri/i",'',$uri));
         
         $params = explode('/',$newUri);
         
@@ -481,14 +481,14 @@ class Router {
     }
     
     /**
-     * @param array $uriParts
+     * @param string $uri
      * @param string $reqMethod
      * @param \Feather\Init\Controller\Controller $controller
      * @param string $method
      * @param array $params
      * @return boolean
      */
-    protected function executeAutoRunRoute(array $uriParts,$reqMethod,$controller,$method,array $params=[],$fallback=false){
+    protected function executeAutoRunRoute($uri,$reqMethod,$controller,$method,array $params=[],$fallback=false){
         $this->cacheAutoRoute($uri, $reqMethod, $controller, $method, $fallback);
         $route = new Route($reqMethod,$controller, $method);
         $route->setParamValues($params);
@@ -499,21 +499,19 @@ class Router {
     
     /**
      * 
-     * @param array $uriParts
+     * @param string $uri
      * @param string $reqMethod
      * @param \Feather\Init\Controller\Controller $controller
      * @param string $method
      * @param array $params
      * @return boolean
      */
-    protected function cacheAutoRoute(array $uriParts,$reqMethod,$controller,$method,$fallback=false){
+    protected function cacheAutoRoute($uri,$reqMethod,$controller,$method,$fallback=false){
         
         if(!$this->cache){
             return false;
         }
-        
-        $uri = implode('/', array_slice($uriParts, 0, 2));
-        
+       
         $info = [
             'controller'=> get_class($controller),
             'method'=>$method,
@@ -521,7 +519,7 @@ class Router {
             'requestMethod'=>$reqMethod
         ];
         
-        $key = $method == ''? strtolower($uri) : strtolower("$uri/$method");
+        $key = strtolower($uri);
         
         if(isset($this->autoRoutes[$key])){
             return true;

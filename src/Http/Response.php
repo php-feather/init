@@ -243,6 +243,11 @@ class Response {
      * send headers
      */
     protected  function sendHeaders(){
+        
+        if(headers_sent()){
+            return;
+        }
+        
         foreach($this->headers as $key=>$value){
             header("$key:$value");
         }
