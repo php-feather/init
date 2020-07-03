@@ -33,6 +33,13 @@ class Route {
     protected $fallBack = false;
     protected $request;
     
+    /**
+     * 
+     * @param string $requestMethod
+     * @param \Feather\Init\Controllers\Controller|\Closure $controller
+     * @param type $method
+     * @param type $params
+     */
     public function __construct($requestMethod,$controller,$method=null,$params=array()) {
         
         $this->requestMethod = $requestMethod;
@@ -48,12 +55,20 @@ class Route {
     public function getParams (){
         
     }
-    
+    /**
+     * 
+     * @param bool $val
+     * @return $this
+     */
     public function setFallback(bool $val){
         $this->fallBack = $val;
         return $this;
     }
-    
+    /**
+     * Set route middlewares
+     * @param array $middleWares
+     * @return $this
+     */
     public function setMiddleware(array $middleWares = array(0)){
         
         foreach($middleWares as $mw){
@@ -64,25 +79,40 @@ class Route {
         return $this;
     }
     
+    /**
+     * Set arguments values
+     * @param array $params
+     * @return $this
+     */
     public function setParamValues(array $params = array()){
         $this->paramValues = $params;
         return $this;
     }
     
+    /**
+     * 
+     * @param string $reqMethod
+     * @return $this
+     */
     public function setRequestMethod($reqMethod){
         $this->requestMethod = $reqMethod;
         return $this;
     }
     
+    /**
+     * 
+     * @return mixed
+     * @throws \Exception
+     */
     public function run(){
         try{
             
             if(!$this->passMiddlewares()){
-                return $this->middleWare[$this->failedMiddleware]->redirect();
+                return $this->sendResponse($this->middleWare[$this->failedMiddleware]->redirect());
             }
             
             if($this->isCallBack){
-                return call_user_func_array($this->controller,$this->paramValues);
+                return $this->sendResponse(call_user_func_array($this->controller,$this->paramValues));
             }
 
             if(method_exists($this->controller, $this->method)){
@@ -93,12 +123,12 @@ class Route {
                 $middleWare = $this->controller->runMiddleware($this->method);
                 
                 if($middleWare === true){
-                    return call_user_func_array(array($this->controller,$this->method), $this->paramValues);
+                    return $this->sendResponse(call_user_func_array(array($this->controller,$this->method), $this->paramValues));
                 }
                 
-                return $middleWare->redirect();
+                return $this->sendResponse($middleWare->redirect());
             }
-            
+                       
             if($this->fallBack){
                 throw new \Exception('Requested Resource Not Found',404);
             }
@@ -109,6 +139,22 @@ class Route {
         }
     }
     
+    /**
+     * 
+     * @param mixed $res
+     * @return type
+     */
+    protected function sendResponse($res){
+        if($res instanceof Response){
+            return $res->send();
+        }
+        return;
+    }
+    
+    /**
+     * Check if request method is valid for resource
+     * @return boolean
+     */
     protected function validateRequestType(){
         
         $reader = new Reader(new Parser,new FileCache(A_STORAGE));
@@ -131,6 +177,10 @@ class Route {
         
     }
     
+    /**
+     * Run middlewares
+     * @return boolean
+     */
     protected function passMiddlewares(){
         
         foreach($this->middleWare as $key=>$mw){

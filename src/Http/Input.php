@@ -38,7 +38,10 @@ class Input {
         
         $this->all = array_merge($this->post,$this->get);
     }
-    
+    /**
+     * 
+     * @return Feather\Init\Http\Input
+     */
     public static function getInstance(){
         
         if(self::$self == null){
@@ -48,6 +51,11 @@ class Input {
         return self::$self;
     }
     
+    /**
+     * Returns array of all request data key/value pairs or value of specified by name
+     * @param string $name
+     * @return mixed
+     */
     public function all($name=null){
         
         if($name != null){
@@ -56,7 +64,11 @@ class Input {
         
         return $this->all;
     }
-    
+    /**
+     * Returns all request data excluding fields specified in $fields
+     * @param array $fields
+     * @return array
+     */
     public function except(array $fields){
         
         $res = array();
@@ -70,10 +82,19 @@ class Input {
         return $res;
     }
     
+    /**
+     *  Returns list of Uploaded files
+     * @return array
+     */
     public function files(){
         return $this->files;
     }
     
+    /**
+     * Get value of key from get request
+     * @param string $name
+     * @return mixed
+     */
     public function get($name=null){
         
         if($name != null){
@@ -83,6 +104,11 @@ class Input {
         return $this->get;
     }
     
+    /**
+     * Get value of key from post request
+     * @param string $name
+     * @return mixed
+     */
     public function post($name = null){
         
         if($name != null){
@@ -91,7 +117,11 @@ class Input {
         
         return $this->post;
     }
-    
+    /**
+     * Get array of key/value pairs for only fields specify in $fields
+     * @param array $fields
+     * @return type
+     */
     public function only(array $fields){
         
         $res = array();
@@ -105,6 +135,10 @@ class Input {
         return $res;
     }
     
+    /**
+     * 
+     * @return string
+     */
     public function toString(){
         $string= '';
         foreach($this->all as $key=>$val){
@@ -114,6 +148,11 @@ class Input {
         return substr($string, 0,strripos($string,'&')-1);
     }
     
+    /**
+     * Fill input with data
+     * @param array $get
+     * @param array $post
+     */
     public static function fill(array $get=array(),array $post=array()){
         
         foreach($get as $key=>$data){

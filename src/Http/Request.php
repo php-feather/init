@@ -8,8 +8,6 @@
 
 namespace Feather\Init\Http;
 use Feather\Session\Session;
-define('CUR_REQ_KEY','cur_req');
-define('PREV_REQ_KEY','prev_req');
 /**
  * Description of Request
  *
@@ -53,6 +51,10 @@ class Request {
         $this->setPreviousRequest();
     }
     
+    /**
+     * 
+     * @return type Feather\Init\Http\Request
+     */
     public static function getInstance(){
         if(self::$self == NULL){
             self::$self  = new Request();
@@ -67,10 +69,17 @@ class Request {
         return null;
     }
     
+    /**
+     * 
+     * @return string|null
+     */
     public static function previousUri(){
         return Session::get(PREV_REQ_KEY);
     }
     
+    /**
+     * Set previous url
+     */
     protected function setPreviousRequest(){
         
         $referrer = isset($_SERVER['HTTP_REFERER'])? preg_replace('/(http\:\/\/)(.*?)(\/.*)/i','$3',$_SERVER['HTTP_REFERER']) : null;

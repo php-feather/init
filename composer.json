@@ -12,11 +12,13 @@
     "autoload":{
         "psr-4":{
             "Feather\\Init\\":"src/"
-        }
+        },
+        "files":["src/bootstrap/autoloader.php"]
     },
     "require": {
         "php": ">=7.0",
         "php-feather/session": "dev-master",
+        "php-feather/cache": "dev-master",
         "minime/annotations": "^3.1"
     }
 }

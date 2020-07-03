@@ -13,7 +13,6 @@ use Feather\Init\Http\Input;
 use Feather\Init\Http\Request;
 use Feather\Init\Http\Response;
 
-define('REDIRECT_DATA_KEY' ,'redirect_data');
 /**
  * Description of Controller
  *
@@ -21,15 +20,29 @@ define('REDIRECT_DATA_KEY' ,'redirect_data');
  */
 abstract class Controller {
     
+    /** @var string **/
     protected $defaultAction = 'index';
+    
+    /** @var \Feather\Init\Http\Input **/
     protected $input;
+    
+    /** @var \Feather\Init\Http\Request **/
     protected $request;
+    
+    /** @var \Feather\Init\Http\Response **/
     protected $response;
+    
     protected $oldData;
-    protected $user;
+    
+    /** @var array **/
     protected $middlewares=array();
+    
+    /** @var array **/
     protected $bypass =array();
+    
+    /** @var boolean **/
     public $validateAnnotations=true;
+    
     private $failedMiddleware;
 
     
@@ -39,11 +52,22 @@ abstract class Controller {
         $this->response = Response::getInstance();
     }
     
+    /**
+     * 
+     * @return array
+     */
     public function bypassMethods(){
         return $this->bypass;
     }
     
-    public function redirect($location,array $data=array(),$withInput=false){
+    /**
+     * 
+     * @param string $location Uri to redirect to
+     * @param array $data
+     * @param bool $withInput
+     * @return void
+     */
+    public function redirect($location,array $data=array(), bool $withInput=false){
 
         $redirectData = ['data'=>$data,];
         
@@ -57,11 +81,22 @@ abstract class Controller {
         return $this->response->redirect($location,$data,$withInput);
     }
     
-    public function redirectBack(array $data=array(),$withInput=false){
+    /**
+     * 
+     * @param array $data
+     * @param bool $withInput
+     * @return void
+     */
+    public function redirectBack(array $data=array(),bool $withInput=false){
         return $this->redirect($this->request->uri,$data,$withInput);
     }
-
-    protected function appendData($data=array()){
+    
+    /**
+     * Merge session data to $data array
+     * @param array $data
+     * @return array
+     */
+    protected function appendData(array $data=array()){
 
         $this->__init();
 
@@ -71,12 +106,19 @@ abstract class Controller {
         return $data;
         
     }
-
+    
+    /**
+     * Populate data from session
+     */
     protected function __init(){
         $this->oldData = $this->retrieveFromSession();
         $this->populateOldInput();
     }
     
+    /**
+     * 
+     * @return string
+     */
     public function defaultAction(){
         return $this->defaultAction;
     }
@@ -102,6 +144,33 @@ abstract class Controller {
         return true;
     }
     
+    /**
+     * 
+     * @param string $template template file
+     * @param array $data
+     * @param int $status
+     * @param array $headers
+     * @return \Feather\Init\Http\Response
+     */
+    protected function renderView($template,array $data=[],int $status=200,array $headers=[]){
+        $data = $this->appendData($data);
+        return $this->response->renderView(view($template, $data),$headers,$status);
+    }
+    
+    /**
+     * 
+     * @param mixed $data
+     * @param int $status
+     * @param array $headers
+     * @return \Feather\Init\Http\Response
+     */
+    protected function renderJson($data,int $status=200,array $headers=[]){
+        return $this->response->renderJson($data,$headers,$status);
+    }
+    
+    /**
+     * Fill input with data from session
+     */
     protected function populateOldInput(){
         if($this->oldData){
             $get = isset($this->oldData['get'])? $this->oldData['get'] : array();
@@ -110,10 +179,21 @@ abstract class Controller {
         }
     }
     
-    protected function retrieveFromSession($key = REDIRECT_DATA_KEY,$remove = true){
+    /**
+     * 
+     * @param string $key
+     * @param bool $remove
+     * @return mixed
+     */
+    protected function retrieveFromSession($key = REDIRECT_DATA_KEY,bool $remove = true){
         return Session::get($key, $remove);
     }
     
+    /**
+     * 
+     * @param mixed $data
+     * @param string $key
+     */
     protected function saveSession($data,$key = REDIRECT_DATA_KEY){
         Session::save($data, $key);  
     }

@@ -8,6 +8,7 @@
 
 namespace Feather\Init\Http;
 use Feather\Init\Controllers\Controller;
+use Feather\Cache\Contracts\Cache;
 
 /**
  * Description of Router
@@ -19,13 +20,35 @@ class Router {
     protected $routes = array();
     protected $registeredRoutes = array();
     protected $defaultController;
+    protected const AUTOROUTE_CACHE_KEY = 'auto_route';
+    
+    /** @var \Feather\Cache\Contracts\Cache **/
+    protected $cache;
+    
+    /** @var \Feather\Init\Http\Request **/
     protected $request;
+    
+    /** @var \Feather\Init\Http\Response **/
     protected $response;
+    
+    /** @var array **/
+    protected $autoRoutes = array();
+    
+    /** @var array **/
     protected $getRoutes = array();
+    
+    /** @var array **/
     protected $patchRoutes = array();
+    
+    /** @var array **/
     protected $postRoutes = array();
+    
+    /** @var array **/
     protected $putRoutes = array();
+    
+    /** @var array **/
     protected $deleteRoutes = array();
+    
     protected $ctrlNamespace = "Feather\\Init\\Controllers\\";
     protected $ctrlPath = '';
     private static $self;
@@ -35,6 +58,10 @@ class Router {
         
     }
     
+    /**
+     * 
+     * @return Feather\Init\Http\Router
+     */
     public static function getInstance(){
         if(self::$self == NULL){
             self::$self  = new Router();
@@ -42,6 +69,13 @@ class Router {
         return self::$self;       
     }
     
+    /**
+     * Sets route for POST,GET,DELETE,PUT and PATCH rquests
+     * @param string $uri
+     * @param string|\Closure $callback
+     * @param array $middleware
+     * @return $this
+     */
     public function any($uri,$callback=null,array $middleware=array()){
         
         $methods = RequestMethod::methods();
@@ -52,7 +86,14 @@ class Router {
         
         return $this;
     }
-    
+    /**
+     * Sets route for all requests except those specify by $exclude
+     * @param array $exclude
+     * @param string $uri
+     * @param string|\Closure $callback
+     * @param array $middleware
+     * @return $this
+     */
     public function except(array $exclude,$uri,$callback=null,array $middleware=array()){
         
         $methods = RequestMethod::methods();
@@ -78,6 +119,13 @@ class Router {
             
     }
     
+    /**
+     * Sets route for DELETE request
+     * @param string $uri
+     * @param string|\Closure $callback
+     * @param array $middleware
+     * @return $this
+     */
     public function delete($uri,$callback=null,array $middleware=array()){
 
         $this->deleteRoutes[$uri] = $uri; 
@@ -89,6 +137,13 @@ class Router {
         return $this;
     }
     
+    /**
+     * Sets route for GET request
+     * @param string $uri
+     * @param string|\Closure $callback
+     * @param array $middleware
+     * @return $this
+     */
     public function get($uri,$callback=null,array $middleware=array()){
 
         $this->getRoutes[$uri] = $uri; 
@@ -100,6 +155,13 @@ class Router {
         return $this;
     }
     
+    /**
+     * Sets route for PATCH request
+     * @param string $uri
+     * @param string|\Closure $callback
+     * @param array $middleware
+     * @return $this
+     */
     public function patch($uri,$callback=null, array$middleware=array()){
         
         $this->patchRoutes[$uri] = $uri; 
@@ -111,6 +173,13 @@ class Router {
         return $this;
     }
     
+    /**
+     * Sets route for POST request
+     * @param string $uri
+     * @param string|\Closure $callback
+     * @param array $middleware
+     * @return $this
+     */
     public function post($uri,$callback=null, array$middleware=array()){
         
         $this->postRoutes[$uri] = $uri; 
@@ -122,6 +191,13 @@ class Router {
         return $this;
     }
     
+    /**
+     * Sets route for PUT request
+     * @param string $uri
+     * @param string|\Closure $callback
+     * @param array $middleware
+     * @return $this
+     */
     public function put($uri,$callback=null,array $middleware=array()){
 
         $this->putRoutes[$uri] = $uri; 
@@ -133,6 +209,13 @@ class Router {
         return $this;
     }
     
+    /**
+     * 
+     * @param type $uri
+     * @param type $method
+     * @return mixed
+     * @throws \Exception
+     */
     public function processRequest($uri,$method){
         
         $this->cleanUri($uri);
@@ -172,20 +255,47 @@ class Router {
         }
     }
     
+    /**
+     * 
+     * @param Cache $cache
+     */
+    public function setCacheHandler(Cache $cache){
+        $this->cache = $cache;
+    }
+    
+    /**
+     * 
+     * @param string $ctrlNamespace
+     */
     public function setControllerNamespace($ctrlNamespace){
         $this->ctrlNamespace = $ctrlNamespace;
     }
     
+    /**
+     * 
+     * @param string $path
+     */
     public function setControllerPath($path){
         $this->ctrlPath = strripos($path,'/') === strlen($path)-1? $path : $path.'/';
     }
     
+    /**
+     * 
+     * @param string $defaultController
+     * @return $this
+     */
     public function setDefaultController($defaultController){
         $this->defaultController = $defaultController;
         return $this;
     }
     
-    protected function addMethodRoutes($uri,$route,$methods){
+    /**
+     * 
+     * @param string $uri
+     * @param \Feather\Init\Http\Route $route
+     * @param array $methods
+     */
+    protected function addMethodRoutes($uri,$route,array $methods){
         
         foreach($methods as $method){
             switch($method){
@@ -224,6 +334,11 @@ class Router {
         }
     }
     
+    /**
+     * 
+     * @param string $controller Controller name
+     * @return \Feather\Init\Controller\Controller|null
+     */
     protected function autoDetectController($controller){
         
         $ctrl = array(strtolower($controller));
@@ -265,7 +380,54 @@ class Router {
         
     }
     
+    public function autoRunCacheRoute($uri,$reqMethod){
+        if(!$this->cache){
+            return false;
+        }
+        
+        $cacheRoutes = $this->cache->get(self::AUTOROUTE_CACHE_KEY);
+        
+        $this->autoRoutes = $cacheRoutes? json_decode($cacheRoutes,true) : [];
+        
+        if(empty($this->autoRoutes)){
+            return false;
+        }
+        
+        $cacheInfo = null;
+        $cacheUri = null;
+        
+        foreach($this->autoRoutes as $key=>$data){
+            $cinfo = json_decode($data,true);
+            if(stripos($uri,$key) !== false && $cinfo['requestMethod'] == $reqMethod){
+               $cacheInfo = $cinfo;
+               $cacheUri = $key;
+               break;
+            }
+        }
+        
+        if(!$cinfo){
+            return false;
+        }
+        
+        $newUri = preg_replace('(^\/)|(\/$)','',preg_replace("/$cacheUri/i",'',$uri));
+        
+        $params = explode('/',$newUri);
+        
+        return $this->executeAutoRunRoute($cacheUri, $reqMethod, new $cacheInfo['controller'], $cacheInfo['method'], $params, $cacheInfo['fallback']);
+        
+    }
+    
+    /**
+     * 
+     * @param string $uri
+     * @param string $reqMethod
+     * @return boolean
+     */
     protected function autoRunRoute($uri,$reqMethod){
+        
+        if(($res = $this->autoRunCacheRoute($uri, $reqMethod)) !== false){
+            return true;
+        }
         
         $parts = preg_split('/\s*\/\s*/', $uri);
         
@@ -299,10 +461,8 @@ class Router {
                 return false;
             }
             
-            $route = new Route($reqMethod,$controller, $controller->defaultAction());
-            $route->setFallback($fallback);
-            $route->run();
-            return TRUE;
+            return $this->executeAutoRunRoute($parts[0],$reqMethod, $controller, $controller->defaultAction(),[], $fallback);
+
         }
         
         $method = $parts[1];
@@ -312,6 +472,20 @@ class Router {
             return false;
         }
         
+        return $this->executeAutoRunRoute($parts[0],$reqMethod, $controller, $method, $params, $fallback);
+
+    }
+    
+    /**
+     * 
+     * @param string $reqMethod
+     * @param \Feather\Init\Controller\Controller $controller
+     * @param string $method
+     * @param array $params
+     * @return boolean
+     */
+    protected function executeAutoRunRoute($uri,$reqMethod,$controller,$method,array $params=[],$fallback=false){
+        $this->cacheAutoRoute($uri, $reqMethod, $controller, $method, $fallback);
         $route = new Route($reqMethod,$controller, $method);
         $route->setParamValues($params);
         $route->setFallback($fallback);
@@ -319,6 +493,43 @@ class Router {
         return true;
     }
     
+    /**
+     * 
+     * @param string $reqMethod
+     * @param \Feather\Init\Controller\Controller $controller
+     * @param string $method
+     * @param array $params
+     * @return boolean
+     */
+    protected function cacheAutoRoute($uri,$reqMethod,$controller,$method,$fallback=false){
+        
+        if(!$this->cache){
+            return false;
+        }
+        $info = [
+            'controller'=> get_class($controller),
+            'method'=>$method,
+            'fallback'=>$fallback,
+            'requestMethod'=>$reqMethod
+        ];
+        
+        $key = $method == ''? strtolower($uri) : strtolower("$uri/$method");
+        
+        if(isset($this->autoRoutes[$key])){
+            return true;
+        }
+        
+        $this->autoRoutes[$key] = json_encode($info);
+        $this->cache->delete(self::AUTOROUTE_CACHE_KEY);
+        $this->cache->set(self::AUTOROUTE_CACHE_KEY,json_encode($this->autoRoutes));
+        return true;
+    }
+    
+    /**
+     * Builds regex pattern for uri
+     * @param string $uri
+     * @return string
+     */
     protected function buildPattern($uri){
 
         $pattern = '';
@@ -352,7 +563,14 @@ class Router {
         
         return $pattern;
     }
-    
+    /**
+     * 
+     * @param type $reqMethod
+     * @param type $uri
+     * @param type $callback
+     * @param array $middleware
+     * @return type
+     */
     protected function buildRoute($reqMethod,$uri,$callback=null,array $middleware=array()){
                 
         $len = strlen($uri); 
@@ -373,6 +591,10 @@ class Router {
         
     }
     
+    /**
+     * 
+     * @param string $uri
+     */
     protected function cleanUri(&$uri){
 
         $uri = preg_replace('/(\/)(\?)(.*)/','$1',
@@ -387,6 +609,10 @@ class Router {
         }
     }
     
+    /**
+     * 
+     * @param array $parts
+     */
     protected function cleanUriParts(array &$parts){
         foreach($parts as $key=>$part){
             if($part == NULL){
@@ -396,6 +622,12 @@ class Router {
         $parts =array_values($parts);
     }
     
+    /**
+     * Determine if request uri matches defined uri
+     * @param string $uriPath
+     * @param string $routePath
+     * @return boolean
+     */
     protected function comparePath($uriPath,$routePath){
         if(preg_match('/{(.*?)}/', $routePath) && strlen($uriPath)>0){
             return true;
@@ -406,8 +638,14 @@ class Router {
         
         return false;
     }
-    
-    protected function comparePaths($uriPaths,$routePaths,$minCount){
+    /**
+     * 
+     * @param array $uriPaths
+     * @param array $routePaths
+     * @param int $minCount
+     * @return boolean
+     */
+    protected function comparePaths(array $uriPaths, array $routePaths,int $minCount){
         
         $match = true;
 
@@ -423,12 +661,21 @@ class Router {
         return $match;
     }
     
+    /**
+     * 
+     * @return \Feather\Init\Http\Route
+     */
     protected function defaultRoute(){
         $controller = new $this->defaultController();
         return new \Feather\Init\Http\Route($controller,$controller->defaultAction());
     }
     
-    protected function getCountablePaths($paths){
+    /**
+     * 
+     * @param array $paths
+     * @return int
+     */
+    protected function getCountablePaths(array $paths){
         $count = 0;
         
         foreach($paths as $path){
@@ -441,6 +688,11 @@ class Router {
         return $count;
     }
     
+    /**
+     * 
+     * @param string $uri
+     * @return array
+     */
     protected function getParamsArgs($uri){
         
         $uriParts = explode('/',$uri);
@@ -457,6 +709,12 @@ class Router {
         
     }
     
+    /**
+     * 
+     * @param string $requestUri
+     * @param string $routeUri
+     * @return array
+     */
     protected function getParamsFromUri($requestUri,$routeUri){
         
         $params = array();
@@ -483,6 +741,11 @@ class Router {
         return $params;
     }
     
+    /**
+     * 
+     * @param string $uri
+     * @return boolean
+     */
     protected function isRegisteredRoute($uri){
         
         if(isset($this->registeredRoutes[$uri])){
@@ -502,8 +765,13 @@ class Router {
         return false;
         
     }
-    
-    protected function matches($uri,$routes){
+    /**
+     * 
+     * @param string $uri
+     * @param array $routes
+     * @return string|null
+     */
+    protected function matches($uri,array $routes){
         
         $uriPaths = explode('/',$uri);
         $count = count($uriPaths);
@@ -528,6 +796,13 @@ class Router {
         return NULL;
     }
     
+    /**
+     * 
+     * @param string $uri
+     * @param string $method
+     * @param array $middleware
+     * @return \Feather\Init\Http\Route
+     */
     protected function parseUri($uri,$method,array $middleware = array()){
         $parts = explode('/',$uri);
         
@@ -546,7 +821,15 @@ class Router {
         
     }
     
-    protected function setClosureRoute($method,$uri,$callback,array $middleware = array()){
+    /**
+     * 
+     * @param string $method
+     * @param string $uri
+     * @param \Closure $callback
+     * @param array $middleware
+     * @return \Feather\Init\Http\ClosureRoute
+     */
+    protected function setClosureRoute($method,$uri, \Closure $callback,array $middleware = array()){
         
         $params = $this->getParamsArgs($uri);
         
@@ -558,6 +841,14 @@ class Router {
 
     }
     
+    /**
+     * 
+     * @param string $method Request method
+     * @param string $uri
+     * @param \Closure| string $callback
+     * @param array $middleware
+     * @return \Feather\Init\Http\Route|\Feather\Init\Http\ClosureRoute
+     */
     protected function setRoute($method,$uri,$callback,array $middleware = array()){
         
         if($callback instanceof \Closure){
@@ -580,6 +871,13 @@ class Router {
         return $route;
     }
     
+    /**
+     * 
+     * @param \Feather\Init\Controller\Controller $controller
+     * @param string $methodName
+     * @param array $params
+     * @return boolean
+     */
     public function shouldRunControllerMethod(\Feather\Init\Controller\Controller $controller,$methodName,array $params){
         
         $func = new \ReflectionMethod($controller,$methodName);
@@ -587,6 +885,11 @@ class Router {
         return $func && count($func->getParameters()) >= count($params);
     }
     
+    /**
+     * 
+     * @param array $uriParts
+     * @return boolean
+     */
     protected function shouldRunDefaultController(array $uriParts){
         
         $uriControllerName = strtolower($uriParts[0]);

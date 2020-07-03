@@ -33,14 +33,26 @@ abstract class Middleware {
     
     abstract function run();
     
+    /**
+     * 
+     * @return int|string
+     */
     public function errorCode(){
         return $this->errorCode;
     }
     
+    /**
+     * 
+     * @return string
+     */
     public function errorMessage(){
         return $this->errorMessage;
     }
     
+    /**
+     * 
+     * @return \Feather\Init\Http\Response
+     */
     public function redirect(){
         
         ob_flush();
@@ -55,8 +67,6 @@ abstract class Middleware {
             \Feather\Session\Session::save(['data'=>$res->toArray()], REDIRECT_DATA_KEY);
             return $this->response->redirect($this->rediretUri);
         }
-        
-        die;
         
     }
     

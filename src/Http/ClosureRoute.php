@@ -14,7 +14,12 @@ namespace Feather\Init\Http;
  * @author fcarbah
  */
 class ClosureRoute extends Route {
-    
+    /**
+     * 
+     * @param string $requestMethod
+     * @param \Closure $closure
+     * @param array $params
+     */
     public function __construct($requestMethod,\Closure $closure, $params = array()) {
         $this->controller = $closure;
         $this->params = $params;

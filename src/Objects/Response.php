@@ -29,7 +29,12 @@ class Response implements \Iterator{
         ];
     }
 
-
+    /**
+     * 
+     * @param string $msg
+     * @param mixed $data
+     * @return \Feather\Init\Objects\Response
+     */
     public static function error($msg='',$data=array()){
         $r = new Response();
         $r->msg = $msg;
@@ -40,7 +45,15 @@ class Response implements \Iterator{
         return $r;
     }
     
-    public static function make($error,$msg='',$data=array(),$type='info'){
+    /**
+     * 
+     * @param bool $error
+     * @param string $msg
+     * @param mixed $data
+     * @param string $type
+     * @return \Feather\Init\Objects\Response
+     */
+    public static function make(bool $error,$msg='',$data=array(),$type='info'){
         $r = new Response();
         $r->msg = $msg;
         $r->data = $data;
@@ -50,6 +63,12 @@ class Response implements \Iterator{
         return $r;
     }
     
+    /**
+     * 
+     * @param string $msg
+     * @param mixed $data
+     * @return \Feather\Init\Objects\Response
+     */
     public static function success($msg='',$data=array()){
         $r = new Response();
         $r->msg = $msg;
