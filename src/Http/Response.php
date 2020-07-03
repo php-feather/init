@@ -93,7 +93,7 @@ class Response {
         $this->sendCookies();
         http_response_code($this->statusCode);
         $this->sendHeaders();
-        $this>$this->sendBody();
+        $this->sendBody();
     }
     
     public function sendHeadersOnly(){
