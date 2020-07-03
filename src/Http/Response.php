@@ -76,15 +76,16 @@ class Response {
         $defaultHeaders = ['Content-Type'=>'text/html'];
         $this->originalContent = $content;
         $this->content = $content;
-        $this->headers->add(array_merge($defaultHeaders,$headers));
+        $this->setHeaders($headers);
         $this->statusCode = $statusCode;
         return $this;
     }
 
-    public function rawOutput($data,$responseCode=200, array $headers=array()){
+    public function rawOutput($data,$statusCode=200, array $headers=array()){
         ob_clean();
         $this->setHeaders($headers);
         $this->content = $data;
+        $this->statusCode = $statusCode;
         return $this;
     }
     
