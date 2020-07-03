@@ -392,11 +392,7 @@ class Router {
         if(empty($this->autoRoutes)){
             return false;
         }
-        
-        $parts = preg_split('/\s*\/\s*/', $uri);
-        
-        $this->cleanUriParts($parts);
-        
+
         $cacheInfo = null;
         $cacheUri = null;
         
@@ -417,7 +413,7 @@ class Router {
         
         $params = explode('/',$newUri);
         
-        return $this->executeAutoRunRoute($parts, $reqMethod, new $cacheInfo['controller'], $cacheInfo['method'], $params, $cacheInfo['fallback']);
+        return $this->executeAutoRunRoute($cacheUri, $reqMethod, new $cacheInfo['controller'], $cacheInfo['method'], $params, $cacheInfo['fallback']);
         
     }
     
@@ -465,7 +461,7 @@ class Router {
                 return false;
             }
             
-            return $this->executeAutoRunRoute($parts,$reqMethod, $controller, $controller->defaultAction(),[], $fallback);
+            return $this->executeAutoRunRoute($parts[0],$reqMethod, $controller, $controller->defaultAction(),[], $fallback);
 
         }
         
@@ -476,7 +472,7 @@ class Router {
             return false;
         }
         
-        return $this->executeAutoRunRoute($parts,$reqMethod, $controller, $method, $params, $fallback);
+        return $this->executeAutoRunRoute($parts[0],$reqMethod, $controller, $method, $params, $fallback);
 
     }
     
