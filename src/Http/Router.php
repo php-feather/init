@@ -907,7 +907,7 @@ class Router {
      * @param string $uri
      */    
     protected function removePreceedingSlashFromUri(&$uri){
-        if(strpos($uri,'/') === 0){
+        if(strpos($uri,'/') === 0 && trim($uri) !='/'){
             $uri = substr($uri, 1);
         }    
     }           
