@@ -16,9 +16,12 @@ use Feather\Cache\Contracts\Cache;
  * @author fcarbah
  */
 class Router {
-    
+    /** @var array **/
     protected $routes = array();
+    
+    /** @var array **/
     protected $registeredRoutes = array();
+    
     protected $defaultController;
     protected const AUTOROUTE_CACHE_KEY = 'auto_route';
     
@@ -78,11 +81,15 @@ class Router {
      */
     public function any($uri,$callback=null,array $middleware=array()){
         
+        $this->removePreceedingSlashFromUri($uri);
+        
         $methods = RequestMethod::methods();
         
         $route = $this->buildRoute($methods[0], $uri, $callback, $middleware);
         
-        $this->addMethodRoutes($uri, $route, $methods);
+        if($route){
+            $this->addMethodRoutes($uri, $route, $methods);
+        }
         
         return $this;
     }
@@ -95,6 +102,8 @@ class Router {
      * @return $this
      */
     public function except(array $exclude,$uri,$callback=null,array $middleware=array()){
+        
+        $this->removePreceedingSlashFromUri($uri);
         
         $methods = RequestMethod::methods();
         
@@ -110,8 +119,11 @@ class Router {
             $methods = array_values($methods);
         
             $route = $this->buildRoute($methods[0], $uri, $callback, $middleware);
+            
+            if($route){
+                $this->addMethodRoutes($uri, $route, $methods);
+            }
 
-            $this->addMethodRoutes($uri, $route, $methods);
         }
         
         return $this;
@@ -127,12 +139,16 @@ class Router {
      * @return $this
      */
     public function delete($uri,$callback=null,array $middleware=array()){
-
+        
+        $this->removePreceedingSlashFromUri($uri);
+        
         $this->deleteRoutes[$uri] = $uri; 
         
         $route = $this->buildRoute(RequestMethod::DELETE, $uri, $callback, $middleware);
         
-        $this->routes[RequestMethod::DELETE.'_'.$uri] = $route;
+        if($route){
+            $this->routes[RequestMethod::DELETE.'_'.$uri] = $route;
+        }
         
         return $this;
     }
@@ -145,12 +161,16 @@ class Router {
      * @return $this
      */
     public function get($uri,$callback=null,array $middleware=array()){
-
+        
+        $this->removePreceedingSlashFromUri($uri);
+        
         $this->getRoutes[$uri] = $uri; 
         
         $route = $this->buildRoute(RequestMethod::GET, $uri, $callback, $middleware);
         
-        $this->routes[RequestMethod::GET.'_'.$uri] = $route;
+        if($route){
+            $this->routes[RequestMethod::GET.'_'.$uri] = $route;
+        }
         
         return $this;
     }
@@ -164,11 +184,15 @@ class Router {
      */
     public function patch($uri,$callback=null, array$middleware=array()){
         
+        $this->removePreceedingSlashFromUri($uri);
+        
         $this->patchRoutes[$uri] = $uri; 
         
         $route = $this->buildRoute(RequestMethod::PATCH, $uri, $callback, $middleware);
         
-        $this->routes[RequestMethod::PATCH.'_'.$uri] = $route;
+        if($route){
+            $this->routes[RequestMethod::PATCH.'_'.$uri] = $route;
+        }
         
         return $this;
     }
@@ -182,11 +206,15 @@ class Router {
      */
     public function post($uri,$callback=null, array$middleware=array()){
         
+        $this->removePreceedingSlashFromUri($uri);
+        
         $this->postRoutes[$uri] = $uri; 
         
         $route = $this->buildRoute(RequestMethod::POST, $uri, $callback, $middleware);
         
-        $this->routes[RequestMethod::POST.'_'.$uri] = $route;
+        if($route){
+            $this->routes[RequestMethod::POST.'_'.$uri] = $route;
+        }
         
         return $this;
     }
@@ -199,12 +227,16 @@ class Router {
      * @return $this
      */
     public function put($uri,$callback=null,array $middleware=array()){
-
+        
+        $this->removePreceedingSlashFromUri($uri);
+        
         $this->putRoutes[$uri] = $uri; 
         
         $route = $this->buildRoute(RequestMethod::PUT, $uri, $callback, $middleware);
         
-        $this->routes[RequestMethod::PUT.'_'.$uri] = $route;
+        if($route){
+            $this->routes[RequestMethod::PUT.'_'.$uri] = $route;
+        }
         
         return $this;
     }
@@ -217,6 +249,8 @@ class Router {
      * @throws \Exception
      */
     public function processRequest($uri,$method){
+        
+        $this->removePreceedingSlashFromUri($uri);
         
         $this->cleanUri($uri);
         
@@ -245,7 +279,7 @@ class Router {
             $route->setParamValues($params);
             return $route->run();
         }
-
+        
         if($this->isRegisteredRoute($uri)){
             throw new \Exception('Bad Request! Method Not Allowed',405);
         }
@@ -675,6 +709,45 @@ class Router {
     
     /**
      * 
+     * @param string $ctrlClass
+     * @return \Feather\Init\Controller\Controller|null
+     */
+    protected function getControllerClass($ctrlClass){
+  
+        $originalClass = $ctrlClass;
+        
+        $classFound = false;
+        
+        if(stripos($ctrlClass,$this->ctrlNamespace) === false){
+            $ctrlClass = $this->ctrlNamespace."\\".$ctrlClass;
+        }
+        
+        if(class_exists($ctrlClass)){
+            return new $ctrlClass;
+        }
+
+        $ctrlClass2 = $this->ctrlNamespace."\\".ucfirst(str_replace($this->ctrlNamespace."\\",'',$ctrlClass));
+
+        $append = ['','Controller','controller'];
+
+        $classes = [$ctrlClass,$ctrlClass2];
+
+        foreach($classes as $class){
+            
+            foreach($append as $str){
+                $newClass = str_replace("\\\\",'\\',$class.$str);
+                if(class_exists($newClass)){
+                    return new $newClass;
+                }
+            }
+        }
+
+        return $this->autoDetectController($ctrl);       
+        
+    }
+    
+    /**
+     * 
      * @param array $paths
      * @return int
      */
@@ -804,7 +877,7 @@ class Router {
      * @param string $uri
      * @param string $method
      * @param array $middleware
-     * @return \Feather\Init\Http\Route
+     * @return \Feather\Init\Http\Route|null
      */
     protected function parseUri($uri,$method,array $middleware = array()){
         $parts = explode('/',$uri);
@@ -813,16 +886,31 @@ class Router {
             return $this->deleteRoute();
         }
         
-        $controller = new $parts[0];
-        $action = isset($parts[1])? $parts[1] : null;
-        $params = isset($parts[2])? array_slice($parts, 2) : array();
-        
-        $route = new Route($method,$controller,$action,$params);
-        $route->setMiddleware($middleware);
+        $controller = class_exists($parts[0])? new $parts[0] : $this->getControllerClass($parts[0]);
 
-        return $route;
+        if($controller){
+            $action = isset($parts[1])? $parts[1] : $controller->defaultAction();
+            $params = isset($parts[2])? array_slice($parts, 2) : array();
+
+            $route = new Route($method,$controller,$action,$params);
+            $route->setMiddleware($middleware);
+
+            return $route;
+        }
+        
+        return null;
         
     }
+    
+    /**
+     * Remove preceeding / from uri
+     * @param string $uri
+     */    
+    protected function removePreceedingSlashFromUri(&$uri){
+        if(strpos($uri,'/') === 0){
+            $uri = substr($uri, 1);
+        }    
+    }           
     
     /**
      * 
@@ -850,7 +938,7 @@ class Router {
      * @param string $uri
      * @param \Closure| string $callback
      * @param array $middleware
-     * @return \Feather\Init\Http\Route|\Feather\Init\Http\ClosureRoute
+     * @return \Feather\Init\Http\Route|\Feather\Init\Http\ClosureRoute|null
      */
     protected function setRoute($method,$uri,$callback,array $middleware = array()){
         
@@ -860,18 +948,20 @@ class Router {
         
         $parts = explode('@',$callback);
         
-        $controller = new $parts[0];
+        $controller = class_exists($parts[0])? new $parts[0] : $this->getControllerClass($parts[0]);
         
-        $action = isset($parts[1])? $parts[1] : null;
-        
-        $cAction = $action== null? $controller->defaultAction() : $action;
-        
-        $params = $this->getParamsArgs($uri);
-        
-        $route = new Route($method,$controller, $cAction, $params);
-        $route->setMiddleware($middleware);
+        if($controller){
+            $action = isset($parts[1])? $parts[1] : $controller->defaultAction();
 
-        return $route;
+            $params = $this->getParamsArgs($uri);
+
+            $route = new Route($method,$controller, $action, $params);
+            $route->setMiddleware($middleware);
+
+            return $route;
+        }
+        
+        return null;
     }
     
     /**
