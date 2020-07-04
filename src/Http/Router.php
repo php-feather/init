@@ -471,8 +471,9 @@ class Router {
 
         if($count <1 && $uri != '/'){
             return FALSE;
-        }elseif($uri == '/'){
-            $parts = [''];
+        }elseif($uri == '/' && $this->defaultController 
+                && ($controller= $this->getControllerClass($this->defaultController))){
+            return $this->executeAutoRunRoute ($uri, $reqMethod, $controller, $controller->defaultAction());            
         }
         
         $controller = $this->autoDetectController($parts[0]);
@@ -909,7 +910,10 @@ class Router {
     protected function removePreceedingSlashFromUri(&$uri){
         if(strpos($uri,'/') === 0 && trim($uri) !='/'){
             $uri = substr($uri, 1);
-        }    
+        }
+        else if(trim($uri) == ''){
+            $uri = '/';
+        }
     }           
     
     /**
