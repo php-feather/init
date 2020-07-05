@@ -251,7 +251,7 @@ class Router {
     public function processRequest($uri,$method){
         
         if(strtoupper($method) == RequestMethod::OPTIONS){
-            throw new Exception("Not Implemented", 501);
+            throw new \Exception("Not Implemented", 501);
         }
         
         if(strtoupper($method) == RequestMethod::HEAD){
