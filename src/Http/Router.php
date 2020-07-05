@@ -250,6 +250,14 @@ class Router {
      */
     public function processRequest($uri,$method){
         
+        if(strtoupper($method) == RequestMethod::OPTIONS){
+            throw new Exception("Not Implemented", 501);
+        }
+        
+        if(strtoupper($method) == RequestMethod::HEAD){
+            $method = RequestMethod::GET;
+        }
+        
         $this->removePreceedingSlashFromUri($uri);
         
         $this->cleanUri($uri);

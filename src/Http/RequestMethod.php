@@ -19,6 +19,8 @@ class RequestMethod {
     const PUT = 'PUT';
     const DELETE = 'DELETE';
     const PATCH = 'PATCH';
+    const HEAD = 'HEAD';
+    const OPTIONS = 'OPTIONS';
     
     public static function methods(){
         return [

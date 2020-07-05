@@ -146,8 +146,16 @@ class Route {
      */
     protected function sendResponse($res){
         if($res instanceof Response){
-            return $res->send();
+            return strtoupper(Request::getInstance()->method == RequestMethod::HEAD)? $res->sendHeadersOnly() : $res->send();
         }
+        
+        
+        if(strtoupper(Request::getInstance()->method == RequestMethod::HEAD)){
+            $resp = Response::getInstance();
+            $resp->setHeaders(headers_list());
+            return $resp->sendHeadersOnly();
+        }
+        
         return;
     }
     

@@ -163,11 +163,13 @@ class Response {
      * @param string|int $value
      * @param string $expires DateTime
      * @param string $path
+     * @param string $domain
      * @param bool $secure
      */
-    public function setCookie($name,$value,$expires,$path='/',bool $secure=false){
+    public function setCookie($name,$value,$expires,$path='/',$domain='',bool $secure=false){
+        
         $this->cookies[] = [
-            'name'=>$name,'value'=>$value,'expires'=>$expires,'path'=>$path,'secure'=>$secure
+            'name'=>$name,'value'=>$value,'expires'=>$expires,'path'=>$path,'domain'=>$domain,'secure'=>$secure
         ];
     }
     
@@ -212,6 +214,14 @@ class Response {
     
     /**
      * 
+     * @param int $code
+     */
+    public function setStatusCode(int $code){
+        $this->statusCode = $code;
+    }
+    
+    /**
+     * 
      * @param string $key
      * @return string
      */
@@ -236,7 +246,7 @@ class Response {
      */
     protected function sendCookies(){
         foreach($this->cookies as $cookie){
-            $this->setCookie($cookie['name'], $cookie['value'], $cookie['expires'], $cookie['path'], $cookie['secure']);
+            setCookie($cookie['name'], $cookie['value'], $cookie['expires'], $cookie['path'], $cookie['domain'],$cookie['secure']);
         }
     }
     /**
