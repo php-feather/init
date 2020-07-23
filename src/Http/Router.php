@@ -400,13 +400,13 @@ class Router {
             $fullPath = $this->ctrlPath.$c.'.php';
             $fullPath2 = $this->ctrlPath.$c.'Controller.php';
             
-            if(file_exists($fullPath) && basename($fullPath) == $c.'.php'){
+            if(feather_file_exists($fullPath) && strcasecmp(basename($fullPath), $c.'.php') == 0){
                 $fileExist = true;
                 $class = $this->ctrlNamespace.\Feather\Init\ClassFinder::findClass($fullPath);
                 break;
             }
             
-            if(file_exists($fullPath2) && basename($fullPath2) == $c.'Controller.php'){
+            if(feather_file_exists($fullPath2) && strcasecmp(basename($fullPath2), $c.'Controller.php') == 0){
                 $fileExist = true;
                 $class = $this->ctrlNamespace.\Feather\Init\ClassFinder::findClass($fullPath2);
                 break;
