@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * 
+ * @param string $dirname absolute path of directory
+ * @param boolean $ci_earch Case insensitive search - true to enable
+ * @return boolean
+ */
 function feather_is_dir(&$dirname,$ci_earch=true){
     
     if(is_dir($dirname)){
@@ -26,6 +32,12 @@ function feather_is_dir(&$dirname,$ci_earch=true){
     return false;
 }
 
+/**
+ * Check if a file exists
+ * @param string $filename absolute path of file to find
+ * @param boolean $ci_search Case insensitive search - true to enable
+ * @return boolean
+ */
 function feather_file_exists(&$filename,$ci_search = true){
     
     if(file_exists($filename)){
@@ -59,8 +71,8 @@ function feather_file_exists(&$filename,$ci_search = true){
 
 /**
  * 
- * @param string $directory full directory path
- * @return array List of directory names in the directory
+ * @param string $directory absolute path of directory
+ * @return array List of sub directories names
  */
 function feather_dir_folders($directory){
     
@@ -85,7 +97,7 @@ function feather_dir_folders($directory){
 
 /**
  * 
- * @param string $directory full directory path
+ * @param string $directory absolute path of directory
  * @return array List of filenames in the directory
  */
 function feather_dir_files($directory){
