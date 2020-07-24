@@ -52,6 +52,9 @@ class Router {
     /** @var array **/
     protected $deleteRoutes = array();
     
+    /** @var boolean **/
+    protected $routeFallback = true;
+    
     protected $ctrlNamespace = "Feather\\Init\\Controllers\\";
     protected $ctrlPath = '';
     private static $self;
@@ -93,6 +96,7 @@ class Router {
         
         return $this;
     }
+    
     /**
      * Sets route for all requests except those specify by $exclude
      * @param array $exclude
@@ -329,6 +333,16 @@ class Router {
     public function setDefaultController($defaultController){
         $this->defaultController = $defaultController;
         return $this;
+    }
+    
+    /**
+     * Enable/Disable Default Controller fallback
+     * Resolve request to default controller if no match found
+     * This is a last resort
+     * @param boolean $enable
+     */
+    public function setRoutingFallback($enable){
+        $this->routeFallback = $enable;
     }
     
     /**
@@ -991,11 +1005,15 @@ class Router {
     }
     
     /**
-     * 
+     * Check if request handling should fallback to default controller
      * @param array $uriParts
      * @return boolean
      */
     protected function shouldRunDefaultController(array $uriParts){
+        
+        if($this->routeFallback){
+            return true;
+        }
         
         $uriControllerName = strtolower($uriParts[0]);
         
