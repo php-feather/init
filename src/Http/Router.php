@@ -55,6 +55,9 @@ class Router {
     /** @var boolean **/
     protected $routeFallback = true;
     
+    /** @var boolean **/
+    protected $autoRoute = true;
+    
     protected $ctrlNamespace = "Feather\\Init\\Controllers\\";
     protected $ctrlPath = '';
     private static $self;
@@ -296,9 +299,17 @@ class Router {
             throw new \Exception('Bad Request! Method Not Allowed',405);
         }
         
-        if(!$this->autoRunRoute($uri,$method)){
+        if(!$this->autoRoute || !$this->autoRunRoute($uri,$method)){
             throw new \Exception('Requested Resource Not Found',404);
         }
+    }
+    
+    /**
+     * Enable/Disable Auto Routing
+     * @param boolean $enable
+     */
+    public function setAutoRouting($enable){
+        $this->autoRoute = $enable;
     }
     
     /**
