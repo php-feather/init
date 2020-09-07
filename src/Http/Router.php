@@ -22,7 +22,9 @@ class Router {
     /** @var array **/
     protected $registeredRoutes = array();
     
+    /** @var string **/
     protected $defaultController;
+    
     protected const AUTOROUTE_CACHE_KEY = 'auto_route';
     
     /** @var \Feather\Cache\Contracts\Cache **/
@@ -57,14 +59,14 @@ class Router {
     
     /** @var boolean **/
     protected $autoRoute = true;
-    
+
     protected $ctrlNamespace = "Feather\\Init\\Controllers\\";
     protected $ctrlPath = '';
     private static $self;
     
     
     private function __construct() {
-        
+        $this->request = Request::getInstance();
     }
     
     /**
@@ -264,6 +266,8 @@ class Router {
         if(strtoupper($method) == RequestMethod::HEAD){
             $method = RequestMethod::GET;
         }
+        
+        $this->removeQueryString($uri);
         
         $this->removePreceedingSlashFromUri($uri);
         
@@ -535,7 +539,7 @@ class Router {
         
         $method = $parts[1];
         $params = $count >2? array_slice($parts,2) : array();
-        
+                  
         return $this->executeAutoRunRoute($parts[0],$reqMethod, $controller, $method, $params, $fallback);
 
     }
@@ -776,7 +780,7 @@ class Router {
             }
         }
 
-        return $this->autoDetectController($ctrl);       
+        return $this->autoDetectController($ctrlClass);       
         
     }
     
@@ -948,6 +952,15 @@ class Router {
             $uri = '/';
         }
     }           
+    
+    /**
+     * Strip query string from uri
+     * @param string $uri
+     */
+    protected function removeQueryString(&$uri){
+        $queryStr = '?'.$this->request->query->toString();
+        $uri = str_replace($queryStr,'',$uri);
+    }
     
     /**
      * 

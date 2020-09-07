@@ -83,7 +83,7 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
     }
     
     /**
-     * 
+     * Get boolean value of parameter name
      * @param string $name
      * @return boolean
      */
@@ -97,7 +97,7 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
     }
     
     /**
-     * 
+     * Get float value of parameter name
      * @param type $name
      * @return float
      */
@@ -105,7 +105,7 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
         return floatval($this->{$name});
     }
     /**
-     * 
+     * Get integer value of parameter name
      * @param string $name
      * @param int $base
      * @return int
@@ -126,6 +126,28 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
     public function merge(ParameterBag $bag){
         $this->_items = array_merge($this->_items,$bag->bag());
         return $this;
+    }
+    
+    /**
+     * Get string value of parameter name
+     * @param string $name
+     * @return string
+     */
+    public function string($name){
+        return strval($this->{$name});
+    }
+    
+    /**
+     * 
+     * @return string
+     */
+    public function toString(){
+        $string= '';
+        foreach($this->_items as $key=>$val){
+            $string .= $key.'='.$val.'&';
+        }
+        
+        return substr($string, 0,-1);
     }
     
     public function next(): void

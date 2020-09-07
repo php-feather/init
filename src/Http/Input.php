@@ -229,7 +229,7 @@ class Input {
             $string .= $key.'='.$val.'&';
         }
         
-        return substr($string, 0,strripos($string,'&')-1);
+        return substr($string, 0,-1);
     }
     
     /**
