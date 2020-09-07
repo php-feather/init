@@ -958,7 +958,7 @@ class Router {
      * @param string $uri
      */
     protected function removeQueryString(&$uri){
-        $queryStr = '?'.$this->request->query->toString();
+        $queryStr = '?'.$this->request->query()->toString();
         $uri = str_replace($queryStr,'',$uri);
     }
     
