@@ -330,6 +330,15 @@ class Router {
      */
     public function setControllerNamespace($ctrlNamespace){
         $this->ctrlNamespace = $ctrlNamespace;
+        
+        if(strpos($ctrlNamespace,'\\') !== 0){
+            $this->ctrlNamespace = '\\'.$ctrlNamespace;
+        }
+        
+        if(strrpos($ctrlNamespace, '\\') !== strlen($ctrlNamespace)-1){
+            $this->ctrlNamespace .= '\\';
+        }
+
     }
     
     /**
@@ -747,36 +756,58 @@ class Router {
     
     /**
      * 
+     * @param string $class
+     * @return \Feather\Init\Http\Controller\Controller|null
+     */
+    protected function getClass($class){
+        
+        if(in_array($class, get_declared_classes())){
+            return new $class;
+        }
+        
+        if(class_exists($class)){
+            return new $class;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 
      * @param string $ctrlClass
      * @return \Feather\Init\Controller\Controller|null
      */
     protected function getControllerClass($ctrlClass){
   
+        if(strpos($ctrlClass,'\\') !== 0){
+            $ctrlClass = '\\'.$ctrlClass;
+        }
+        
         $originalClass = $ctrlClass;
         
         $classFound = false;
-        
+
         if(stripos($ctrlClass,$this->ctrlNamespace) === false){
-            $ctrlClass = $this->ctrlNamespace."\\".$ctrlClass;
+            $ctrlClass = str_replace('\\\\','\\',$this->ctrlNamespace.$ctrlClass);
         }
         
-        if(class_exists($ctrlClass)){
-            return new $ctrlClass;
+        if(($class = $this->getClass($ctrlClass))){
+            return $class;
         }
-
-        $ctrlClass2 = $this->ctrlNamespace."\\".ucfirst(str_replace($this->ctrlNamespace."\\",'',$ctrlClass));
-
+        
         $append = ['','Controller','controller'];
 
-        $classes = [$ctrlClass,$ctrlClass2];
+        $classes = [$ctrlClass];
 
         foreach($classes as $class){
             
             foreach($append as $str){
                 $newClass = str_replace("\\\\",'\\',$class.$str);
-                if(class_exists($newClass)){
-                    return new $newClass;
+                
+                if(($class = $this->getClass($ctrlClass))){
+                    return $class;
                 }
+        
             }
         }
 
@@ -924,7 +955,11 @@ class Router {
             return $this->deleteRoute();
         }
         
-        $controller = class_exists($parts[0])? new $parts[0] : $this->getControllerClass($parts[0]);
+        $controller = $this->getClass($parts[0]);
+        
+        if(!$controller){
+            $controller = $this->getControllerClass($parts[0]);
+        }
 
         if($controller){
             $action = isset($parts[1])? $parts[1] : $controller->defaultAction();
@@ -997,8 +1032,13 @@ class Router {
         }
         
         $parts = explode('@',$callback);
+
+        $controller = $this->getClass($parts[0]);
         
-        $controller = class_exists($parts[0])? new $parts[0] : $this->getControllerClass($parts[0]);
+        if(!$controller){
+            $controller = $this->getControllerClass($parts[0]);
+        }
+
         
         if($controller){
             $action = isset($parts[1])? $parts[1] : $controller->defaultAction();
