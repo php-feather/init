@@ -69,6 +69,36 @@ class Request {
         return null;
     }
     
+    public function all($name= null,$default = null){
+        return $this->input->all($name, $default);
+    }
+    
+    
+    public function cookie($name= null,$default = null){
+        return $this->input->cookie($name, $default);
+    }
+    
+    public function file($name= null,$default = null){
+        return $this->input->file();
+    }
+    
+    
+    public function get($name= null,$default = null){
+        return $this->input->get($name, $default);
+    }
+    
+    public function invalidFile($name= null,$default = null){
+        return $this->input->invalidFile($name, $default);
+    }
+
+    public function post($name= null,$default = null){
+        return $this->input->post($name, $default);
+    }
+    
+    public function query($name= null,$default = null){
+        return $this->input->query($name, $default);
+    }
+ 
     /**
      * 
      * @return string|null
