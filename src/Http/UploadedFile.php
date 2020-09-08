@@ -1,6 +1,6 @@
 <?php
 
-namespace Feather\Init\Http\Upload;
+namespace Feather\Init\Http;
 
 /**
  * Description of File

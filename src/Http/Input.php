@@ -8,8 +8,7 @@
 
 namespace Feather\Init\Http;
 use Feather\Init\Http\Parameters\ParameterBag;
-use Feather\Init\Http\Upload\UploadedFile;
-use Feather\Init\Http\Upload\InvalidUploadedFile;
+use Feather\Init\Http\UploadedFile;
 
 /**
  * Description of Input
@@ -257,16 +256,13 @@ class Input {
      * @return UploadedFile
      */
     protected function getFile($fileInfo){
+        
         $errors = $this->getFileErroMessage($fileInfo['error']);
         
         if(!empty($errors)){
-            $file = new Upload\InvalidUploadedFile();
-            $file->setErrors($errors);
-        }else{
-            $file = new UploadedFile($fileInfo['tmp_name']);
+            return $errors;
         }
-        
-        return $file;
+        return new UploadedFile($fileInfo['tmp_name']);      
     }
     
     /**
@@ -309,12 +305,14 @@ class Input {
     }
     /**
      * 
+     * @param string $key file parameter name
      * @param array $files multiple upload files
      * @return array
      */
-    protected function getFiles($files){
+    protected function setFileArray($key,$files){
         
-        $newFiles = [];
+        $valid = [];
+        $invalid = [];
         
         foreach($files['names'] as $key=>$val){
             $tmpFile = [
@@ -325,11 +323,21 @@ class Input {
                 'size' => $files['size'][$key]
             ];
             
-            $newFiles[] = $this->getFile($tmpFile);
+            $file = $this->getFile($tmpFile);
+            
+            if($file instanceof UploadedFile){
+                $valid[] = $file;
+            }else{
+                $invalid[] = $file;
+            }
+            
         }
         
-        return $newFiles;
-        
+        $this->files->{$key} = $valid;
+                
+        if(!empty($invalid)){
+            $this->invalidFiles->{$key} = $invalid;
+        }
     }
     
     /**
@@ -355,20 +363,18 @@ class Input {
         foreach($_FILES as $key=>$data){
             
             if(is_array($data['name'])){
-                
-                $file = $this->getFiles($files);
-                
+                $this->setFileArray($files);                
             }
             else{
                 $file = $this->getFile($fileInfo);
+                
+                if($file instanceof UploadedFile){
+                     $this->files->{$key} = $file;
+                }else{
+                    $this->invalidFiles->{$key} = $file;
+                }
             }
-            
-            if($file instanceof Upload\InvalidUploadedFile){
-                $this->invalidFiles->{$key} = $file;
-            }else{
-                $this->files->{$key} = $file;
-            }
-            
+
         }
         
     }
