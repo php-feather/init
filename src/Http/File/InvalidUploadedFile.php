@@ -26,7 +26,7 @@ class InvalidUploadedFile implements IUploadedFile
      * 
      * @param array $fileInfo
      */
-    public function __construct($fileInfo)
+    public function __construct(array $fileInfo)
     {
         foreach($fileInfo as $key=>$value){
             if(property_exists($this, $key)){
@@ -70,9 +70,9 @@ class InvalidUploadedFile implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function getFilename()
+    public function getFilename($wExtension=false)
     {
-        if(($pos = strrpos($this->name,'.')) > 1){
+        if($wExtension && ($pos = strrpos($this->name,'.')) > 1){
             return substr($this->name,0,$pos);
         }
         

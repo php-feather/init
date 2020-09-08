@@ -26,9 +26,10 @@ interface IUploadedFile
     public function getExtension();
     
     /**
+     * @param boolean $wExtension With extension set to true to include extension in file name
      * @return string
      */
-    public function getFilename();
+    public function getFilename($wExtension=false);
     
     /**
      * 

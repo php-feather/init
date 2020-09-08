@@ -327,6 +327,7 @@ class Input {
             $file = $this->getFile($tmpFile);
             
             if($file instanceof UploadedFile){
+                $file->setUploadInfo($tmpFile);
                 $valid[] = $file;
             }else{
                 $tmpFile['errors'] = $file;
@@ -371,6 +372,7 @@ class Input {
                 $file = $this->getFile($data);
                 
                 if($file instanceof UploadedFile){
+                    $file->setUploadInfo($data);
                      $this->files->{$key} = $file;
                 }else{
                     $data['errors'] = $file;

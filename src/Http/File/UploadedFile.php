@@ -16,7 +16,7 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
     protected $errors = array();
     
     /** @var string **/
-    protected $name;
+    protected $originalInfo = array();
     
     /**
      * 
@@ -30,15 +30,15 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function getFilename()
+    public function getFilename($wExtension = false)
     {
+        
+        if(isset($this->originalInfo['name'])){
+            return $wExtension? $this->originalInfo['name'] : $this->stripExtension($this->originalInfo['name']);
+        }
         $filename = parent::getFilename();
         
-        if(($pos = strrpos($filename,'.')) > 1){
-            return substr($filename,0,$pos);
-        }
-        
-        return $filename;
+        return $wExtension? $filename : $this->stripExtension($filename);
     }
     
     /**
@@ -62,7 +62,15 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
             $this->errors[] = $errors;
         }
     }
-
+    
+    /**
+     * 
+     * @param array $fileInfo
+     */
+    public function setUploadInfo(array $fileInfo){
+        $this->originalInfo = $fileInfo;
+    }
+    
     /**
      * 
      * {@inheritdoc}
@@ -94,5 +102,18 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
         $finfo = new \finfo;
         return $finfo->file($this->getRealPath(),FILEINFO_MIME_TYPE);
     }
-
+    
+    /**
+     * 
+     * @param string $filename
+     * @return string
+     */
+    protected function stripExtension($filename){
+        if(($pos = strrpos($filename,'.')) > 1){
+            return substr($filename,0,$pos);
+        }
+        
+        return $filename;
+    }
+    
 }
