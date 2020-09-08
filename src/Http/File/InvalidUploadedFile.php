@@ -39,11 +39,22 @@ class InvalidUploadedFile implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function delete(): boolean
+    public function delete()
     {
+        if(file_exists($this->tmp_name)){
+            return unlink($this->tmp_name);
+        }
         return false;
     }
     
+    /**
+     * 
+     * {@inheritdoc}
+     */
+    public function getAbsolutePath()
+    {
+        return $this->tmp_name;
+    }
     /**
      * 
      * {@inheritdoc}

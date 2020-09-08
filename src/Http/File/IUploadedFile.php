@@ -16,6 +16,11 @@ interface IUploadedFile
     public function delete();
     
     /**
+     * @return string absolute filepath
+     */
+    public function getAbsolutePath();
+    
+    /**
      * @return array list of error messages
      */
     public function getErrors();

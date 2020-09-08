@@ -18,6 +18,17 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
     /** @var string **/
     protected $originalInfo = array();
     
+    /** @var array **/
+    protected $paths = [];
+    
+    /**
+     * 
+     * {@inheritdoc}
+     */
+    public function getAbsolutePath()
+    {
+        return $this->getRealPath();
+    }
     /**
      * 
      * @return array
@@ -87,6 +98,10 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
      */
     public function delete()
     {
+        if(isset($this->originalInfo['tmp_name']) && file_exists($this->originalInfo['tmp_name'])){
+            unlink($this->originalInfo['tmp_name']);
+        }
+        
         if($this->destination && file_exists($this->destination)){
             return unlink($this->destination);
         }
@@ -100,6 +115,7 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
     public function save($destination)
     {
         $this->destination = $destination;
+        $this->paths[] = $destination;
         return move_uploaded_file($this->getRealPath(), $destination);
     }
     
