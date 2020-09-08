@@ -8,7 +8,9 @@
 
 namespace Feather\Init\Http;
 use Feather\Init\Http\Parameters\ParameterBag;
-use Feather\Init\Http\UploadedFile;
+use Feather\Init\Http\File\UploadedFile;
+use Feather\Init\Http\File\IUploadedFile;
+use Feather\Init\Http\File\InvalidUploadedFile;
 
 /**
  * Description of Input
@@ -130,7 +132,7 @@ class Input {
      *  Returns list of Uploaded files
      * @param string $name name of parameter value  to retrieve
      * @default mixed default value to return if param name not found
-     * @return mixed|Feather\Init\Http\Upload\UploadedFile|\Feather\Init\Http\Parameters\ParameterBag
+     * @return null|Feather\Init\Http\File\IUploadedFile|\Feather\Init\Http\Parameters\ParameterBag
      */
     public function file($name=null,$default=null){
         if($name !== null){
@@ -144,7 +146,7 @@ class Input {
      *  Returns list of Uploaded files
      * @param string $name name of parameter value  to retrieve
      * @default mixed default value to return if param name not found
-     * @return mixed|Feather\Init\Http\Upload\UploadedFile|\Feather\Init\Http\Parameters\ParameterBag
+     * @return null|Feather\Init\Http\File\IUploadedFile|\Feather\Init\Http\Parameters\ParameterBag
      */
     public function invalidFile($name=null,$default=null){
         if($name !== null){
@@ -201,7 +203,6 @@ class Input {
         
         return $this->post;
     }
-    
     
     /**
      * Returns ParameterBag of request Query data key/value pairs or specific value of specified by name
@@ -314,13 +315,13 @@ class Input {
         $valid = [];
         $invalid = [];
         
-        foreach($files['names'] as $key=>$val){
+        foreach($files['name'] as $indx=>$val){
             $tmpFile = [
-                'error'=>$files['error'][$key],
-                'tmp_name'=> $files['tmp_name']=[$key],
+                'error'=>$files['error'][$indx],
+                'tmp_name'=> $files['tmp_name'][$indx],
                 'name'=> $val,
-                'type'=> $files['type'][$key],
-                'size' => $files['size'][$key]
+                'type'=> $files['type'][$indx],
+                'size' => $files['size'][$indx]
             ];
             
             $file = $this->getFile($tmpFile);
@@ -328,7 +329,8 @@ class Input {
             if($file instanceof UploadedFile){
                 $valid[] = $file;
             }else{
-                $invalid[] = $file;
+                $tmpFile['errors'] = $file;
+                $invalid[] = new InvalidUploadedFile($tmpFile);
             }
             
         }
@@ -371,7 +373,8 @@ class Input {
                 if($file instanceof UploadedFile){
                      $this->files->{$key} = $file;
                 }else{
-                    $this->invalidFiles->{$key} = $file;
+                    $data['errors'] = $file;
+                    $this->invalidFiles->{$key} = new InvalidUploadedFile($data);
                 }
             }
 

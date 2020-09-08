@@ -69,32 +69,72 @@ class Request {
         return null;
     }
     
+    /**
+     *  Returns ParameterBag of all request data key/value pairs or specific value of specified by name
+     * @param string $name name of parameter value  to retrieve
+     * @default mixed default value to return if param name not found
+     * @return mixed|\Feather\Init\Http\Parameters\ParameterBag
+     */
     public function all($name= null,$default = null){
         return $this->input->all($name, $default);
     }
     
-    
+    /**
+     * Returns ParameterBag of all cookie data key/value pairs or specific value of specified by name
+     * @param string $name name of parameter value  to retrieve
+     * @default mixed default value to return if param name not found
+     * @return mixed|\Feather\Init\Http\Parameters\ParameterBag
+     */
     public function cookie($name= null,$default = null){
         return $this->input->cookie($name, $default);
     }
     
+    /**
+     *  Returns list of Uploaded files
+     * @param string $name name of parameter value  to retrieve
+     * @default mixed default value to return if param name not found
+     * @return null|Feather\Init\Http\File\UploadedFile|\Feather\Init\Http\Parameters\ParameterBag
+     */
     public function file($name= null,$default = null){
         return $this->input->file($name,$default);
     }
     
-    
+    /**
+     * Returns ParameterBag of GET request data key/value pairs or specific value of specified by name
+     * @param string $name name of parameter value  to retrieve
+     * @default mixed default value to return if param name not found
+     * @return mixed|\Feather\Init\Http\Parameters\ParameterBag
+     */
     public function get($name= null,$default = null){
         return $this->input->get($name, $default);
     }
     
+    /**
+     *  Returns list of Uploaded files
+     * @param string $name name of parameter value  to retrieve
+     * @default mixed default value to return if param name not found
+     * @return null|Feather\Init\Http\File\InvalidUploadedFile|\Feather\Init\Http\Parameters\ParameterBag
+     */
     public function invalidFile($name= null,$default = null){
         return $this->input->invalidFile($name, $default);
     }
-
+    
+    /**
+     * Returns ParameterBag of POST request data key/value pairs or specific value of specified by name
+     * @param string $name name of parameter value  to retrieve
+     * @default mixed default value to return if param name not found
+     * @return mixed|\Feather\Init\Http\Parameters\ParameterBag
+     */
     public function post($name= null,$default = null){
         return $this->input->post($name, $default);
     }
     
+    /**
+     * Returns ParameterBag of request Query data key/value pairs or specific value of specified by name
+     * @param string $name name of parameter value  to retrieve
+     * @default mixed default value to return if param name not found
+     * @return mixed|\Feather\Init\Http\Parameters\ParameterBag
+     */
     public function query($name= null,$default = null){
         return $this->input->query($name, $default);
     }
