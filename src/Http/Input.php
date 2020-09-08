@@ -363,10 +363,10 @@ class Input {
         foreach($_FILES as $key=>$data){
             
             if(is_array($data['name'])){
-                $this->setFileArray($files);                
+                $this->setFileArray($key,$data);                
             }
             else{
-                $file = $this->getFile($fileInfo);
+                $file = $this->getFile($data);
                 
                 if($file instanceof UploadedFile){
                      $this->files->{$key} = $file;
