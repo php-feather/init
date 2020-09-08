@@ -26,6 +26,16 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
         return $this->errors;
     }
     
+    public function getExtension(){
+        
+        if(isset($this->originalInfo['name']) && ($pos = strrpos($this->name,'.')) > 1){
+            return substr($this->name,$pos+1);
+        }
+        
+        return parent::getExtension();
+        
+    }
+    
     /**
      * 
      * {@inheritdoc}
