@@ -132,7 +132,7 @@ class Input {
      *  Returns list of Uploaded files
      * @param string $name name of parameter value  to retrieve
      * @default mixed default value to return if param name not found
-     * @return null|Feather\Init\Http\File\IUploadedFile|\Feather\Init\Http\Parameters\ParameterBag
+     * @return null|Feather\Init\Http\File\UploadedFile|\Feather\Init\Http\Parameters\ParameterBag
      */
     public function file($name=null,$default=null){
         if($name !== null){
@@ -146,7 +146,7 @@ class Input {
      *  Returns list of Uploaded files
      * @param string $name name of parameter value  to retrieve
      * @default mixed default value to return if param name not found
-     * @return null|Feather\Init\Http\File\IUploadedFile|\Feather\Init\Http\Parameters\ParameterBag
+     * @return null|Feather\Init\Http\File\InvalidUploadedFile|\Feather\Init\Http\Parameters\ParameterBag
      */
     public function invalidFile($name=null,$default=null){
         if($name !== null){
