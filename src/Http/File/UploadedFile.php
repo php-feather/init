@@ -30,7 +30,7 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function getFilename(): string
+    public function getFilename()
     {
         $filename = parent::getFilename();
         
@@ -67,7 +67,7 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function delete(): boolean
+    public function delete()
     {
         if($this->destination && file_exists($this->destination)){
             return unlink($this->destination);
@@ -79,7 +79,7 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function save($destination): boolean
+    public function save($destination)
     {
         $this->destination = $destination;
         return move_uploaded_file($this->getRealPath(), $destination);
@@ -89,7 +89,7 @@ class UploadedFile extends \SplFileObject implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function getMimeType(): string
+    public function getMimeType()
     {
         $finfo = new \finfo;
         return $finfo->file($this->getRealPath(),FILEINFO_MIME_TYPE);

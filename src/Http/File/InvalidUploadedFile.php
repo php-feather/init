@@ -48,7 +48,7 @@ class InvalidUploadedFile implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function getErrors(): array
+    public function getErrors()
     {
         return $this->errors;
     }
@@ -57,7 +57,7 @@ class InvalidUploadedFile implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function getExtension(): string
+    public function getExtension()
     {
         if(($pos = strrpos($this->name,'.')) > 1){
             return substr($this->name,$pos+1);
@@ -70,7 +70,7 @@ class InvalidUploadedFile implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function getFilename(): string
+    public function getFilename()
     {
         if(($pos = strrpos($this->name,'.')) > 1){
             return substr($this->name,0,$pos);
@@ -83,7 +83,7 @@ class InvalidUploadedFile implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function getMimeType(): string
+    public function getMimeType()
     {
         return $this->type;
     }
@@ -92,7 +92,7 @@ class InvalidUploadedFile implements IUploadedFile
      * 
      * {@inheritdoc}
      */
-    public function save($destination): boolean
+    public function save($destination)
     {
         return false;
     }
