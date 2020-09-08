@@ -79,7 +79,7 @@ class Request {
     }
     
     public function file($name= null,$default = null){
-        return $this->input->file();
+        return $this->input->file($name,$default);
     }
     
     
