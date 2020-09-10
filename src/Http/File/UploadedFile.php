@@ -7,7 +7,7 @@ namespace Feather\Init\Http\File;
  *
  * @author fcarbah
  */
-class UploadedFile extends \SplFileObject implements IUploadedFile
+class UploadedFile extends \SplFileInfo implements IUploadedFile
 {
     /** @var string **/
     protected $destination;

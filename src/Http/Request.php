@@ -8,6 +8,7 @@
 
 namespace Feather\Init\Http;
 use Feather\Session\Session;
+use Feather\Init\Http\Parameters\ParameterBag;
 /**
  * Description of Request
  *
@@ -15,19 +16,38 @@ use Feather\Session\Session;
  */
 class Request {
     
+    /** @var string **/
     protected $host;
+    /** @var string **/
     protected $uri;
+    /** @var string **/
     protected $method;
+    /** @var string **/
     protected $userAgent;
+    /** @var string **/
     protected $serverIp;
+    /** @var string **/
     protected $remoteIp;
+    /** @var string **/
     protected $protocol;
+    /** @var string **/
     protected $scheme;
+    /** @var string **/
     protected $time;
+    /** @var boolean **/
     protected $isAjax;
+    /** @var string **/
     protected $cookie;
+    /** @var string **/
     protected $queryStr;
+    
+    /** @var \Feather\Init\Http\Input **/
     protected $input;
+    
+    /** @var \Feather\Init\Http\Parameters\ParameterBag **/
+    protected $server;
+    
+    /** @var \Feather\Init\Http\Request **/
     private static $self;
     
     private function __construct() {
@@ -47,13 +67,13 @@ class Request {
         $this->isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'? TRUE : FALSE;
         $this->cookie = isset($_SERVER['HTTP_COOKIE'])? $_SERVER['HTTP_COOKIE']: null;
         $this->queryStr = $_SERVER['QUERY_STRING'];
-        
+        $this->setServerParameters();
         $this->setPreviousRequest();
     }
     
     /**
      * 
-     * @return type \Feather\Init\Http\Request
+     * @return \Feather\Init\Http\Request
      */
     public static function getInstance(){
         if(self::$self == NULL){
@@ -162,6 +182,17 @@ class Request {
         
         Session::save($this->uri, CUR_REQ_KEY);
         Session::save($prev,PREV_REQ_KEY);
+    }
+    
+    /**
+     * Set server parameter bag
+     */
+    protected function setServerParameters(){
+        $data = array();
+        foreach($_SERVER as $key=>$val){
+            $data[$key] = filter_input(INPUT_SERVER, $key);
+        }
+        $this->server = new ParameterBag($data);
     }
 
 
