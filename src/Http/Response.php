@@ -118,7 +118,7 @@ class Response {
         $defaultHeaders = ['Content-Type'=>'text/html'];
         $this->originalContent = $content;
         $this->content = $content;
-        $this->setHeaders($headers);
+        $this->setHeaders(array_merge($defaultHeaders, $headers));
         $this->statusCode = $statusCode;
         return $this;
     }
