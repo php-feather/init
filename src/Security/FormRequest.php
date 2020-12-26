@@ -59,6 +59,8 @@ class FormRequest extends \Feather\Init\Http\Request implements \Feather\Init\Mi
      */
     public function run($next)
     {
+        $this->validate();
+
         if ($this->isValidReq) {
             return $next;
         }
