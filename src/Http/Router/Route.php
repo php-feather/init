@@ -160,7 +160,7 @@ class Route
         $paramType = $reflectionParams[0]->getType();
         if ($reflectionParams[0] instanceof FormRequest) {
             $class = $paramType::class;
-            return new $class()
+            return new $class();
         }
         return null;
     }

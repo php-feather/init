@@ -104,6 +104,9 @@ class FormRequest extends \Feather\Init\Http\Request implements \Feather\Init\Mi
     protected function buildRule($param, $rule)
     {
         $count = 1;
+        if (stripos($rule, ':') !== 0) {
+            $rule .= ':';
+        }
         $rule = str_replace(':', ":[$param],", $rule, $count);
         return $this->parseRule($rule);
     }
