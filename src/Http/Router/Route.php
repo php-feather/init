@@ -14,6 +14,7 @@ use Minime\Annotations\Cache\FileCache;
 use Feather\Init\Http\Request;
 use Feather\Init\Http\RequestMethod;
 use Feather\Init\Http\Response;
+use Feather\Init\Security\FormRequest;
 
 define('A_STORAGE', dirname(__FILE__, 2) . '/storage/');
 
@@ -55,11 +56,6 @@ class Route
         }
         $this->params = is_array($params) ? $params : array($params);
         $this->request = Request::getInstance();
-    }
-
-    public function getParams()
-    {
-
     }
 
     /**
@@ -125,10 +121,17 @@ class Route
                 };
                 $next = \Closure::bind($closure, $this);
             } elseif (method_exists($this->controller, $this->method)) {
+
+                if (($formRequest = $this->getControllerMethodRequestParam()) !== null) {
+                    array_unshift($this->paramValues, $formRequest);
+                }
                 $closure = \Closure::bind(function() {
                             return call_user_func_array(array($this->controller, $this->method), $this->paramValues);
                         }, $this);
                 $next = $this->controller->runMiddleware($this->method, $closure);
+                if ($formRequest) {
+                    $next = $formRequest->run($next);
+                }
             } elseif ($this->fallBack) {
                 throw new \Exception('Requested Resource Not Found', 404);
             } else {
@@ -140,6 +143,42 @@ class Route
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), $e->getCode());
         }
+    }
+
+    /**
+     *
+     * @return \Feather\Init\Security\FormRequest|null
+     */
+    protected function getControllerMethodRequestParam()
+    {
+        $reflectionFunc = new \ReflectionMethod($this->controller, $this->method);
+        $reflectionParams = $reflectionFunc->getParameters();
+
+        if (empty($reflectionParams)) {
+            return null;
+        }
+        $paramType = $reflectionParams[0]->getType();
+        if ($reflectionParams[0] instanceof FormRequest) {
+            $class = $paramType::class;
+            return new $class()
+        }
+        return null;
+    }
+
+    /**
+     * Run middlewares
+     * @param \Feather\Init\Http\Response|\Closure $next
+     * @return \Feather\Init\Http\Response|\Closure $next
+     */
+    protected function runMiddlewares($next)
+    {
+        foreach ($this->middleWare as $key => $mw) {
+            $next = $mw->run($next);
+            if (!$mw->passed()) {
+                return $next;
+            }
+        }
+        return $next;
     }
 
     /**
@@ -189,24 +228,6 @@ class Route
         }
 
         return $isValid;
-    }
-
-    /**
-     * Run middlewares
-     * @param \Feather\Init\Http\Response|\Closure $next
-     * @return \Feather\Init\Http\Response|\Closure $next
-     */
-    protected function runMiddlewares($next)
-    {
-
-        foreach ($this->middleWare as $key => $mw) {
-            $next = $mw->run($next);
-            if (!$mw->passed()) {
-                return $next;
-            }
-        }
-
-        return $next;
     }
 
 }
