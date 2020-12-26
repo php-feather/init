@@ -132,7 +132,7 @@ abstract class Controller {
                 continue;
             }
             
-            $mw->run();
+            $mw->validate();
             $error = $mw->errorCode();
             
             if($error != 0){

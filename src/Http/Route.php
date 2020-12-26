@@ -193,7 +193,7 @@ class Route {
         
         foreach($this->middleWare as $key=>$mw){
             
-            $mw->run();
+            $mw->validate();
             $error = $mw->errorCode();
             
             if($error != 0){

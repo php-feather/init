@@ -1,7 +1,7 @@
 {
     "name": "php-feather/init",
     "description": "Feather Init - Lightweight PHP Routing Engine",
-    "type":"library",
+    "type": "library",
     "license": "MIT",
     "authors": [
         {
@@ -9,16 +9,17 @@
             "email": "afrounit@hotmail.com.com"
         }
     ],
-    "autoload":{
-        "psr-4":{
-            "Feather\\Init\\":"src/"
+    "autoload": {
+        "psr-4": {
+            "Feather\\Init\\": "src/"
         },
-        "files":["src/bootstrap/autoloader.php"]
+        "files": ["src/bootstrap/autoloader.php"]
     },
     "require": {
         "php": ">=7.0",
         "php-feather/session": "dev-master",
         "php-feather/cache": "dev-master",
+        "php-feather/security": "dev-master",
         "minime/annotations": "^3.1"
     }
 }
