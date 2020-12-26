@@ -13,7 +13,7 @@ namespace Feather\Init\Objects;
  *
  * @author fcarbah
  */
-class Response implements \Iterator{
+class AppResponse implements \Iterator{
     
     public $msg;
     public $msgType;
@@ -33,10 +33,10 @@ class Response implements \Iterator{
      * 
      * @param string $msg
      * @param mixed $data
-     * @return \Feather\Init\Objects\Response
+     * @return \Feather\Init\Objects\AppResponse
      */
     public static function error($msg='',$data=array()){
-        $r = new Response();
+        $r = new AppResponse();
         $r->msg = $msg;
         $r->data = $data;
         $r->error = true;
@@ -51,10 +51,10 @@ class Response implements \Iterator{
      * @param string $msg
      * @param mixed $data
      * @param string $type
-     * @return \Feather\Init\Objects\Response
+     * @return \Feather\Init\Objects\AppResponse
      */
     public static function make(bool $error,$msg='',$data=array(),$type='info'){
-        $r = new Response();
+        $r = new AppResponse();
         $r->msg = $msg;
         $r->data = $data;
         $r->error = $error;
@@ -67,10 +67,10 @@ class Response implements \Iterator{
      * 
      * @param string $msg
      * @param mixed $data
-     * @return \Feather\Init\Objects\Response
+     * @return \Feather\Init\Objects\AppResponse
      */
     public static function success($msg='',$data=array()){
-        $r = new Response();
+        $r = new AppResponse();
         $r->msg = $msg;
         $r->data = is_array($data)? $data : [$data];
         $r->error = false;

@@ -153,7 +153,7 @@ class Route
             $res = $res();
         }
 
-        if ($res instanceof Response) {
+        if ($res instanceof AppResponse) {
             return strtoupper(Request::getInstance()->method == RequestMethod::HEAD) ? $res->sendHeadersOnly() : $res->send();
         }
 

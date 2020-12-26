@@ -19,9 +19,12 @@ use Feather\Init\Http\Input;
 abstract class Middleware implements IMiddleware
 {
 
+    /** @var \Feather\Init\Http\Request * */
     protected $request;
+
+    /** @var \Feather\Init\Http\Response * */
     protected $response;
-    protected $errorCode;
+    protected $responseCode;
     protected $errorMessage;
     protected $rediretUri = '/';
     protected $pass = true;
@@ -30,7 +33,7 @@ abstract class Middleware implements IMiddleware
     {
         $this->request = Request::getInstance();
         $this->response = Response::getInstance();
-        $this->errorCode = 0; // 0 means no error
+        $this->responseCode = 400;
         $this->errorMessage = '';
     }
 
@@ -61,10 +64,10 @@ abstract class Middleware implements IMiddleware
 
         ob_flush();
 
-        $res = \Feather\Init\Objects\Response::error($this->errorMessage);
+        $res = \Feather\Init\Objects\AppResponse::error($this->errorMessage);
 
         if ($this->request->isAjax) {
-            return $this->response->renderJSON($res->toArray(), [], $this->errorCode);
+            return $this->response->renderJSON($res->toArray(), [], $this->responseCode);
         } else {
             \Feather\Session\Session::save(['data' => $res->toArray()], REDIRECT_DATA_KEY);
             return $this->response->redirect($this->rediretUri);

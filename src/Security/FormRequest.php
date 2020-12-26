@@ -9,7 +9,7 @@ use Feather\Security\Validation\Validator;
  *
  * @author fcarbah
  */
-class FormRequest extends \Feather\Init\Http\Request
+class FormRequest extends \Feather\Init\Http\Request implements \Feather\Init\Middleware\IMiddleware
 {
 
     use ValidationParser;
@@ -18,6 +18,9 @@ class FormRequest extends \Feather\Init\Http\Request
     protected $messages = [];
     protected $validator;
     protected $validationRules = [];
+
+    /** @var \Feather\Init\Http\Response * */
+    protected $response;
 
     /** @var boolean* */
     protected $isValidReq = true;
@@ -29,6 +32,7 @@ class FormRequest extends \Feather\Init\Http\Request
     {
         $this->validator = Validator::getInstance();
         $this->errors = new ValidationErrors();
+        $this->response = \Feather\Init\Http\Response::getInstance();
     }
 
     /**
@@ -38,6 +42,27 @@ class FormRequest extends \Feather\Init\Http\Request
     public function errorBag()
     {
         return $this->errors;
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     */
+    public function passed()
+    {
+        return $this->isValidReq;
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     */
+    public function run($next)
+    {
+        if ($this->isValidReq) {
+            return $next;
+        }
+        return $this->redirect();
     }
 
     public function validate()
@@ -98,6 +123,27 @@ class FormRequest extends \Feather\Init\Http\Request
                 $vRule = $this->buildRule($param, $rule);
                 $this->validationRules[$param . $vRule->abbreviation()] = $vRule;
             }
+        }
+    }
+
+    /**
+     *
+     * @return \Feather\Init\Http\Response
+     */
+    protected function redirect()
+    {
+
+        ob_flush();
+
+        $res = \Feather\Init\Objects\AppResponse::error('', ['errorBag' => $this->errors]);
+        $redirectUri = $this->server->{'HTTP_REFERER'};
+        if ($this->request->isAjax) {
+            return $this->response->renderJSON($res->toArray(), [], 200);
+        } elseif ($redirectUri) {
+            \Feather\Session\Session::save(['data' => $res->toArray()], REDIRECT_DATA_KEY);
+            return $this->response->redirect($redirectUri);
+        } else {
+            throw new \Exception('Bad Request', 400);
         }
     }
 
