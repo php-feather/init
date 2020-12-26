@@ -9,7 +9,7 @@ use Feather\Security\Validation\Validator;
  *
  * @author fcarbah
  */
-class FormRequest extends \Feather\Init\Http\Request implements \Feather\Init\Middleware\IMiddleware
+class FormRequest extends \Feather\Init\Http\Request implements IFormRequest, \Feather\Init\Middleware\IMiddleware
 {
 
     use ValidationParser;
@@ -106,7 +106,7 @@ class FormRequest extends \Feather\Init\Http\Request implements \Feather\Init\Mi
     protected function buildRule($param, $rule)
     {
         $count = 1;
-        if (stripos($rule, ':') !== 0) {
+        if (!preg_match('/^((.*?)\:(.*?)$/', $rule)) {
             $rule .= ':';
         }
         $rule = str_replace(':', ":[$param],", $rule, $count);

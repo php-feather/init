@@ -3,6 +3,7 @@
 namespace Feather\Init\Security;
 
 use Feather\Security\Validation\Rules\Rule;
+use Feather\Security\Validation\ValidationException;
 
 /**
  * Description of Parser
@@ -15,7 +16,7 @@ trait ValidationParser
      * FORMAT
      * rulename:arg1,arg2,...
      * Rule_argument
-     * if an argument is another rule put rule and arguments in cyrly brackets {}
+     * if an argument is another rule put rule and arguments in curly brackets {}
      * |rulename:arg1,arg2,..|
      * if argument is a request variable the put argument in square brackets [arg1]
      */
@@ -56,7 +57,7 @@ trait ValidationParser
      */
     protected function getArgumentValue($argName)
     {
-        if (preg_match('/^(\{(.*?)\})$/', $argName)) {
+        if (preg_match('/^(\[(.*?)\])$/', $argName)) {
             $argName = str_replace(['[', ']'], ['', ''], $argName);
             return $this->post($argName, $this->get($argName));
         }

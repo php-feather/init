@@ -14,7 +14,6 @@ use Minime\Annotations\Cache\FileCache;
 use Feather\Init\Http\Request;
 use Feather\Init\Http\RequestMethod;
 use Feather\Init\Http\Response;
-use Feather\Init\Security\FormRequest;
 
 define('A_STORAGE', dirname(__FILE__, 2) . '/storage/');
 
@@ -147,7 +146,7 @@ class Route
 
     /**
      *
-     * @return \Feather\Init\Security\FormRequest|null
+     * @return \Feather\Init\Security\IFormRequest|null
      */
     protected function getControllerMethodRequestParam()
     {
@@ -160,8 +159,8 @@ class Route
         $paramType = $reflectionParams[0]->getType();
         if ($paramType instanceof \ReflectionNamedType) {
             $class = $paramType->getName();
-            $instance = new $class();
-            if ($instance instanceof FormRequest) {
+            $instance = $class::getInstance();
+            if ($instance instanceof \Feather\Init\Security\IFormRequest) {
                 return $instance;
             }
         }
