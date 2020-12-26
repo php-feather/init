@@ -11,6 +11,9 @@ use Feather\Init\Controllers\Controller;
 use Minime\Annotations\Reader;
 use Minime\Annotations\Parser;
 use Minime\Annotations\Cache\FileCache;
+use Feather\Init\Http\Request;
+use Feather\Init\Http\RequestMethod;
+use Feather\Init\Http\Response;
 
 define('A_STORAGE', dirname(__FILE__, 2) . '/storage/');
 
@@ -116,16 +119,11 @@ class Route
     {
         try {
 
-//            if (!$this->passMiddlewares()) {
-//                return $this->sendResponse($this->middleWare[$this->failedMiddleware]->redirect());
-//            }
-
             if ($this->isCallBack) {
                 $closure = function() {
                     return call_user_func_array($this->controller, $this->paramValues);
                 };
                 $next = \Closure::bind($closure, $this);
-                //return $this->sendResponse(call_user_func_array($this->controller, $this->paramValues));
             } elseif (method_exists($this->controller, $this->method)) {
                 $closure = \Closure::bind(function() {
                             return call_user_func_array(array($this->controller, $this->method), $this->paramValues);
@@ -139,26 +137,6 @@ class Route
 
             $next = $this->runMiddlewares($next);
             return $this->sendResponse($next);
-
-
-            if (method_exists($this->controller, $this->method)) {
-
-                if (strcasecmp($this->requestMethod, Request::getInstance()->method) != 0 || ($this->controller->validateAnnotations && !$this->validateRequestType())) {
-                    throw new \Exception('Bad Request! Method Not Allowed', 405);
-                }
-                $middleWare = $this->controller->runMiddleware($this->method);
-
-                if ($middleWare === true) {
-                    return $this->sendResponse(call_user_func_array(array($this->controller, $this->method), $this->paramValues));
-                }
-
-                return $this->sendResponse($middleWare->redirect());
-            }
-
-            if ($this->fallBack) {
-                throw new \Exception('Requested Resource Not Found', 404);
-            }
-            throw new \Exception('Bad Request', 400);
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), $e->getCode());
         }
@@ -216,16 +194,15 @@ class Route
     /**
      * Run middlewares
      * @param \Feather\Init\Http\Response|\Closure $next
-     * @return Response
+     * @return \Feather\Init\Http\Response|\Closure $next
      */
     protected function runMiddlewares($next)
     {
 
         foreach ($this->middleWare as $key => $mw) {
             $next = $mw->run($next);
-            $error = $mw->errorCode();
-            if ($error != 0) {
-                break;
+            if (!$mw->passed()) {
+                return $next;
             }
         }
 

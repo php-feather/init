@@ -128,9 +128,9 @@ abstract class Controller
 
     /**
      *
-     * @param type $method
-     * @param type $next
-     * @return boolean
+     * @param string $method
+     * @param \Feather\Init\Http\Response|\Closure $next
+     * @return \Feather\Init\Http\Response|\Closure
      */
     public function runMiddleware($method, $next)
     {
@@ -143,9 +143,8 @@ abstract class Controller
             }
 
             $next = $mw->run($next);
-            $error = $mw->errorCode();
 
-            if ($error != 0) {
+            if (!$mw->passed()) {
                 return $next;
             }
         }

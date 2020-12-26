@@ -2,6 +2,8 @@
 
 namespace Feather\Init\Http\Router;
 
+use Feather\Init\Http\RequestMethod;
+
 /**
  * Description of RouteBuilder
  *

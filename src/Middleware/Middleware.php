@@ -16,7 +16,7 @@ use Feather\Init\Http\Input;
  *
  * @author fcarbah
  */
-abstract class Middleware
+abstract class Middleware implements IMiddleware
 {
 
     protected $request;
@@ -24,6 +24,7 @@ abstract class Middleware
     protected $errorCode;
     protected $errorMessage;
     protected $rediretUri = '/';
+    protected $pass = true;
 
     public function __construct()
     {
@@ -34,18 +35,12 @@ abstract class Middleware
     }
 
     /**
-     * @param \Feather\Init\Http\Response|\Closure $next
-     * @return \Feather\Init\Http\Response|\Closure
-     */
-    abstract function run($next);
-
-    /**
      *
      * @return int|string
      */
-    public function errorCode()
+    public function passed()
     {
-        return $this->errorCode;
+        return $this->pass;
     }
 
     /**
@@ -61,7 +56,7 @@ abstract class Middleware
      *
      * @return \Feather\Init\Http\Response
      */
-    public function redirect()
+    protected function redirect()
     {
 
         ob_flush();
