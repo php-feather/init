@@ -158,9 +158,12 @@ class Route
             return null;
         }
         $paramType = $reflectionParams[0]->getType();
-        if ($reflectionParams[0] instanceof FormRequest) {
-            $class = $paramType::class;
-            return new $class();
+        if ($paramType instanceof \ReflectionNamedType) {
+            $class = $paramType->getName();
+            $instance = new $class();
+            if ($instance instanceof FormRequest) {
+                return $instance;
+            }
         }
         return null;
     }
@@ -192,7 +195,7 @@ class Route
             $res = $res();
         }
 
-        if ($res instanceof AppResponse) {
+        if ($res instanceof Response) {
             return strtoupper(Request::getInstance()->method == RequestMethod::HEAD) ? $res->sendHeadersOnly() : $res->send();
         }
 
