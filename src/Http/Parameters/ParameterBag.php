@@ -91,6 +91,18 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
         return boolval($this->{$name});
     }
 
+    /**
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->_items);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function current()
     {
         return current($this->_items);
@@ -117,6 +129,9 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
         return intval($this->{$name}, $base);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function key()
     {
         return key($this->_items);
@@ -157,20 +172,71 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
         return substr($string, 0, -1);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function next(): void
     {
         next($this->_items);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function rewind(): void
     {
         reset($this->_items);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function valid(): bool
     {
         $key = key($this->_items);
         return $key !== null && $key !== false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetExists($offset): bool
+    {
+        return array_key_exists($offset, $this->_items);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetGet($offset)
+    {
+        return $this->{$offset};
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetSet($offset, $value): void
+    {
+        $this->_items[$offset] = $value;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetUnset($offset): void
+    {
+        if ($this->offsetExists($offset)) {
+            unset($this->_items[$offset]);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        return json_encode($this->_items);
     }
 
     /**
@@ -183,33 +249,6 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
         foreach (get_object_vars($object) as $key => $value) {
             $this->_items[$key] = $value;
         }
-    }
-
-    public function offsetExists($offset): bool
-    {
-        return array_key_exists($offset, $this->_items);
-    }
-
-    public function offsetGet($offset)
-    {
-        return $this->{$offset};
-    }
-
-    public function offsetSet($offset, $value): void
-    {
-        $this->_items[$offset] = $value;
-    }
-
-    public function offsetUnset($offset): void
-    {
-        if ($this->offsetExists($offset)) {
-            unset($this->_items[$offset]);
-        }
-    }
-
-    public function jsonSerialize()
-    {
-        return json_encode($this->_items);
     }
 
 }
