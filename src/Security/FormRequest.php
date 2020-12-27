@@ -41,6 +41,19 @@ class FormRequest implements IFormRequest, \Feather\Init\Middleware\IMiddleware
 
     /**
      *
+     * @param string $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        if (isset($this->{$name})) {
+            return $this->{$name};
+        }
+        return null;
+    }
+
+    /**
+     *
      * @return ValidationErrors
      */
     public function errorBag()
@@ -78,7 +91,7 @@ class FormRequest implements IFormRequest, \Feather\Init\Middleware\IMiddleware
 
         foreach ($this->validationRules as $param => $rule) {
 
-            if (!$rule->validate()) {
+            if (!$rule->run()) {
                 $this->isValidReq = false;
                 $paramParts = explode('.', $param);
 
@@ -109,11 +122,10 @@ class FormRequest implements IFormRequest, \Feather\Init\Middleware\IMiddleware
      */
     protected function buildRule($param, $rule)
     {
-        $count = 1;
-        if (!preg_match('/^((.*?)\:(.*?)$/', $rule)) {
+        if (!preg_match('/^((.*?)\:(.*))$/', $rule)) {
             $rule .= ':';
         }
-        $rule = str_replace(':', ":[$param],", $rule, $count);
+        $rule = preg_replace('/(.*?)(\:)(.*)/', "$1$2[{$param}],$3", $rule);
         return $this->parseRule($rule);
     }
 
@@ -130,7 +142,7 @@ class FormRequest implements IFormRequest, \Feather\Init\Middleware\IMiddleware
                 }
             } else {
                 $vRule = $this->buildRule($param, $rule);
-                $this->validationRules[$param . $vRule->abbreviation()] = $vRule;
+                $this->validationRules[$param . '.' . $vRule->abbreviation()] = $vRule;
             }
         }
     }
@@ -141,11 +153,9 @@ class FormRequest implements IFormRequest, \Feather\Init\Middleware\IMiddleware
      */
     protected function redirect()
     {
-
         ob_flush();
-
         $res = \Feather\Init\Objects\AppResponse::error('', ['errorBag' => $this->errors]);
-        $redirectUri = $this->server->{'HTTP_REFERER'};
+        $redirectUri = $this->request->server->{'HTTP_REFERER'};
         if ($this->request->isAjax) {
             return $this->response->renderJSON($res->toArray(), [], 200);
         } elseif ($redirectUri) {

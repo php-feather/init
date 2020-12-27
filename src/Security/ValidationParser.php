@@ -29,21 +29,22 @@ trait ValidationParser
      */
     public function parseRule($rule)
     {
-        $ruleParts = explode(':', $rule);
-
-        if (count($ruleParts) !== 2) {
+        $matches = [];
+        $rule = trim($rule);
+        if (!preg_match('/(.*?)(\:)(.*)/', $rule, $matches)) {
             throw new ValidationException('Invalid Rule definition format');
         }
 
-        $name = $ruleParts[0];
+        $name = $matches[1];
+        $allMatches = [];
+        preg_match_all('/\[(.*?)\]\,?|\{(.*?)\}\,?|(.*?)\,|.*/', $matches[3], $allMatches);
+        $argumentList = $allMatches[0];
 
         $ruleClass = $this->validator->getRule($name);
 
         if (!$ruleClass) {
             throw new ValidationException("Rule {$name} does not exist");
         }
-
-        $argumentList = explode(',', $ruleParts[1]);
 
         $arguments = $this->parseArguments($argumentList);
 
@@ -59,7 +60,7 @@ trait ValidationParser
     {
         if (preg_match('/^(\[(.*?)\])$/', $argName)) {
             $argName = str_replace(['[', ']'], ['', ''], $argName);
-            return $this->post($argName, $this->get($argName));
+            return $this->request->post($argName, $this->request->get($argName));
         }
 
         return is_numeric($argName) ? (int) $argName : $argName;
@@ -76,7 +77,7 @@ trait ValidationParser
     {
         try {
             $rule = call_user_func_array("$class::getInstance", $arguments);
-            if ($rule instanceof Rules\IRule) {
+            if ($rule instanceof \Feather\Security\Validation\Rules\IRule) {
                 return $rule;
             }
             throw new ValidationException("Rule does not exist");
@@ -87,7 +88,7 @@ trait ValidationParser
 
     /**
      *
-     * @param arguments $argumentList
+     * @param array $argumentList
      * @return array
      */
     protected function parseArguments($argumentList)
@@ -99,8 +100,9 @@ trait ValidationParser
             if (empty($argName)) {
                 continue;
             }
-            if (preg_match('/^(\{(.*?)\})$/', $argName)) {
-                $arguments[] = $this->buildRule($argName);
+            $matches = array();
+            if (preg_match('/^(\{(.*?)\})$/', $argName, $matches)) {
+                $arguments[] = $this->parseRule($matches[2]);
             } else {
                 $arguments[] = $this->getArgumentValue($argName);
             }

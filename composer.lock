@@ -114,12 +114,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-feather/cache.git",
-                "reference": "3685acc5e4ae9e2a9a125f4ab6434e691474cbb5"
+                "reference": "625fc1381fb5d0c471fae037a8fe81d29374adb1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-feather/cache/zipball/3685acc5e4ae9e2a9a125f4ab6434e691474cbb5",
-                "reference": "3685acc5e4ae9e2a9a125f4ab6434e691474cbb5",
+                "url": "https://api.github.com/repos/php-feather/cache/zipball/625fc1381fb5d0c471fae037a8fe81d29374adb1",
+                "reference": "625fc1381fb5d0c471fae037a8fe81d29374adb1",
                 "shasum": ""
             },
             "require": {
@@ -143,7 +143,7 @@
                 }
             ],
             "description": "Feather Cache",
-            "time": "2019-09-08T13:59:49+00:00"
+            "time": "2020-12-27T00:24:24+00:00"
         },
         {
             "name": "php-feather/security",
@@ -151,12 +151,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-feather/security.git",
-                "reference": "e0dab8ea92871d6fa2989e79aa237cb8242fb594"
+                "reference": "b4ca159d74b45c37ea7af868b77a3386bca6b284"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-feather/security/zipball/e0dab8ea92871d6fa2989e79aa237cb8242fb594",
-                "reference": "e0dab8ea92871d6fa2989e79aa237cb8242fb594",
+                "url": "https://api.github.com/repos/php-feather/security/zipball/b4ca159d74b45c37ea7af868b77a3386bca6b284",
+                "reference": "b4ca159d74b45c37ea7af868b77a3386bca6b284",
                 "shasum": ""
             },
             "require": {
@@ -183,7 +183,7 @@
                 }
             ],
             "description": "Feather Security",
-            "time": "2020-12-27T00:22:54+00:00"
+            "time": "2020-12-27T01:12:41+00:00"
         },
         {
             "name": "php-feather/session",
