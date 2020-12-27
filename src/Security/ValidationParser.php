@@ -96,7 +96,7 @@ trait ValidationParser
         $arguments = [];
 
         foreach ($argumentList as $argName) {
-            $argName = trim($argName);
+            $argName = preg_replace('/(,)$/', '', trim($argName));
             if (empty($argName)) {
                 continue;
             }

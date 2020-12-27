@@ -146,7 +146,7 @@ class FormRequest extends Request implements IFormRequest, \Feather\Init\Middlew
 
         $res = \Feather\Init\Objects\AppResponse::error('', ['errorBag' => $this->errors]);
 
-        if ($this->request->isAjax) {
+        if ($this->isAjax) {
             return $this->response->renderJSON($res->toArray(), [], 200);
         } elseif ($this->redirectUri) {
             \Feather\Session\Session::save(['data' => $res->toArray()], REDIRECT_DATA_KEY);
