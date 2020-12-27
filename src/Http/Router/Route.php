@@ -159,8 +159,8 @@ class Route
         $paramType = $reflectionParams[0]->getType();
         if ($paramType instanceof \ReflectionNamedType) {
             $class = $paramType->getName();
-            $instance = $class::getInstance();
-            if ($instance instanceof \Feather\Init\Security\IFormRequest) {
+            $instance = new $class();
+            if ($instance instanceof \Feather\Init\Security\FormRequest) {
                 return $instance;
             }
         }

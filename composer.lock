@@ -151,12 +151,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-feather/security.git",
-                "reference": "3e6925514dfc705b6dd199100cba167142a85538"
+                "reference": "e0dab8ea92871d6fa2989e79aa237cb8242fb594"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-feather/security/zipball/3e6925514dfc705b6dd199100cba167142a85538",
-                "reference": "3e6925514dfc705b6dd199100cba167142a85538",
+                "url": "https://api.github.com/repos/php-feather/security/zipball/e0dab8ea92871d6fa2989e79aa237cb8242fb594",
+                "reference": "e0dab8ea92871d6fa2989e79aa237cb8242fb594",
                 "shasum": ""
             },
             "require": {
@@ -183,7 +183,7 @@
                 }
             ],
             "description": "Feather Security",
-            "time": "2020-12-26T15:45:04+00:00"
+            "time": "2020-12-27T00:22:54+00:00"
         },
         {
             "name": "php-feather/session",

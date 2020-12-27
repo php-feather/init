@@ -9,7 +9,7 @@ use Feather\Security\Validation\Validator;
  *
  * @author fcarbah
  */
-class FormRequest extends \Feather\Init\Http\Request implements IFormRequest, \Feather\Init\Middleware\IMiddleware
+class FormRequest implements IFormRequest, \Feather\Init\Middleware\IMiddleware
 {
 
     use ValidationParser;
@@ -18,6 +18,9 @@ class FormRequest extends \Feather\Init\Http\Request implements IFormRequest, \F
     protected $messages = [];
     protected $validator;
     protected $validationRules = [];
+
+    /** @var \Feather\Init\Http\Request * */
+    protected $request;
 
     /** @var \Feather\Init\Http\Response * */
     protected $response;
@@ -33,6 +36,7 @@ class FormRequest extends \Feather\Init\Http\Request implements IFormRequest, \F
         $this->validator = Validator::getInstance();
         $this->errors = new ValidationErrors();
         $this->response = \Feather\Init\Http\Response::getInstance();
+        $this->request = \Feather\Init\Http\Request::getInstance();
     }
 
     /**
