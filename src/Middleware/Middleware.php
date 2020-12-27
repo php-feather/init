@@ -26,7 +26,7 @@ abstract class Middleware implements IMiddleware
     protected $response;
     protected $responseCode;
     protected $errorMessage;
-    protected $rediretUri = '/';
+    protected $redirectUri = '/';
     protected $pass = true;
 
     public function __construct()
@@ -57,7 +57,7 @@ abstract class Middleware implements IMiddleware
 
     /**
      *
-     * @return \Feather\Init\Http\Response
+     * @return \Feather\Init\Http\Response|\Closure
      */
     protected function redirect()
     {
@@ -68,9 +68,16 @@ abstract class Middleware implements IMiddleware
 
         if ($this->request->isAjax) {
             return $this->response->renderJSON($res->toArray(), [], $this->responseCode);
-        } else {
+        } else if ($this->redirectUri) {
             \Feather\Session\Session::save(['data' => $res->toArray()], REDIRECT_DATA_KEY);
-            return $this->response->redirect($this->rediretUri);
+            return $this->response->redirect($this->redirectUri);
+        } else {
+            return function() {
+                $middleware = static::class;
+                $pos = strrpos($middleware, '/');
+                $name = $pos ? substr($middleware, $pos + 1) : $middleware;
+                echo '<h4>Middleware: "' . $name . '" failed</h4>';
+            };
         }
     }
 
