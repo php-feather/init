@@ -19,6 +19,7 @@ class FormRequest extends Request implements IFormRequest, \Feather\Init\Middlew
     protected $messages = [];
     protected $validator;
     protected $validationRules = [];
+    protected $redirectUri = '';
 
     /** @var \Feather\Init\Http\Request * */
     protected $request;
@@ -137,20 +138,38 @@ class FormRequest extends Request implements IFormRequest, \Feather\Init\Middlew
 
     /**
      *
-     * @return \Feather\Init\Http\Response
+     * @return \Feather\Init\Http\Response|\\Closure
      */
     protected function redirect()
     {
         ob_flush();
+
         $res = \Feather\Init\Objects\AppResponse::error('', ['errorBag' => $this->errors]);
-        $redirectUri = $this->server->{'HTTP_REFERER'};
+
         if ($this->request->isAjax) {
             return $this->response->renderJSON($res->toArray(), [], 200);
-        } elseif ($redirectUri) {
+        } elseif ($this->redirectUri) {
             \Feather\Session\Session::save(['data' => $res->toArray()], REDIRECT_DATA_KEY);
-            return $this->response->redirect($redirectUri);
+            return $this->response->redirect($this->redirectUri);
         } else {
-            throw new \Exception('Bad Request', 400);
+            $closure = function() {
+
+                if ($this->isValidReq) {
+                    echo "<h1>Validation Failed</h1>";
+                } else {
+                    echo "<h2>Validation Failed</h2><br/> <h3>Messages</h3><br/>";
+                }
+
+                foreach ($this->errors->bag() as $key => $data) {
+                    echo "<h4>$key:</h4><br/>";
+                    foreach ($data as $val) {
+                        echo "$val<br/>";
+                    }
+                    echo '<hr><br/>';
+                }
+            };
+
+            return \Closure::bind($closure, $this);
         }
     }
 
