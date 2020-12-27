@@ -63,7 +63,7 @@ class Request
     /** @var \Feather\Init\Http\Request * */
     private static $self;
 
-    private function __construct()
+    public function __construct()
     {
 
         $this->input = Input::getInstance();

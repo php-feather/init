@@ -3,13 +3,14 @@
 namespace Feather\Init\Security;
 
 use Feather\Security\Validation\Validator;
+use Feather\Init\Http\Request;
 
 /**
  * Description of FormRequest
  *
  * @author fcarbah
  */
-class FormRequest implements IFormRequest, \Feather\Init\Middleware\IMiddleware
+class FormRequest extends Request implements IFormRequest, \Feather\Init\Middleware\IMiddleware
 {
 
     use ValidationParser;
@@ -36,20 +37,7 @@ class FormRequest implements IFormRequest, \Feather\Init\Middleware\IMiddleware
         $this->validator = Validator::getInstance();
         $this->errors = new ValidationErrors();
         $this->response = \Feather\Init\Http\Response::getInstance();
-        $this->request = \Feather\Init\Http\Request::getInstance();
-    }
-
-    /**
-     *
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        if (isset($this->{$name})) {
-            return $this->{$name};
-        }
-        return null;
+        parent::__construct();
     }
 
     /**
