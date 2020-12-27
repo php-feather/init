@@ -76,10 +76,10 @@ class Request {
      * @return \Feather\Init\Http\Request
      */
     public static function getInstance(){
-        if(self::$self == NULL){
-            self::$self  = new Request();
+        if(static::$self == NULL){
+            static::$self  = new Request();
         }
-        return self::$self;  
+        return static::$self;  
     }
     
     public function __get($name) {

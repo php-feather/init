@@ -72,11 +72,11 @@ class Input {
      */
     public static function getInstance(){
         
-        if(self::$self == null){
-            self::$self = new Input();
+        if(static::$self == null){
+            static::$self = new Input();
         }
         
-        return self::$self;
+        return static::$self;
     }
     
     /**
@@ -247,7 +247,7 @@ class Input {
             $_POST[$key] = $data;
         }
         
-        self::getInstance();
+        static::getInstance();
         
     }
     

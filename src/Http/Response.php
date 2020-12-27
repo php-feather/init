@@ -30,10 +30,10 @@ class Response {
      * @return \Feather\Init\Http\Response
      */
     public static function getInstance(){
-        if(self::$self == NULL){
-            self::$self  = new Response();
+        if(static::$self == NULL){
+            static::$self  = new Response();
         }
-        return self::$self;  
+        return static::$self;  
     }
     
     /**

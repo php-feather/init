@@ -76,10 +76,10 @@ class Router
      */
     public static function getInstance()
     {
-        if (self::$self == NULL) {
-            self::$self = new Router();
+        if (static::$self == NULL) {
+            static::$self = new Router();
         }
-        return self::$self;
+        return static::$self;
     }
 
     /**
@@ -304,7 +304,7 @@ class Router
             return false;
         }
 
-        $cacheRoutes = $this->cache->get(self::AUTOROUTE_CACHE_KEY);
+        $cacheRoutes = $this->cache->get(static::AUTOROUTE_CACHE_KEY);
 
         $this->autoRoutes = $cacheRoutes ? json_decode($cacheRoutes, true) : [];
 
@@ -442,8 +442,8 @@ class Router
         }
 
         $this->autoRoutes[$key] = json_encode($info);
-        $this->cache->delete(self::AUTOROUTE_CACHE_KEY);
-        $this->cache->set(self::AUTOROUTE_CACHE_KEY, json_encode($this->autoRoutes));
+        $this->cache->delete(static::AUTOROUTE_CACHE_KEY);
+        $this->cache->set(static::AUTOROUTE_CACHE_KEY, json_encode($this->autoRoutes));
         return true;
     }
 
