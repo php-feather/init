@@ -143,7 +143,7 @@ class FormRequest extends Request implements IFormRequest, \Feather\Init\Middlew
     {
         ob_flush();
         $res = \Feather\Init\Objects\AppResponse::error('', ['errorBag' => $this->errors]);
-        $redirectUri = $this->request->server->{'HTTP_REFERER'};
+        $redirectUri = $this->server->{'HTTP_REFERER'};
         if ($this->request->isAjax) {
             return $this->response->renderJSON($res->toArray(), [], 200);
         } elseif ($redirectUri) {

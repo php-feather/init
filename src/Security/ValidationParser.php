@@ -60,7 +60,7 @@ trait ValidationParser
     {
         if (preg_match('/^(\[(.*?)\])$/', $argName)) {
             $argName = str_replace(['[', ']'], ['', ''], $argName);
-            return $this->request->post($argName, $this->request->get($argName));
+            return $this->post($argName, $this->get($argName));
         }
 
         return is_numeric($argName) ? (int) $argName : $argName;
