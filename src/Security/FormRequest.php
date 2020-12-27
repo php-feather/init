@@ -15,9 +15,54 @@ class FormRequest extends Request implements IFormRequest, \Feather\Init\Middlew
 
     use ValidationParser;
 
+    /**
+     * RULE FORMAT
+     * rulename:arg1,arg2,...
+     * Rule_argument
+     * if an argument is another rule put rule and arguments in curly brackets {}
+     * |rulename:arg1,arg2,..|
+     * if argument is a request variable the put argument in square brackets [arg1]
+     * ex. array(
+     *  'firstname' => 'required',
+     *  'lastname' => 'requiredif:{required:firstname},
+     *  'password' => array('required','minlength:8','regex:/\d+/'),
+     *  'confirmpasswd' => array('required','same:[password]'),
+     *  'email_address' => 'email'
+     * )
+     * @var array List of request param and their validation rules
+     */
     protected $rules = [];
+
+    /**
+     * Associative array of validation messages
+     * ex. array(
+     *  'firstname.required' => 'Firstname is required',
+     *  'lastname.requiredif' => 'Lastname is required',
+     *  'password.required' => 'Password is required',
+     *  'password.minlength' => 'Password does not meet the minimum length',
+     * ...
+     * )
+     * @var array
+     */
     protected $messages = [];
+
+    /** @var \Feather\Security\Validation\Validator * */
     protected $validator;
+
+    /**
+     * Array of \Feather\Security\Validation\Rules\Rule rules
+     * Instead of using the $this->rules and setting the formats,
+     * you could also just set the validation rules by overriding
+     * the constructor or validate method and manually setting the rules
+     * ex.
+      array(
+      'firstname' => new \Feather\Security\Validation\Rules\Required($this->all('firstname')),
+      'lastname' => new \Feather\Security\Validation\Rules\RequiredIf($this->all('lastname'), new \Feather\Security\Validation\Rules\Required($this->all('firstname')))
+      );
+     * You can also get request params using
+      $this->get('param'), $this->post('param')
+     * @var array
+     */
     protected $validationRules = [];
     protected $redirectUri = '';
 
