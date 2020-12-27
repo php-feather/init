@@ -56,8 +56,8 @@ class FormRequest extends Request implements IFormRequest, \Feather\Init\Middlew
      * the constructor or validate method and manually setting the rules
      * ex.
       array(
-      'firstname' => new \Feather\Security\Validation\Rules\Required($this->all('firstname')),
-      'lastname' => new \Feather\Security\Validation\Rules\RequiredIf($this->all('lastname'), new \Feather\Security\Validation\Rules\Required($this->all('firstname')))
+      'firstname.required' => new \Feather\Security\Validation\Rules\Required($this->all('firstname')),
+      'lastname.requiredif' => new \Feather\Security\Validation\Rules\RequiredIf($this->all('lastname'), new \Feather\Security\Validation\Rules\Required($this->all('firstname')))
       );
      * You can also get request params using
       $this->get('param'), $this->post('param')
