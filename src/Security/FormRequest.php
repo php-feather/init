@@ -78,6 +78,10 @@ class FormRequest extends Request implements IFormRequest, \Feather\Init\Middlew
     /** @var ValidationErrors * */
     private $errors;
 
+    /** @var int * */
+    protected $responseCode = 200;
+    protected $responseHeaders = [];
+
     public function __construct()
     {
         $this->validator = Validator::getInstance();
@@ -118,6 +122,10 @@ class FormRequest extends Request implements IFormRequest, \Feather\Init\Middlew
         return $this->redirect();
     }
 
+    /**
+     * Validate Request params
+     * @return boolean
+     */
     public function validate()
     {
         $this->buildRules();
@@ -214,7 +222,11 @@ class FormRequest extends Request implements IFormRequest, \Feather\Init\Middlew
                 }
             };
 
-            return \Closure::bind($closure, $this);
+            $next = \Closure::bind($closure, $this);
+            $contents = $next();
+
+            $this->response->render($contents, $this->responseHeaders, $this->responseCode);
+            return $this->response;
         }
     }
 
