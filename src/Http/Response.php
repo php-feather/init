@@ -5,7 +5,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 namespace Feather\Init\Http;
 
 /**
@@ -13,152 +12,166 @@ namespace Feather\Init\Http;
  *
  * @author fcarbah
  */
-class Response {
-    
+class Response
+{
+
     private static $self;
     protected $content;
     protected $headers = [];
     protected $cookies = [];
     protected $statusCode;
-    
-    private function __construct() {
-        
+
+    private function __construct()
+    {
+
     }
-    
+
     /**
-     * 
+     *
      * @return \Feather\Init\Http\Response
      */
-    public static function getInstance(){
-        if(static::$self == NULL){
-            static::$self  = new Response();
+    public static function getInstance()
+    {
+        if (static::$self == NULL) {
+            static::$self = new Response();
         }
-        return static::$self;  
+        return static::$self;
     }
-    
+
     /**
      * Url to redirect to
      * @param string $location
      */
-    public function redirect($location){
-        header('Location: '.$location);
+    public function redirect($location)
+    {
+        header('Location: ' . $location);
     }
-    
+
     /**
-     * 
+     *
      * @return mixed
      */
-    public function getContent(){
+    public function getContent()
+    {
         return $this->content;
     }
-    
+
     /**
-     * 
+     *
      * @return array
      */
-    public function getCookies(){
+    public function getCookies()
+    {
         return $this->cookies;
     }
-    
+
     /**
      * Key/Value pairs of headers
      * @return array
      */
-    public function getHeaders(){
+    public function getHeaders()
+    {
         return $this->headers;
     }
-    
+
     /**
-     * 
+     *
      * @return int
      */
-    public function getStatusCode(){
+    public function getStatusCode()
+    {
         return $this->statusCode;
     }
-    
+
     /**
-     * 
+     *
      * @param mixed $content
      * @param array $headers Http Headers
      * @param int $statusCode
      */
-    public function render($content,array $headers=[], int $statusCode=200){
-        
-        if(is_array($content) || is_object($content)){
+    public function render($content, array $headers = [], int $statusCode = 200)
+    {
+
+        if (is_array($content) || is_object($content)) {
             $this->renderJson($content, $headers, $statusCode);
-        }else{
+        } else {
             $this->renderView($content, $headers, $statusCode);
         }
-        
     }
-    
+
     /**
-     * 
+     *
      * @param mixed $data
      * @param array $headers Http Headers
      * @param int $statusCode
      * @return $this
      */
-    public function renderJson($data,array $headers=[],int $statusCode=200){
-        $defaultHeaders = ['Content-Type'=>'application/json'];
+    public function renderJson($data, array $headers = [], int $statusCode = 200)
+    {
+        $defaultHeaders = ['Content-Type' => 'application/json'];
         $this->originalContent = $data;
-        $this->content = json_encode($data); 
-        $this->headers->add(array_merge($defaultHeaders,$headers));
+        $this->content = json_encode($data);
+        $this->headers->add(array_merge($defaultHeaders, $headers));
         $this->statusCode = $statusCode;
         return $this;
     }
+
     /**
-     * 
+     *
      * @param mixed $content
      * @param array $headers Http Headers
      * @param int $statusCode
      * @return $this
      */
-    public function renderView($content,array $headers=[],$statusCode=200){
-        $defaultHeaders = ['Content-Type'=>'text/html'];
+    public function renderView($content, array $headers = [], $statusCode = 200)
+    {
+        $defaultHeaders = ['Content-Type' => 'text/html'];
         $this->originalContent = $content;
         $this->content = $content;
         $this->setHeaders(array_merge($defaultHeaders, $headers));
         $this->statusCode = $statusCode;
         return $this;
     }
-    
+
     /**
-     * 
+     *
      * @param mixed $data
      * @param int $statusCode
      * @param array $headers Http Headers
      * @return $this
      */
-    public function rawOutput($data,$statusCode=200, array $headers=array()){
+    public function rawOutput($data, $statusCode = 200, array $headers = array())
+    {
         ob_clean();
         $this->setHeaders($headers);
         $this->content = $data;
         $this->statusCode = $statusCode;
         return $this;
     }
-    
+
     /**
      * Sends response to client
      */
-    public function send(){
+    public function send()
+    {
         $this->sendCookies();
         http_response_code($this->statusCode);
         $this->sendHeaders();
         $this->sendBody();
     }
-    
+
     /**
      * Sends response headers only to client
      */
-    public function sendHeadersOnly(){
+    public function sendHeadersOnly()
+    {
         $this->sendCookies();
         http_response_code($this->statusCode);
         $this->sendHeaders();
     }
-    
+
     /**
-     * 
+     *
      * @param string $name
      * @param string|int $value
      * @param string $expires DateTime
@@ -166,99 +179,109 @@ class Response {
      * @param string $domain
      * @param bool $secure
      */
-    public function setCookie($name,$value,$expires,$path='/',$domain='',bool $secure=false){
-        
+    public function setCookie($name, $value, $expires, $path = '/', $domain = '', bool $secure = false)
+    {
+
         $this->cookies[] = [
-            'name'=>$name,'value'=>$value,'expires'=>$expires,'path'=>$path,'domain'=>$domain,'secure'=>$secure
+            'name' => $name, 'value' => $value, 'expires' => $expires, 'path' => $path, 'domain' => $domain, 'secure' => $secure
         ];
     }
-    
+
     /**
-     * 
+     *
      * @param string $header
      * @param string $value
      * @param bool $replace
      * @return void
      */
-    public function setHeader($header,$value,bool $replace=true){
+    public function setHeader($header, $value, bool $replace = true)
+    {
         $key = $this->reformatHeaderKey($header);
-        if(!$replace && isset($this->headers[$key])){
+        if (!$replace && isset($this->headers[$key])) {
             return;
         }
         $this->headers[$key] = $value;
     }
+
     /**
-     * 
+     *
      * @param array $headers Http Headers
      * @param bool $replace
      */
-    public function setHeaders($headers,bool $replace=true){
-        
-        foreach($headers as $key=>$val){
-                
-            if(is_int($key)){
-                
-                if(($pos = stripos($val,':')) !== false){
-                    $key = strtolower(substr($val,0,$pos));
-                    $value = substr($val, $pos+1);
-                    $this->setHeader($key, $value,$replace);
-                }else{
-                    $this->setHeader(strtolower($val), '',$replace);
+    public function setHeaders($headers, bool $replace = true)
+    {
+
+        foreach ($headers as $key => $val) {
+
+            if (is_int($key)) {
+
+                if (($pos = stripos($val, ':')) !== false) {
+                    $key = strtolower(substr($val, 0, $pos));
+                    $value = substr($val, $pos + 1);
+                    $this->setHeader($key, $value, $replace);
+                } else {
+                    $this->setHeader(strtolower($val), '', $replace);
                 }
-            }else{
-                $this->setHeader(strtolower($key),$val,$replace);
+            } else {
+                $this->setHeader(strtolower($key), $val, $replace);
             }
-            
         }
     }
-    
+
     /**
-     * 
+     *
      * @param int $code
      */
-    public function setStatusCode(int $code){
+    public function setStatusCode(int $code)
+    {
         $this->statusCode = $code;
     }
-    
+
     /**
-     * 
+     *
      * @param string $key
      * @return string
      */
-    protected function reformatHeaderKey($key){
-        $keyParts = explode('-',$key);
-        
-        if(count($keyParts) >1){
-            return ucfirst($keyParts[0]).'-'.ucfirst($keyParts[1]);
+    protected function reformatHeaderKey($key)
+    {
+        $keyParts = explode('-', $key);
+
+        if (count($keyParts) > 1) {
+            return ucfirst($keyParts[0]) . '-' . ucfirst($keyParts[1]);
         }
-        
+
         return ucfirst($keyParts[0]);
-        
     }
+
     /**
      * Send response body to client
      */
-    protected function sendBody(){
+    protected function sendBody()
+    {
         echo $this->content;
     }
+
     /**
      * Send Response cookies
      */
-    protected function sendCookies(){
-        foreach($this->cookies as $cookie){
-            setCookie($cookie['name'], $cookie['value'], $cookie['expires'], $cookie['path'], $cookie['domain'],$cookie['secure']);
+    protected function sendCookies()
+    {
+        foreach ($this->cookies as $cookie) {
+            setCookie($cookie['name'], $cookie['value'], $cookie['expires'], $cookie['path'], $cookie['domain'], $cookie['secure']);
         }
     }
+
     /**
      * send headers
      */
-    protected  function sendHeaders(){
-        
-        if(headers_sent()){
+    protected function sendHeaders()
+    {
+
+        if (headers_sent()) {
             return;
         }
-        
-        foreach($this->headers as $key=>$value){
+
+        foreach ($this->headers as $key => $value) {
             header("$key:$value");
         }
     }

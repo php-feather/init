@@ -9,107 +9,112 @@ namespace Feather\Init\Http\File;
  */
 class UploadedFile extends \SplFileInfo implements IUploadedFile
 {
-    /** @var string **/
+
+    /** @var string * */
     protected $destination;
-    
-    /** @var array **/
+
+    /** @var array * */
     protected $errors = array();
-    
-    /** @var string **/
+
+    /** @var string * */
     protected $originalInfo = array();
-    
-    /** @var array **/
+
+    /** @var array * */
     protected $paths = [];
-    
+
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function getAbsolutePath()
     {
         return $this->getRealPath();
     }
+
     /**
-     * 
+     *
      * @return array
      */
-    public function getErrors(){
+    public function getErrors()
+    {
         return $this->errors;
     }
-    
-    public function getExtension(){
-        
-        if(isset($this->originalInfo['name']) && ($pos = strrpos($this->originalInfo['name'],'.')) > 1){
-            return substr($this->originalInfo['name'],$pos+1);
+
+    public function getExtension()
+    {
+
+        if (isset($this->originalInfo['name']) && ($pos = strrpos($this->originalInfo['name'], '.')) > 1) {
+            return substr($this->originalInfo['name'], $pos + 1);
         }
-        
+
         return parent::getExtension();
-        
     }
-    
+
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function getFilename($wExtension = false)
     {
-        
-        if(isset($this->originalInfo['name'])){
-            return $wExtension? $this->originalInfo['name'] : $this->stripExtension($this->originalInfo['name']);
+
+        if (isset($this->originalInfo['name'])) {
+            return $wExtension ? $this->originalInfo['name'] : $this->stripExtension($this->originalInfo['name']);
         }
         $filename = parent::getFilename();
-        
-        return $wExtension? $filename : $this->stripExtension($filename);
+
+        return $wExtension ? $filename : $this->stripExtension($filename);
     }
-    
+
     /**
-     * 
+     *
      * @return boolean
      */
-    public function hasError(){
+    public function hasError()
+    {
         return !empty($this->errors);
     }
-    
+
     /**
-     * 
+     *
      * @param string|array $errors
      */
-    public function setErrors($errors){
-        
-        if(is_array($errors)){
+    public function setErrors($errors)
+    {
+
+        if (is_array($errors)) {
             $this->errors = $errors;
-        }
-        else{
+        } else {
             $this->errors[] = $errors;
         }
     }
-    
+
     /**
-     * 
+     *
      * @param array $fileInfo
      */
-    public function setUploadInfo(array $fileInfo){
+    public function setUploadInfo(array $fileInfo)
+    {
         $this->originalInfo = $fileInfo;
     }
-    
+
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function delete()
     {
-        if(isset($this->originalInfo['tmp_name']) && file_exists($this->originalInfo['tmp_name'])){
+        if (isset($this->originalInfo['tmp_name']) && file_exists($this->originalInfo['tmp_name'])) {
             unlink($this->originalInfo['tmp_name']);
         }
-        
-        if($this->destination && file_exists($this->destination)){
+
+        if ($this->destination && file_exists($this->destination)) {
             return unlink($this->destination);
         }
         return true;
     }
 
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function save($destination)
@@ -118,28 +123,29 @@ class UploadedFile extends \SplFileInfo implements IUploadedFile
         $this->paths[] = $destination;
         return move_uploaded_file($this->getRealPath(), $destination);
     }
-    
+
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function getMimeType()
     {
         $finfo = new \finfo;
-        return $finfo->file($this->getRealPath(),FILEINFO_MIME_TYPE);
+        return $finfo->file($this->getRealPath(), FILEINFO_MIME_TYPE);
     }
-    
+
     /**
-     * 
+     *
      * @param string $filename
      * @return string
      */
-    protected function stripExtension($filename){
-        if(($pos = strrpos($filename,'.')) > 1){
-            return substr($filename,0,$pos);
+    protected function stripExtension($filename)
+    {
+        if (($pos = strrpos($filename, '.')) > 1) {
+            return substr($filename, 0, $pos);
         }
-        
+
         return $filename;
     }
-    
+
 }

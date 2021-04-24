@@ -9,54 +9,61 @@ namespace Feather\Init\Http\File;
  */
 class InvalidUploadedFile implements IUploadedFile
 {
-    /** @var string **/
+
+    /** @var string * */
     protected $name;
-    /** @var string **/
+
+    /** @var string * */
     protected $type;
-    /** @var string **/
+
+    /** @var string * */
     protected $tmp_name;
-    /** @var int **/
+
+    /** @var int * */
     protected $error;
-    /** @var int **/
+
+    /** @var int * */
     protected $size = 0;
-    /** @var array **/
+
+    /** @var array * */
     protected $errors = [];
-    
+
     /**
-     * 
+     *
      * @param array $fileInfo
      */
     public function __construct(array $fileInfo)
     {
-        foreach($fileInfo as $key=>$value){
-            if(property_exists($this, $key)){
+        foreach ($fileInfo as $key => $value) {
+            if (property_exists($this, $key)) {
                 $this->{$key} = $value;
             }
         }
     }
-    
+
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function delete()
     {
-        if(file_exists($this->tmp_name)){
+        if (file_exists($this->tmp_name)) {
             return unlink($this->tmp_name);
         }
         return false;
     }
-    
+
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function getAbsolutePath()
     {
         return $this->tmp_name;
     }
+
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function getErrors()
@@ -65,42 +72,42 @@ class InvalidUploadedFile implements IUploadedFile
     }
 
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function getExtension()
     {
-        if(($pos = strrpos($this->name,'.')) > 1){
-            return substr($this->name,$pos+1);
+        if (($pos = strrpos($this->name, '.')) > 1) {
+            return substr($this->name, $pos + 1);
         }
-        
+
         return '';
     }
-    
+
     /**
-     * 
+     *
      * {@inheritdoc}
      */
-    public function getFilename($wExtension=false)
+    public function getFilename($wExtension = false)
     {
-        if($wExtension && ($pos = strrpos($this->name,'.')) > 1){
-            return substr($this->name,0,$pos);
+        if ($wExtension && ($pos = strrpos($this->name, '.')) > 1) {
+            return substr($this->name, 0, $pos);
         }
-        
+
         return $this->name;
     }
-    
+
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function getMimeType()
     {
         return $this->type;
     }
-    
+
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function save($destination)
