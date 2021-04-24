@@ -26,11 +26,30 @@ trait RouteBuilder
 
         $methods = RequestMethod::methods();
 
-        $route = $this->buildRoute($methods[0], $uri, $callback, $middleware);
+        $routeProps = $this->buildRouteProps($methods[0], $uri, $callback, $middleware);
 
-        if ($route) {
-            $this->addMethodRoutes($uri, $route, $methods);
-        }
+        $this->addRouteProps($uri, $routeProps, $methods);
+
+        return $this;
+    }
+
+    /**
+     * Sets route for DELETE request
+     * @param string $uri
+     * @param string|\Closure $callback
+     * @param array $middleware
+     * @return $this
+     */
+    public function delete($uri, $callback = null, array $middleware = array())
+    {
+
+        $this->removePreceedingSlashFromUri($uri);
+
+        $this->deleteRoutes[$uri] = $uri;
+
+        $routeProps = $this->buildRouteProps(RequestMethod::DELETE, $uri, $callback, $middleware);
+
+        $this->addRouteProps($uri, $routeProps, [RequestMethod::DELETE]);
 
         return $this;
     }
@@ -61,34 +80,9 @@ trait RouteBuilder
 
             $methods = array_values($methods);
 
-            $route = $this->buildRoute($methods[0], $uri, $callback, $middleware);
+            $routeProps = $this->buildRouteProps($methods[0], $uri, $callback, $middleware);
 
-            if ($route) {
-                $this->addMethodRoutes($uri, $route, $methods);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Sets route for DELETE request
-     * @param string $uri
-     * @param string|\Closure $callback
-     * @param array $middleware
-     * @return $this
-     */
-    public function delete($uri, $callback = null, array $middleware = array())
-    {
-
-        $this->removePreceedingSlashFromUri($uri);
-
-        $this->deleteRoutes[$uri] = $uri;
-
-        $route = $this->buildRoute(RequestMethod::DELETE, $uri, $callback, $middleware);
-
-        if ($route) {
-            $this->routes[RequestMethod::DELETE . '_' . $uri] = $route;
+            $this->addRouteProps($uri, $routeProps, $methods);
         }
 
         return $this;
@@ -108,11 +102,9 @@ trait RouteBuilder
 
         $this->getRoutes[$uri] = $uri;
 
-        $route = $this->buildRoute(RequestMethod::GET, $uri, $callback, $middleware);
+        $routeProps = $this->buildRouteProps(RequestMethod::GET, $uri, $callback, $middleware);
 
-        if ($route) {
-            $this->routes[RequestMethod::GET . '_' . $uri] = $route;
-        }
+        $this->addRouteProps($uri, $routeProps, [RequestMethod::GET]);
 
         return $this;
     }
@@ -131,11 +123,9 @@ trait RouteBuilder
 
         $this->patchRoutes[$uri] = $uri;
 
-        $route = $this->buildRoute(RequestMethod::PATCH, $uri, $callback, $middleware);
+        $routeProps = $this->buildRouteProps(RequestMethod::PATCH, $uri, $callback, $middleware);
 
-        if ($route) {
-            $this->routes[RequestMethod::PATCH . '_' . $uri] = $route;
-        }
+        $this->addRouteProps($uri, $routeProps, [RequestMethod::PATCH]);
 
         return $this;
     }
@@ -154,11 +144,9 @@ trait RouteBuilder
 
         $this->postRoutes[$uri] = $uri;
 
-        $route = $this->buildRoute(RequestMethod::POST, $uri, $callback, $middleware);
+        $routeProps = $this->buildRouteProps(RequestMethod::POST, $uri, $callback, $middleware);
 
-        if ($route) {
-            $this->routes[RequestMethod::POST . '_' . $uri] = $route;
-        }
+        $this->addRouteProps($uri, $routeProps, [RequestMethod::POST]);
 
         return $this;
     }
@@ -177,11 +165,9 @@ trait RouteBuilder
 
         $this->putRoutes[$uri] = $uri;
 
-        $route = $this->buildRoute(RequestMethod::PUT, $uri, $callback, $middleware);
+        $routeProps = $this->buildRouteProps(RequestMethod::PUT, $uri, $callback, $middleware);
 
-        if ($route) {
-            $this->routes[RequestMethod::PUT . '_' . $uri] = $route;
-        }
+        $this->addRouteProps($uri, $routeProps, [RequestMethod::PUT]);
 
         return $this;
     }
@@ -228,13 +214,27 @@ trait RouteBuilder
 
     /**
      *
+     * @param array $routeConfig
+     * @return \Feather\Init\Http\Route|\Feather\Init\Http\ClosureRoute|null
+     */
+    protected function buildRoute(array $routeConfig)
+    {
+        if ($routeConfig['callback'] == NULL) {
+            return $this->parseUri($routeConfig['uri'], $routeConfig['method'], $routeConfig['middleware']);
+        } else {
+            return $this->setRoute($routeConfig['method'], $routeConfig['uri'], $routeConfig['callback'], $routeConfig['middleware']);
+        }
+    }
+
+    /**
+     *
      * @param type $reqMethod
      * @param type $uri
      * @param type $callback
      * @param array $middleware
-     * @return type
+     * @return array
      */
-    protected function buildRoute($reqMethod, $uri, $callback = null, array $middleware = array())
+    protected function buildRouteProps($reqMethod, $uri, $callback = null, array $middleware = array())
     {
 
         $len = strlen($uri);
@@ -247,11 +247,12 @@ trait RouteBuilder
 
         $this->registeredRoutes[$routeUri] = $this->buildPattern($routeUri);
 
-        if ($callback == NULL) {
-            return $this->parseUri($routeUri, $reqMethod, $middleware);
-        } else {
-            return $this->setRoute($reqMethod, $routeUri, $callback, $middleware);
-        }
+        return [
+            'callback' => $callback,
+            'uri' => $routeUri,
+            'method' => $reqMethod,
+            'middleware' => $middleware
+        ];
     }
 
 }

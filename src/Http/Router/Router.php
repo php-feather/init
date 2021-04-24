@@ -108,25 +108,13 @@ class Router
 
         $methodType = strtoupper($method);
 
-        switch ($methodType) {
-            case RequestMethod::DELETE:
-                $key = $this->matches($uri, $this->deleteRoutes);
-                break;
-            case RequestMethod::GET:
-                $key = $this->matches($uri, $this->getRoutes);
-                break;
-            case RequestMethod::POST:
-                $key = $this->matches($uri, $this->postRoutes);
-                break;
-            case RequestMethod::PUT:
-                $key = $this->matches($uri, $this->putRoutes);
-                break;
-            default:
-                throw new \Exception('Bad Request', 405);
-        }
+        $key = $this->findRouteKey($methodType, $uri);
 
         if ($key) {
-            $route = $this->routes[$methodType . '_' . $key];
+
+            $routeConfig = $this->routes[$methodType . '_' . $key];
+            $route = $this->buildRoute($routeConfig);
+
             $params = $this->getParamsFromUri($uri, $key);
             $route->setParamValues($params);
             return $route->run();
@@ -210,46 +198,34 @@ class Router
     /**
      *
      * @param string $uri
-     * @param \Feather\Init\Http\Route $route
+     * @param array $routeProps
      * @param array $methods
      */
-    protected function addMethodRoutes($uri, $route, array $methods)
+    protected function addRouteProps($uri, array $routeProps, array $methods)
     {
-
         foreach ($methods as $method) {
+
             switch ($method) {
                 case RequestMethod::DELETE:
                     $this->deleteRoutes[$uri] = $uri;
-                    $newRoute = clone $route;
-                    $newRoute->setRequestMethod(RequestMethod::DELETE);
                     break;
                 case RequestMethod::GET:
                     $this->getRoutes[$uri] = $uri;
-                    $newRoute = clone $route;
-                    $newRoute->setRequestMethod(RequestMethod::GET);
                     break;
                 case RequestMethod::PATCH:
                     $this->patchRoutes[$uri] = $uri;
-                    $newRoute = clone $route;
-                    $newRoute->setRequestMethod(RequestMethod::PATCH);
                     break;
                 case RequestMethod::POST:
                     $this->postRoutes[$uri] = $uri;
-                    $newRoute = clone $route;
-                    $newRoute->setRequestMethod(RequestMethod::POST);
                     break;
                 case RequestMethod::PUT:
                     $this->putRoutes[$uri] = $uri;
-                    $newRoute = clone $route;
-                    $newRoute->setRequestMethod(RequestMethod::PUT);
                     break;
                 default:
                     break;
             }
-
-            if (isset($newRoute)) {
-                $this->routes[$method . '_' . $uri] = $newRoute;
-            }
+            $routeProps['method'] = $method;
+            $this->routes[$method . '_' . $uri] = $routeProps;
         }
     }
 
@@ -528,6 +504,29 @@ class Router
     {
         $controller = new $this->defaultController();
         return new \Feather\Init\Http\Route($controller, $controller->defaultAction());
+    }
+
+    /**
+     *
+     * @param string $method Request Method
+     * @param string uri Request Uri
+     * @return string
+     * @throws \Exception
+     */
+    protected function findRouteKey($method, $uri)
+    {
+        switch ($method) {
+            case RequestMethod::DELETE:
+                return $this->matches($uri, $this->deleteRoutes);
+            case RequestMethod::GET:
+                return $this->matches($uri, $this->getRoutes);
+            case RequestMethod::POST:
+                return $this->matches($uri, $this->postRoutes);
+            case RequestMethod::PUT:
+                return $this->matches($uri, $this->putRoutes);
+            default:
+                throw new \Exception('Bad Request', 405);
+        }
     }
 
     /**

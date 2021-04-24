@@ -73,7 +73,7 @@ class Route
      * @param array $middleWares
      * @return $this
      */
-    public function setMiddleware(array $middleWares = array(0))
+    public function setMiddleware(array $middleWares = array())
     {
 
         foreach ($middleWares as $mw) {
