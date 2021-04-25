@@ -209,7 +209,7 @@ class Input
     {
 
         if ($name != null) {
-            return $this->post{$name} ?? $default;
+            return $this->post->{$name} ?? $default;
         }
 
         return $this->post;
