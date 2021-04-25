@@ -17,20 +17,26 @@ trait RouteBuilder
      * @param string $uri
      * @param string|\Closure $callback
      * @param array $middleware
-     * @return $this
+     * @param array $requirements
+     * @return \Feather\Init\Http\Router\RouteParam
      */
-    public function any($uri, $callback = null, array $middleware = array())
+    public function any($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $callStack = debug_backtrace(false);
+
+        $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
 
         $this->removePreceedingSlashFromUri($uri);
 
+        $this->cleanUri($uri);
+
         $methods = RequestMethod::methods();
 
-        $routeProps = $this->buildRouteProps($methods[0], $uri, $callback, $middleware);
+        $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, $requirements);
 
-        $this->addRouteProps($uri, $routeProps, $methods);
+        $this->addRouteParam($uri, $routeParam, $methods);
 
-        return $this;
+        return $routeParam;
     }
 
     /**
@@ -38,20 +44,26 @@ trait RouteBuilder
      * @param string $uri
      * @param string|\Closure $callback
      * @param array $middleware
-     * @return $this
+     * @param array $requirements
+     * @return \Feather\Init\Http\Router\RouteParam
      */
-    public function delete($uri, $callback = null, array $middleware = array())
+    public function delete($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $callStack = debug_backtrace(false);
+
+        $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
 
         $this->removePreceedingSlashFromUri($uri);
 
+        $this->cleanUri($uri);
+
         $this->deleteRoutes[$uri] = $uri;
 
-        $routeProps = $this->buildRouteProps(RequestMethod::DELETE, $uri, $callback, $middleware);
+        $routeParam = $this->buildRouteParam(RequestMethod::DELETE, $uri, $callback, $middleware, $requirements);
 
-        $this->addRouteProps($uri, $routeProps, [RequestMethod::DELETE]);
+        $this->addRouteParam($uri, $routeParam, [RequestMethod::DELETE]);
 
-        return $this;
+        return $routeParam;
     }
 
     /**
@@ -60,12 +72,18 @@ trait RouteBuilder
      * @param string $uri
      * @param string|\Closure $callback
      * @param array $middleware
-     * @return $this
+     * @param array $requirements
+     * @return \Feather\Init\Http\Router\RouteParam
      */
-    public function except(array $exclude, $uri, $callback = null, array $middleware = array())
+    public function except(array $exclude, $uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $callStack = debug_backtrace(false);
+
+        $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
 
         $this->removePreceedingSlashFromUri($uri);
+
+        $this->cleanUri($uri);
 
         $methods = RequestMethod::methods();
 
@@ -80,12 +98,12 @@ trait RouteBuilder
 
             $methods = array_values($methods);
 
-            $routeProps = $this->buildRouteProps($methods[0], $uri, $callback, $middleware);
+            $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, $requirements);
 
-            $this->addRouteProps($uri, $routeProps, $methods);
+            $this->addRouteParam($uri, $routeParam, $methods);
         }
 
-        return $this;
+        return $routeParam;
     }
 
     /**
@@ -93,20 +111,37 @@ trait RouteBuilder
      * @param string $uri
      * @param string|\Closure $callback
      * @param array $middleware
-     * @return $this
+     * @param array $requirements
+     * @return \Feather\Init\Http\Router\RouteParam
      */
-    public function get($uri, $callback = null, array $middleware = array())
+    public function get($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $callStack = debug_backtrace(false);
+
+        $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
 
         $this->removePreceedingSlashFromUri($uri);
 
+        $this->cleanUri($uri);
+
         $this->getRoutes[$uri] = $uri;
 
-        $routeProps = $this->buildRouteProps(RequestMethod::GET, $uri, $callback, $middleware);
+        $routeParam = $this->buildRouteParam(RequestMethod::GET, $uri, $callback, $middleware, $requirements);
 
-        $this->addRouteProps($uri, $routeProps, [RequestMethod::GET]);
+        $this->addRouteParam($uri, $routeParam, [RequestMethod::GET]);
 
-        return $this;
+        return $routeParam;
+    }
+
+    /**
+     *
+     * @param array $options
+     * @param \Closure $closure
+     * @return mixed
+     */
+    public function group(array $options, \Closure $closure)
+    {
+        return $closure();
     }
 
     /**
@@ -114,20 +149,26 @@ trait RouteBuilder
      * @param string $uri
      * @param string|\Closure $callback
      * @param array $middleware
-     * @return $this
+     * @param array $requirements
+     * @return \Feather\Init\Http\Router\RouteParam
      */
-    public function patch($uri, $callback = null, array$middleware = array())
+    public function patch($uri, $callback = null, array$middleware = array(), array $requirements = array())
     {
+        $callStack = debug_backtrace(false);
+
+        $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
 
         $this->removePreceedingSlashFromUri($uri);
 
+        $this->cleanUri($uri);
+
         $this->patchRoutes[$uri] = $uri;
 
-        $routeProps = $this->buildRouteProps(RequestMethod::PATCH, $uri, $callback, $middleware);
+        $routeParam = $this->buildRouteParam(RequestMethod::PATCH, $uri, $callback, $middleware, $requirements);
 
-        $this->addRouteProps($uri, $routeProps, [RequestMethod::PATCH]);
+        $this->addRouteParam($uri, $routeParam, [RequestMethod::PATCH]);
 
-        return $this;
+        return $routeParam;
     }
 
     /**
@@ -135,20 +176,26 @@ trait RouteBuilder
      * @param string $uri
      * @param string|\Closure $callback
      * @param array $middleware
-     * @return $this
+     * @param array $requirements
+     * @return \Feather\Init\Http\Router\RouteParam
      */
-    public function post($uri, $callback = null, array$middleware = array())
+    public function post($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $callStack = debug_backtrace(false);
+
+        $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
 
         $this->removePreceedingSlashFromUri($uri);
 
+        $this->cleanUri($uri);
+
         $this->postRoutes[$uri] = $uri;
 
-        $routeProps = $this->buildRouteProps(RequestMethod::POST, $uri, $callback, $middleware);
+        $routeParam = $this->buildRouteParam(RequestMethod::POST, $uri, $callback, $middleware, $requirements);
 
-        $this->addRouteProps($uri, $routeProps, [RequestMethod::POST]);
+        $this->addRouteParam($uri, $routeParam, [RequestMethod::POST]);
 
-        return $this;
+        return $routeParam;
     }
 
     /**
@@ -156,20 +203,26 @@ trait RouteBuilder
      * @param string $uri
      * @param string|\Closure $callback
      * @param array $middleware
-     * @return $this
+     * @param array $requirements
+     * @return \Feather\Init\Http\Router\RouteParam
      */
-    public function put($uri, $callback = null, array $middleware = array())
+    public function put($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $callStack = debug_backtrace(false);
+
+        $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
 
         $this->removePreceedingSlashFromUri($uri);
 
+        $this->cleanUri($uri);
+
         $this->putRoutes[$uri] = $uri;
 
-        $routeProps = $this->buildRouteProps(RequestMethod::PUT, $uri, $callback, $middleware);
+        $routeParam = $this->buildRouteParam(RequestMethod::PUT, $uri, $callback, $middleware, $requirements);
 
-        $this->addRouteProps($uri, $routeProps, [RequestMethod::PUT]);
+        $this->addRouteParam($uri, $routeParam, [RequestMethod::PUT]);
 
-        return $this;
+        return $routeParam;
     }
 
     /**
@@ -214,15 +267,15 @@ trait RouteBuilder
 
     /**
      *
-     * @param array $routeConfig
+     * @param \Feather\Init\Http\Router\RouteParam $routeParam
      * @return \Feather\Init\Http\Route|\Feather\Init\Http\ClosureRoute|null
      */
-    protected function buildRoute(array $routeConfig)
+    protected function buildRoute(RouteParam $routeParam)
     {
-        if ($routeConfig['callback'] == NULL) {
-            return $this->parseUri($routeConfig['uri'], $routeConfig['method'], $routeConfig['middleware']);
+        if ($routeParam->callback == NULL) {
+            return $this->parseUri($routeParam->uri, $routeParam->method, $routeParam->middleware, $routeParam->requirements);
         } else {
-            return $this->setRoute($routeConfig['method'], $routeConfig['uri'], $routeConfig['callback'], $routeConfig['middleware']);
+            return $this->setRoute($routeParam->method, $routeParam->uri, $routeParam->callback, $routeParam->middleware, $routeParam->requirements);
         }
     }
 
@@ -232,9 +285,10 @@ trait RouteBuilder
      * @param type $uri
      * @param type $callback
      * @param array $middleware
-     * @return array
+     * @param array $requirements
+     * @return \Feather\Init\Http\Router\RouteParam
      */
-    protected function buildRouteProps($reqMethod, $uri, $callback = null, array $middleware = array())
+    protected function buildRouteParam($reqMethod, $uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
 
         $len = strlen($uri);
@@ -247,12 +301,66 @@ trait RouteBuilder
 
         $this->registeredRoutes[$routeUri] = $this->buildPattern($routeUri);
 
+        return (new RouteParam())->setUri($uri)
+                        ->setCallback($callback)
+                        ->setRequestMethod($reqMethod)
+                        ->setMiddleware($middleware)
+                        ->setRequirements($requirements);
+    }
+
+    protected function getCallStackArgs(array $callStack)
+    {
+        $args = [];
+        foreach ($callStack as $stack) {
+            if (isset($stack['class']) && isset($stack['function']) && $stack['class'] === Router::class && $stack['function'] === 'group') {
+                $args[] = $stack['args'][0];
+            }
+        }
+        return $args;
+    }
+
+    protected function normalizeCallStackArgs(array $callStackArgs)
+    {
+        $prefix = [];
+        $middleware = [];
+        $requirements = [];
+
+        foreach (array_reverse($callStackArgs) as $args) {
+            if (isset($args['prefix'])) {
+                $prefix[] = $args['prefix'];
+            }
+
+            if (isset($args['middleware'])) {
+
+                if (!is_array($args['middleware'])) {
+                    $middleware[] = $args['middleware'];
+                } else {
+                    $middleware = array_merge($middleware, $args['middleware']);
+                }
+            }
+
+            if (isset($args['requirements']) && is_array($args['requirements'])) {
+                $requirements = array_merge($requirements, $args['requirements']);
+            }
+        }
+
         return [
-            'callback' => $callback,
-            'uri' => $routeUri,
-            'method' => $reqMethod,
-            'middleware' => $middleware
+            'prefix' => implode('/', $prefix),
+            'middleware' => $middleware,
+            'requirements' => $requirements
         ];
+    }
+
+    protected function updateRouteInfo(&$uri, array &$middleware, array &$requirements, array $callStack)
+    {
+        $args = $this->normalizeCallStackArgs($this->getCallStackArgs($callStack));
+
+        if ($args['prefix']) {
+            $uri = $uri === '/' ? $args['prefix'] . $uri : $args['prefix'] . '/' . $uri;
+        }
+
+        $middleware = array_merge($middleware, $args['middleware']);
+        $requirements = array_merge($requirements, $args['requirements']);
     }
 
 }

@@ -25,26 +25,50 @@ define('A_STORAGE', dirname(__FILE__, 2) . '/storage/');
 class Route
 {
 
+    /** @var * */
     protected $controller;
+
+    /** @var string Controller method name * */
     protected $method;
+
+    /** @var string Default controller method * */
     protected $defaultMethod = 'index';
+
+    /** @var array * */
     protected $params = array();
+
+    /** @var array * */
     protected $paramValues = array();
+
+    /** @var boolean * */
     protected $isCallBack = false;
+
+    /** @var array * */
     protected $middleWare = array();
+
+    /** @var array * */
+    protected $requirements = array();
+
+    /** @var string * */
     protected $failedMiddleware;
+
+    /** @var \Feather\Init\Http\Request * */
     protected $requestMethod;
+
+    /** @var boolean * */
     protected $fallBack = false;
+
+    /** @var array * */
     protected $request;
 
     /**
      *
      * @param string $requestMethod
      * @param \Feather\Init\Controllers\Controller|\Closure $controller
-     * @param type $method
-     * @param type $params
+     * @param string $method
+     * @param array $params
      */
-    public function __construct($requestMethod, $controller, $method = null, $params = array())
+    public function __construct($requestMethod, $controller, $method = null, array $params = array())
     {
 
         $this->requestMethod = $requestMethod;
@@ -107,12 +131,25 @@ class Route
 
     /**
      *
+     * @param array $requirements
+     * @return $this
+     */
+    public function setRequirements(array $requirements)
+    {
+        $this->requirements = $requirements;
+        return $this;
+    }
+
+    /**
+     *
      * @return mixed
      * @throws \Exception
      */
     public function run()
     {
         try {
+
+            $this->validateParamsValues();
 
             if ($this->isCallBack) {
                 $closure = function() {
@@ -168,6 +205,52 @@ class Route
     }
 
     /**
+     *
+     * @param string $name
+     * @param string $value
+     * @return boolean
+     */
+    protected function isValidParamValue($name, $value)
+    {
+        if (isset($this->requirements[$name])) {
+            $pattern = trim($this->requirements[$name]);
+
+            if (preg_match('/^(\/)(.*?)(\/i?m?s?x?A?D?U?)$/', $pattern)) {
+                return preg_match($pattern, $value);
+            }
+
+            return preg_match("/$pattern/i", $value);
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if request method is valid for resource
+     * @return boolean
+     */
+    protected function isValidRequestMethod()
+    {
+
+        $reader = new Reader(new Parser, new FileCache(A_STORAGE));
+        $annotations = $reader->getMethodAnnotations(get_class($this->controller), $this->method);
+
+        $methods = RequestMethod::methods();
+        $isValid = true;
+
+        foreach ($methods as $method) {
+
+            if (($annotations->get(strtolower($method)) || $annotations->get($method)) && $this->request->method != $method) {
+                $isValid = false;
+            } else if (($annotations->get(strtolower($method)) || $annotations->get($method)) && $this->request->method == $method) {
+                return true;
+            }
+        }
+
+        return $isValid;
+    }
+
+    /**
      * Run middlewares
      * @param \Feather\Init\Http\Response|\Closure $next
      * @return \Feather\Init\Http\Response|\Closure $next
@@ -208,28 +291,25 @@ class Route
     }
 
     /**
-     * Check if request method is valid for resource
-     * @return boolean
+     *
+     * @throws RuntimeException
      */
-    protected function validateRequestType()
+    protected function validateParamsValues()
     {
+        foreach ($this->paramValues as $param => $value) {
+            if (strpos($param, ':') === 0 && $value) {
+                $param = substr($param, 1);
+                $isValid = $this->isValidParamValue($param, $value);
+                $paramType = 'optional';
+            } else {
+                $isValid = $this->isValidParamValue($param, $value);
+                $paramType = 'required';
+            }
 
-        $reader = new Reader(new Parser, new FileCache(A_STORAGE));
-        $annotations = $reader->getMethodAnnotations(get_class($this->controller), $this->method);
-
-        $methods = RequestMethod::methods();
-        $isValid = true;
-
-        foreach ($methods as $method) {
-
-            if (($annotations->get(strtolower($method)) || $annotations->get($method)) && $this->request->method != $method) {
-                $isValid = false;
-            } else if (($annotations->get(strtolower($method)) || $annotations->get($method)) && $this->request->method == $method) {
-                return true;
+            if (!$isValid) {
+                throw new \RuntimeException(sprintf('The value "%s" supplied for %s url parameter "%s" is not valid', $value, $paramType, $param), 105);
             }
         }
-
-        return $isValid;
     }
 
 }

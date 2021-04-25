@@ -22,6 +22,9 @@ class Router
     protected $routes = array();
 
     /** @var array * */
+    protected $routesParams = array();
+
+    /** @var array * */
     protected $registeredRoutes = array();
 
     /** @var string * */
@@ -112,8 +115,10 @@ class Router
 
         if ($key) {
 
-            $routeConfig = $this->routes[$methodType . '_' . $key];
-            $route = $this->buildRoute($routeConfig);
+            $routeParamKey = $this->routes[$methodType . '_' . $key];
+            $routeParam = $this->routesParams[$routeParamKey];
+            $routeParam->setRequestMethod($methodType);
+            $route = $this->buildRoute($routeParam);
 
             $params = $this->getParamsFromUri($uri, $key);
             $route->setParamValues($params);
@@ -198,11 +203,14 @@ class Router
     /**
      *
      * @param string $uri
-     * @param array $routeProps
+     * @param \Feather\Init\Http\Router\RouteParam $routeParam
      * @param array $methods
      */
-    protected function addRouteProps($uri, array $routeProps, array $methods)
+    protected function addRouteParam($uri, RouteParam $routeParam, array $methods)
     {
+
+        $this->routesParams[$uri] = $routeParam;
+
         foreach ($methods as $method) {
 
             switch ($method) {
@@ -224,8 +232,7 @@ class Router
                 default:
                     break;
             }
-            $routeProps['method'] = $method;
-            $this->routes[$method . '_' . $uri] = $routeProps;
+            $this->routes[$method . '_' . $uri] = $uri;
         }
     }
 
@@ -638,7 +645,6 @@ class Router
      */
     protected function getParamsFromUri($requestUri, $routeUri)
     {
-
         $params = array();
         $indexes = array();
 
@@ -648,14 +654,16 @@ class Router
 
         foreach ($routePaths as $key => $path) {
 
-            if (preg_match('/{(.*?)}/', $path)) {
-                $indexes[] = $key;
+            $matches = [];
+
+            if (preg_match('/{(.*?)}/', $path, $matches)) {
+                $indexes[$matches[1]] = $key;
             }
         }
 
-        foreach ($indexes as $index) {
+        foreach ($indexes as $key => $index) {
             if (isset($requestPaths[$index])) {
-                $params[] = $requestPaths[$index];
+                $params[$key] = $requestPaths[$index];
             }
         }
 
@@ -722,9 +730,10 @@ class Router
      * @param string $uri
      * @param string $method
      * @param array $middleware
+     * @param array $requirements
      * @return \Feather\Init\Http\Route|null
      */
-    protected function parseUri($uri, $method, array $middleware = array())
+    protected function parseUri($uri, $method, array $middleware = array(), array $requirements = array())
     {
         $parts = explode('/', $uri);
 
@@ -744,6 +753,7 @@ class Router
 
             $route = new Route($method, $controller, $action, $params);
             $route->setMiddleware($middleware);
+            $route->setRequirements($requirements);
 
             return $route;
         }
@@ -780,9 +790,10 @@ class Router
      * @param string $uri
      * @param \Closure $callback
      * @param array $middleware
+     * @param array $requirements
      * @return \Feather\Init\Http\ClosureRoute
      */
-    protected function setClosureRoute($method, $uri, \Closure $callback, array $middleware = array())
+    protected function setClosureRoute($method, $uri, \Closure $callback, array $middleware = array(), array $requirements = array())
     {
 
         $params = $this->getParamsArgs($uri);
@@ -790,6 +801,8 @@ class Router
         $route = new ClosureRoute($method, $callback, $params);
 
         $route->setMiddleware($middleware);
+
+        $route->setRequirements($requirements);
 
         return $route;
     }
@@ -800,13 +813,14 @@ class Router
      * @param string $uri
      * @param \Closure| string $callback
      * @param array $middleware
+     * @param array $requirements
      * @return \Feather\Init\Http\Route|\Feather\Init\Http\ClosureRoute|null
      */
-    protected function setRoute($method, $uri, $callback, array $middleware = array())
+    protected function setRoute($method, $uri, $callback, array $middleware = array(), array $requirements = array())
     {
 
         if ($callback instanceof \Closure) {
-            return $this->setClosureRoute($method, $uri, $callback, $middleware);
+            return $this->setClosureRoute($method, $uri, $callback, $middleware, $requirements);
         }
 
         $parts = explode('@', $callback);
@@ -825,6 +839,7 @@ class Router
 
             $route = new Route($method, $controller, $action, $params);
             $route->setMiddleware($middleware);
+            $route->setRequirements($requirements);
 
             return $route;
         }

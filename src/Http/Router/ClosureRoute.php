@@ -29,4 +29,29 @@ class ClosureRoute extends Route
         $this->isCallBack = true;
     }
 
+    /**
+     *
+     * @param array $params
+     * @return $this
+     */
+    public function setParamValues(array $params = array())
+    {
+        $cl = new \ReflectionFunction($this->controller);
+
+        $validParams = array_map(function($param) {
+            return $param->name;
+        }, $cl->getParameters());
+
+        unset($cl);
+
+        foreach ($params as $name => $value) {
+            $tempName = strpos($name, ':') === 0 ? substr($name, 1) : $name;
+            if (in_array($tempName, $validParams)) {
+                $this->paramValues[$name] = $value;
+            }
+        }
+
+        return $this;
+    }
+
 }
