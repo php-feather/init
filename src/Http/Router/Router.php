@@ -3,7 +3,7 @@
 namespace Feather\Init\Http\Router;
 
 use Feather\Init\Controllers\Controller;
-use Feather\Cache\Contracts\Cache;
+use Feather\Cache\ICache;
 use Feather\Init\Http\Request;
 use Feather\Init\Http\Response;
 use Feather\Init\Http\RequestMethod;
@@ -145,9 +145,9 @@ class Router
 
     /**
      *
-     * @param Cache $cache
+     * @param ICache $cache
      */
-    public function setCacheHandler(Cache $cache)
+    public function setCacheHandler(ICache $cache)
     {
         $this->cache = $cache;
     }
