@@ -56,7 +56,7 @@ class Route
     protected $requestMethod;
 
     /** @var boolean * */
-    protected $fallBack = false;
+    protected $fallback = false;
 
     /** @var array * */
     protected $request;
@@ -81,6 +81,14 @@ class Route
         $this->request = Request::getInstance();
     }
 
+    public function __get($name)
+    {
+        if (property_exists($this, $name)) {
+            return $this->{$name};
+        }
+        return null;
+    }
+
     /**
      *
      * @param bool $val
@@ -88,7 +96,7 @@ class Route
      */
     public function setFallback(bool $val)
     {
-        $this->fallBack = $val;
+        $this->fallback = $val;
         return $this;
     }
 
@@ -168,7 +176,7 @@ class Route
                 if ($formRequest) {
                     $next = $formRequest->run($next);
                 }
-            } elseif ($this->fallBack) {
+            } elseif ($this->fallback) {
                 throw new \Exception('Requested Resource Not Found', 404);
             } else {
                 throw new \Exception('Bad Request', 400);

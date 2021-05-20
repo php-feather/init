@@ -142,7 +142,9 @@ class Response
      */
     public function rawOutput($data, $statusCode = 200, array $headers = array())
     {
-        ob_clean();
+        if (ob_get_level() > 0) {
+            ob_clean();
+        }
         $this->setHeaders($headers);
         $this->content = $data;
         $this->statusCode = $statusCode;

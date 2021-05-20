@@ -7,6 +7,7 @@ use Feather\Cache\ICache;
 use Feather\Init\Http\Request;
 use Feather\Init\Http\Response;
 use Feather\Init\Http\RequestMethod;
+use Feather\Init\Http\Router\Resolver\AutoResolver;
 
 /**
  * Description of Router
@@ -241,45 +242,45 @@ class Router
      * @param string $controller Controller name
      * @return \Feather\Init\Controller\Controller|null
      */
-    protected function autoDetectController($controller)
-    {
+    /* protected function autoDetectController($controller)
+      {
 
-        $ctrl = array(strtolower($controller));
-        $ctrl[] = ucfirst($controller);
-        $ctrl[] = strtoupper($controller);
+      $ctrl = array(strtolower($controller));
+      $ctrl[] = ucfirst($controller);
+      $ctrl[] = strtoupper($controller);
 
 
-        if (stripos($controller, 'Controller') === FALSE) {
-            $ctrl[] = $controller . 'Controller';
-        }
+      if (stripos($controller, 'Controller') === FALSE) {
+      $ctrl[] = $controller . 'Controller';
+      }
 
-        $fileExist = false;
-        $class = '';
+      $fileExist = false;
+      $class = '';
 
-        foreach ($ctrl as $c) {
+      foreach ($ctrl as $c) {
 
-            $fullPath = $this->ctrlPath . $c . '.php';
-            $fullPath2 = $this->ctrlPath . $c . 'Controller.php';
+      $fullPath = $this->ctrlPath . $c . '.php';
+      $fullPath2 = $this->ctrlPath . $c . 'Controller.php';
 
-            if (feather_file_exists($fullPath) && strcasecmp(basename($fullPath), $c . '.php') == 0) {
-                $fileExist = true;
-                $class = $this->ctrlNamespace . \Feather\Init\ClassFinder::findClass($fullPath);
-                break;
-            }
+      if (feather_file_exists($fullPath) && strcasecmp(basename($fullPath), $c . '.php') == 0) {
+      $fileExist = true;
+      $class = $this->ctrlNamespace . \Feather\Init\ClassFinder::findClass($fullPath);
+      break;
+      }
 
-            if (feather_file_exists($fullPath2) && strcasecmp(basename($fullPath2), $c . 'Controller.php') == 0) {
-                $fileExist = true;
-                $class = $this->ctrlNamespace . \Feather\Init\ClassFinder::findClass($fullPath2);
-                break;
-            }
-        }
+      if (feather_file_exists($fullPath2) && strcasecmp(basename($fullPath2), $c . 'Controller.php') == 0) {
+      $fileExist = true;
+      $class = $this->ctrlNamespace . \Feather\Init\ClassFinder::findClass($fullPath2);
+      break;
+      }
+      }
 
-        if ($fileExist) {
-            return new $class();
-        }
+      if ($fileExist) {
+      return new $class();
+      }
 
-        return null;
-    }
+      return null;
+      } */
 
     public function autoRunCacheRoute($uri, $reqMethod)
     {
@@ -315,7 +316,10 @@ class Router
 
         $params = explode('/', $newUri);
 
-        return $this->executeAutoRunRoute($cacheUri, $reqMethod, new $cacheInfo['controller'], $cacheInfo['method'], $params, $cacheInfo['fallback']);
+        $route = new Route($reqMethod, new $cacheInfo['controller'], $cacheInfo['method'], $params);
+        $route->setFallback($cacheInfo['fallback']);
+
+        return $this->executeAutoRunRoute($route, $cacheUri, $reqMethod);
     }
 
     /**
@@ -331,66 +335,28 @@ class Router
             return true;
         }
 
-        $parts = preg_split('/\s*\/\s*/', $uri);
 
-        $this->cleanUriParts($parts);
+        $resolver = new AutoResolver();
+        $route = $resolver->setControllerParams($this->ctrlNamespace, $this->ctrlPath, $this->defaultController)
+                ->setRouteFallback($this->routeFallback)
+                ->resolve($uri, $reqMethod);
 
-        $count = count($parts);
-
-        if ($count < 1 && $uri != '/') {
-            return FALSE;
-        } elseif ($uri == '/' && $this->defaultController && ($controller = $this->getControllerClass($this->defaultController))) {
-            return $this->executeAutoRunRoute($uri, $reqMethod, $controller, $controller->defaultAction());
+        if ($route) {
+            return $this->executeAutoRunRoute($route, $uri, $reqMethod);
         }
 
-        $controller = $this->autoDetectController($parts[0]);
-        $fallback = false;
-        if ($controller == NULL) {
-
-            if ($this->defaultController && $this->shouldRunDefaultController($parts)) {
-                $controller = new $this->defaultController;
-                array_unshift($parts, $parts[0]);
-                $fallback = true;
-                $count++;
-            } else {
-                return FALSE;
-            }
-        }
-
-        if ($count == 1) {
-
-            if (!$controller || !method_exists($controller, $controller->defaultAction())) {
-                return false;
-            }
-
-            return $this->executeAutoRunRoute($parts[0], $reqMethod, $controller, $controller->defaultAction(), [], $fallback);
-        }
-
-        $method = $parts[1];
-        $params = $count > 2 ? array_slice($parts, 2) : array();
-
-        return $this->executeAutoRunRoute($parts[0], $reqMethod, $controller, $method, $params, $fallback);
+        return false;
     }
 
     /**
+     * @param \Feather\Init\Http\Router\Route $route
      * @param string $uri
      * @param string $reqMethod
-     * @param \Feather\Init\Controller\Controller $controller
-     * @param string $method
-     * @param array $params
      * @return boolean
      */
-    protected function executeAutoRunRoute($uri, $reqMethod, $controller, $method, array $params = [], $fallback = false)
+    protected function executeAutoRunRoute(Route $route, $uri, $reqMethod)
     {
-        $this->cacheAutoRoute($uri, $reqMethod, $controller, $method, $fallback);
-
-        if (!is_callable(array($controller, $method)) || !$this->shouldRunControllerMethod($controller, $method, $params)) {
-            return false;
-        }
-
-        $route = new Route($reqMethod, $controller, $method);
-        $route->setParamValues($params);
-        $route->setFallback($fallback);
+        $this->cacheAutoRoute($uri, $reqMethod, $route->controller, $route->method, $route->fallback);
         $route->run();
         return true;
     }
@@ -557,48 +523,6 @@ class Router
 
     /**
      *
-     * @param string $ctrlClass
-     * @return \Feather\Init\Controller\Controller|null
-     */
-    protected function getControllerClass($ctrlClass)
-    {
-
-        if (strpos($ctrlClass, '\\') !== 0) {
-            $ctrlClass = '\\' . $ctrlClass;
-        }
-
-        $originalClass = $ctrlClass;
-
-        $classFound = false;
-
-        if (stripos($ctrlClass, $this->ctrlNamespace) === false) {
-            $ctrlClass = str_replace('\\\\', '\\', $this->ctrlNamespace . $ctrlClass);
-        }
-
-        if (($class = $this->getClass($ctrlClass))) {
-            return $class;
-        }
-
-        $append = ['', 'Controller', 'controller'];
-
-        $classes = [$ctrlClass];
-
-        foreach ($classes as $class) {
-
-            foreach ($append as $str) {
-                $newClass = str_replace("\\\\", '\\', $class . $str);
-
-                if (($class = $this->getClass($ctrlClass))) {
-                    return $class;
-                }
-            }
-        }
-
-        return $this->autoDetectController($ctrlClass);
-    }
-
-    /**
-     *
      * @param array $paths
      * @return int
      */
@@ -735,30 +659,8 @@ class Router
      */
     protected function parseUri($uri, $method, array $middleware = array(), array $requirements = array())
     {
-        $parts = explode('/', $uri);
-
-        if (empty($parts) || $parts[0] == '/') {
-            return $this->deleteRoute();
-        }
-
-        $controller = $this->getClass($parts[0]);
-
-        if (!$controller) {
-            $controller = $this->getControllerClass($parts[0]);
-        }
-
-        if ($controller) {
-            $action = isset($parts[1]) ? $parts[1] : $controller->defaultAction();
-            $params = isset($parts[2]) ? array_slice($parts, 2) : array();
-
-            $route = new Route($method, $controller, $action, $params);
-            $route->setMiddleware($middleware);
-            $route->setRequirements($requirements);
-
-            return $route;
-        }
-
-        return null;
+        return (new AutoResolver())->setControllerParams($this->ctrlNamespace, $this->ctrlPath, $this->defaultController)
+                        ->resolve($uri, $method);
     }
 
     /**
@@ -823,12 +725,14 @@ class Router
             return $this->setClosureRoute($method, $uri, $callback, $middleware, $requirements);
         }
 
+        $resolver = (new AutoResolver())->setControllerParams($this->ctrlNamespace, $this->ctrlPath, $this->ctrlPath);
+
         $parts = explode('@', $callback);
 
         $controller = $this->getClass($parts[0]);
 
         if (!$controller) {
-            $controller = $this->getControllerClass($parts[0]);
+            $controller = $resolver->getControllerClass($parts[0]);
         }
 
 
@@ -845,40 +749,6 @@ class Router
         }
 
         return null;
-    }
-
-    /**
-     *
-     * @param \Feather\Init\Controller\Controller $controller
-     * @param string $methodName
-     * @param array $params
-     * @return boolean
-     */
-    public function shouldRunControllerMethod(\Feather\Init\Controller\Controller $controller, $methodName, array $params)
-    {
-
-        $func = new \ReflectionMethod($controller, $methodName);
-
-        return $func && count($func->getParameters()) >= count($params);
-    }
-
-    /**
-     * Check if request handling should fallback to default controller
-     * @param array $uriParts
-     * @return boolean
-     */
-    protected function shouldRunDefaultController(array $uriParts)
-    {
-
-        if ($this->routeFallback) {
-            return true;
-        }
-
-        $uriControllerName = strtolower($uriParts[0]);
-
-        $defControllerName = strtolower(preg_replace('/(controller)$/i', '', $this->defaultController));
-
-        return $uriControllerName == $defControllerName;
     }
 
 }
