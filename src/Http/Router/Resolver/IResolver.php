@@ -15,5 +15,5 @@ interface IResolver
      * @param string $reqMethod
      * @return \Feather\Init\Http\Router\Route|null
      */
-    public function resolve();
+    public function resolve($uri, $reqMethod);
 }
