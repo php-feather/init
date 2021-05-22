@@ -268,15 +268,23 @@ trait RouteBuilder
     /**
      *
      * @param \Feather\Init\Http\Router\RouteParam $routeParam
+     * @param string $reqMethod Request method
+     * @param string $uri Request uri
      * @return \Feather\Init\Http\Route|\Feather\Init\Http\ClosureRoute|null
      */
-    protected function buildRoute(RouteParam $routeParam)
+    protected function buildRoute(RouteParam $routeParam, $reqMethod, $uri)
     {
-        if ($routeParam->callback == NULL) {
-            return $this->parseUri($routeParam->uri, $routeParam->method, $routeParam->middleware, $routeParam->requirements);
-        } else {
-            return $this->setRoute($routeParam->method, $routeParam->uri, $routeParam->callback, $routeParam->middleware, $routeParam->requirements);
-        }
+        return $this->registeredResolver->setRouteParam($routeParam)
+                        ->setControllerParams($this->ctrlNamespace, $this->ctrlPath, $this->defaultController)
+                        ->setRequestMethod($reqMethod)
+                        ->setRouteFallback($this->routeFallback)
+                        ->setUri($uri)
+                        ->resolve();
+        /* if ($routeParam->callback == NULL) {
+          return $this->parseUri($routeParam);
+          } else {
+          return $this->setRoute($routeParam->method, $routeParam->uri, $routeParam->callback, $routeParam->middleware, $routeParam->requirements);
+          } */
     }
 
     /**

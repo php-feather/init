@@ -14,16 +14,10 @@ class AutoResolver extends RouteResolver
 
     /**
      *
-     * @param string $uri
-     * @param string $reqMethod
      * @return \Feather\Init\Http\Router\Route|null
      */
-    public function resolve($uri, $reqMethod)
+    public function resolve()
     {
-
-        $this->validateRequestMethod($reqMethod);
-        $this->reqMethod = $reqMethod;
-        $this->uri = $uri;
 
         $uriParts = array_filter(preg_split('/\s*\/\s*/', $this->uri));
         $count = count($uriParts);
@@ -41,38 +35,25 @@ class AutoResolver extends RouteResolver
 
     /**
      *
-     * @param string $controller Controller name
-     * @return \Feather\Init\Controller\Controller|null
+     * @param string $reqMethod
+     * @return $this
      */
-    public function autoDetectController($controller)
+    public function setRequestMethod($reqMethod)
     {
+        $this->validateRequestMethod($reqMethod);
+        $this->reqMethod = $reqMethod;
+        return $this;
+    }
 
-        $ctrl = array(strtolower($controller));
-        $ctrl[] = ucfirst($controller);
-        $ctrl[] = strtoupper($controller);
-
-
-        if (stripos($controller, 'Controller') === FALSE) {
-            $ctrl[] = $controller . 'Controller';
-        }
-
-        foreach ($ctrl as $c) {
-
-            $fullPath = $this->ctrlPath . $c . '.php';
-            $fullPath2 = $this->ctrlPath . $c . 'Controller.php';
-
-            if (feather_file_exists($fullPath) && strcasecmp(basename($fullPath), $c . '.php') == 0) {
-                $class = $this->ctrlNamespace . \Feather\Init\ClassFinder::findClass($fullPath);
-                return new $class;
-            }
-
-            if (feather_file_exists($fullPath2) && strcasecmp(basename($fullPath2), $c . 'Controller.php') == 0) {
-                $class = $this->ctrlNamespace . \Feather\Init\ClassFinder::findClass($fullPath2);
-                return new $class;
-            }
-        }
-
-        return null;
+    /**
+     *
+     * @param string $uri
+     * @return $this
+     */
+    public function setUri($uri)
+    {
+        $this->uri = $uri;
+        return $this;
     }
 
     /**
@@ -119,63 +100,6 @@ class AutoResolver extends RouteResolver
         $route->setParamValues($params)->setFallback($fallback);
 
         return $route;
-    }
-
-    /**
-     *
-     * @param string $class
-     * @return \Feather\Init\Http\Controller\Controller|null
-     */
-    protected function getClass($class)
-    {
-
-        if (in_array($class, get_declared_classes())) {
-            return new $class;
-        }
-
-        if (class_exists($class)) {
-            return new $class;
-        }
-
-        return null;
-    }
-
-    /**
-     *
-     * @param string $ctrlClass
-     * @return \Feather\Init\Controller\Controller|null
-     */
-    public function getControllerClass($ctrlClass)
-    {
-
-        if (strpos($ctrlClass, '\\') !== 0) {
-            $ctrlClass = '\\' . $ctrlClass;
-        }
-
-        if (stripos($ctrlClass, $this->ctrlNamespace) === false) {
-            $ctrlClass = str_replace('\\\\', '\\', $this->ctrlNamespace . $ctrlClass);
-        }
-
-        if (($class = $this->getClass($ctrlClass))) {
-            return $class;
-        }
-
-        $append = ['', 'Controller', 'controller'];
-
-        $classes = [$ctrlClass];
-
-        foreach ($classes as $class) {
-
-            foreach ($append as $str) {
-                $newClass = str_replace("\\\\", '\\', $class . $str);
-
-                if (($class = $this->getClass($newClass))) {
-                    return $class;
-                }
-            }
-        }
-
-        return $this->autoDetectController($ctrlClass);
     }
 
     /**
