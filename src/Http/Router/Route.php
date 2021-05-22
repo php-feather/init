@@ -116,6 +116,17 @@ class Route
     }
 
     /**
+     *
+     * @param array $params
+     * @return $this
+     */
+    public function setParams(array $params)
+    {
+        $this->params = $params;
+        return $this;
+    }
+
+    /**
      * Set arguments values
      * @param array $params
      * @return $this

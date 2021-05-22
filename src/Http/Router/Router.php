@@ -8,7 +8,9 @@ use Feather\Init\Http\Request;
 use Feather\Init\Http\Response;
 use Feather\Init\Http\RequestMethod;
 use Feather\Init\Http\Router\Resolver\AutoResolver;
+use Feather\Init\Http\Router\Resolver\CacheResolver;
 use Feather\Init\Http\Router\Resolver\RegisteredResolver;
+use Feather\Init\Http\Router\Matcher\RegisteredMatcher;
 
 /**
  * Description of Router
@@ -67,6 +69,9 @@ class Router
     /** @var \Feather\Init\Http\Router\Resolver\AutoResolver * */
     protected $autoResolver;
 
+    /** @var \Feather\Init\Http\Router\Resolver\CacheResolver * */
+    protected $cacheResolver;
+
     /** @var Feather\Init\Http\Router\Resolver\RegisteredResolver * */
     protected $registeredResolver;
 
@@ -81,6 +86,7 @@ class Router
         $this->request = Request::getInstance();
         $this->autoResolver = new AutoResolver();
         $this->registeredResolver = new RegisteredResolver();
+        $this->cacheResolver = new CacheResolver();
     }
 
     /**
@@ -258,30 +264,16 @@ class Router
             return false;
         }
 
-        $cacheInfo = null;
-        $cacheUri = null;
+        $route = $this->cacheResolver->setRequestMethod($reqMethod)
+                ->setUri($uri)
+                ->setCache($this->autoRoutes)
+                ->resolve();
 
-        foreach ($this->autoRoutes as $key => $data) {
-            $cinfo = json_decode($data, true);
-            if (stripos($uri, $key) !== false && $cinfo['requestMethod'] == $reqMethod) {
-                $cacheInfo = $cinfo;
-                $cacheUri = $key;
-                break;
-            }
+        if ($route) {
+            return $this->executeAutoRunRoute($route, $cacheUri, $reqMethod);
         }
 
-        if (!$cacheInfo) {
-            return false;
-        }
-
-        $newUri = preg_replace('/(^\/)|(\/$)/', '', preg_replace("/$cacheUri/i", '', $uri));
-
-        $params = explode('/', $newUri);
-
-        $route = new Route($reqMethod, new $cacheInfo['controller'], $cacheInfo['method'], $params);
-        $route->setFallback($cacheInfo['fallback']);
-
-        return $this->executeAutoRunRoute($route, $cacheUri, $reqMethod);
+        return false;
     }
 
     /**
@@ -318,21 +310,19 @@ class Router
      */
     protected function executeAutoRunRoute(Route $route, $uri, $reqMethod)
     {
-        $this->cacheAutoRoute($uri, $reqMethod, $route->controller, $route->method, $route->fallback);
+        $this->cacheAutoRoute($route, $uri, $reqMethod);
         $route->run();
         return true;
     }
 
     /**
      *
+     * @param \Feather\Init\Http\Router\Route $route
      * @param string $uri
      * @param string $reqMethod
-     * @param \Feather\Init\Controller\Controller $controller
-     * @param string $method
-     * @param array $params
      * @return boolean
      */
-    protected function cacheAutoRoute($uri, $reqMethod, $controller, $method, $fallback = false)
+    protected function cacheAutoRoute(Route $route, $uri, $reqMethod)
     {
 
         if (!$this->cache) {
@@ -342,8 +332,7 @@ class Router
         $info = [
             'controller' => get_class($controller),
             'method' => $method,
-            'fallback' => $fallback,
-            'requestMethod' => $reqMethod
+            'route' => serialize($route)
         ];
 
         $key = strtolower($uri);
@@ -392,46 +381,6 @@ class Router
     }
 
     /**
-     * Determine if request uri matches defined uri
-     * @param string $uriPath
-     * @param string $routePath
-     * @return boolean
-     */
-    protected function comparePath($uriPath, $routePath)
-    {
-        if (preg_match('/{(.*?)}/', $routePath) && strlen($uriPath) > 0) {
-            return true;
-        } elseif (strcasecmp($uriPath, $routePath) == 0) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     * @param array $uriPaths
-     * @param array $routePaths
-     * @param int $minCount
-     * @return boolean
-     */
-    protected function comparePaths(array $uriPaths, array $routePaths, int $minCount)
-    {
-
-        $match = true;
-
-        for ($i = 0; $i < $minCount; $i++) {
-
-            $match = $this->comparePath($uriPaths[$i], $routePaths[$i]);
-            if (!$match) {
-                break;
-            }
-        }
-
-        return $match;
-    }
-
-    /**
      *
      * @return \Feather\Init\Http\Route
      */
@@ -452,35 +401,16 @@ class Router
     {
         switch ($method) {
             case RequestMethod::DELETE:
-                return $this->matches($uri, $this->deleteRoutes);
+                return RegisteredMatcher::getMatch($uri, $this->deleteRoutes);
             case RequestMethod::GET:
-                return $this->matches($uri, $this->getRoutes);
+                return RegisteredMatcher::getMatch($uri, $this->getRoutes);
             case RequestMethod::POST:
-                return $this->matches($uri, $this->postRoutes);
+                return RegisteredMatcher::getMatch($uri, $this->postRoutes);
             case RequestMethod::PUT:
-                return $this->matches($uri, $this->putRoutes);
+                return RegisteredMatcher::getMatch($uri, $this->putRoutes);
             default:
                 throw new \Exception('Bad Request', 405);
         }
-    }
-
-    /**
-     *
-     * @param array $paths
-     * @return int
-     */
-    protected function getCountablePaths(array $paths)
-    {
-        $count = 0;
-
-        foreach ($paths as $path) {
-
-            if (!preg_match('/{\:(.*?)}/', $path)) {
-                $count++;
-            }
-        }
-
-        return $count;
     }
 
     /**
@@ -505,37 +435,6 @@ class Router
         }
 
         return false;
-    }
-
-    /**
-     *
-     * @param string $uri
-     * @param array $routes
-     * @return string|null
-     */
-    protected function matches($uri, array $routes)
-    {
-
-        $uriPaths = explode('/', $uri);
-        $count = count($uriPaths);
-
-        foreach (array_keys($routes) as $key) {
-
-            $paths = explode('/', $key);
-            $pathsCount = count($paths);
-            $minCount = $this->getCountablePaths($paths);
-
-            if ($count == $pathsCount || ($count >= $minCount && $count <= $pathsCount)) {
-
-                $match = $this->comparePaths($uriPaths, $paths, $minCount);
-
-                if ($match) {
-                    return $key;
-                }
-            }
-        }
-
-        return NULL;
     }
 
     /**
