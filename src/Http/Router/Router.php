@@ -270,7 +270,7 @@ class Router
                 ->resolve();
 
         if ($route) {
-            return $this->executeAutoRunRoute($route, $cacheUri, $reqMethod);
+            return $this->executeAutoRunRoute($route, $uri, $reqMethod);
         }
 
         return false;
