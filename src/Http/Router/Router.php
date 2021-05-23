@@ -330,8 +330,8 @@ class Router
         }
 
         $info = [
-            'controller' => get_class($controller),
-            'method' => $method,
+            'method' => $reqMethod,
+            'uri' => $uri,
             'route' => serialize($route)
         ];
 
