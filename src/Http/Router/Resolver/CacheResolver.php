@@ -33,7 +33,7 @@ class CacheResolver extends RegisteredResolver
 
         foreach ($this->cacheRoutes as $key => $data) {
             $cinfo = json_decode($data, true);
-            if (stripos($this->uri, $key) !== false && $cinfo['requestMethod'] == $this->reqMethod) {
+            if (stripos($this->uri, $key) !== false && $cinfo['method'] == $this->reqMethod) {
                 $cacheInfo = $cinfo;
                 $cacheUri = $key;
                 break;
