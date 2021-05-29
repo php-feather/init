@@ -242,13 +242,14 @@ class Router
     }
 
     /**
-     *
-     * @param string $absRootPath Absolute path of parent directory for folder routing
-     * @return $this
+     * Enable/Disable Auto Routing
+     * @param boolean $enable
+     * @param string $folderAbspath Absolute path of parent directory for folder routing
      */
-    public function setFolderRoutePath($absRootPath)
+    public function setFolderRouting($enable, $folderAbspath = '')
     {
-        $this->folderRouteBasepath = $absRootPath;
+        $this->folderRoute = $enable;
+        $this->folderRouteBasepath = $folderAbspath;
         return $this;
     }
 
