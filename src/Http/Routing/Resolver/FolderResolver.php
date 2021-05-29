@@ -4,6 +4,7 @@ namespace Feather\Init\Http\Routing\Resolver;
 
 use Feather\Init\Http\Routing\FolderRoute;
 use Feather\Init\Http\Routing\RouteParam;
+use Feather\Init\Http\Routing\Matcher\RegisteredMatcher;
 
 /**
  * Description of FolderResolver
@@ -48,12 +49,12 @@ class FolderResolver extends RegisteredResolver
             $controller = $this->getFilepath();
             if (feather_file_exists($controller)) {
                 $route = new FolderRoute($this->reqMethod, $controller);
-                return $route->setMiddleware($this->routeParam->middlewares);
+                return $route->setMiddleware($this->routeParam->middleware);
             }
             return null;
         } else {
 
-            $filepath = $this->basePath . $this->appendExtension($this->uri);
+            $filepath = preg_replace('/\/+/', '/', $this->basePath . $this->appendExtension($this->uri));
 
             if (feather_file_exists($filepath)) {
                 return new FolderRoute($this->reqMethod, $filepath);
@@ -66,7 +67,7 @@ class FolderResolver extends RegisteredResolver
     protected function findKey()
     {
         $uriParts = explode('/', $this->uri);
-        $uriParts[] = $this->uri . '.php';
+        $uriParts[] = '.php';
 
         array_walk($uriParts, function($item) {
             $item = strtolower($item);
@@ -77,9 +78,10 @@ class FolderResolver extends RegisteredResolver
         while (count($uriParts) > 0) {
             $tempUri = implode('/', $uriParts);
 
-            if (isset($this->registeredRoutes[$tempUri])) {
-                return $tempUri;
+            if (($key = RegisteredMatcher::getMatch($tempUri, $this->registeredRoutes))) {
+                return $key;
             }
+
             array_pop($uriParts);
         }
 
@@ -89,19 +91,21 @@ class FolderResolver extends RegisteredResolver
     protected function getFilepath()
     {
         $targetUri = $this->routeParam->callback;
-        $tempUri = $this->routeParam->uri;
+        $uri = $this->uri;
 
         if (preg_match('/(\.php)$/i', $targetUri)) {
             return $targetUri;
         }
 
-        if ($tempUri == $this->uri) {
-            return $this->basePath . $this->appendExtension($tempUri);
+        if ($uri == $targetUri) {
+            return $this->basePath . $this->appendExtension($uri);
         }
 
-        $relUri = str_replace($tempUri, $targetUri, $this->uri);
+        $origPos = stripos($uri, $this->routeParam->originalUri) + strlen($this->routeParam->originalUri);
 
-        return $this->basePath . $this->appendExtension($relUri);
+        $relUri = $targetUri . '/' . substr($uri, $origPos);
+
+        return preg_replace('/\/+/', '/', $this->basePath . $this->appendExtension($relUri));
     }
 
     protected function findRouteParam()

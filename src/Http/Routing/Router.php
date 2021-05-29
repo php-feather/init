@@ -163,30 +163,6 @@ class Router
     }
 
     /**
-     *
-     * @param string $uri
-     * @param string $method
-     * @throws \Exception
-     */
-    protected function autoProcessRequest($uri, $method)
-    {
-
-        if ($this->isRegisteredRoute($uri)) {
-            throw new \Exception('Bad Request! Method Not Allowed', 405);
-        }
-
-        $notFound = !$this->autoRoute || !$this->autorunRoute($uri, $method);
-
-        if ($notFound) {
-            $notFound = !$this->folderRoute || !$this->autorunFolderRoute($uri, $method);
-        }
-
-        if ($notFound) {
-            throw new \Exception('Requested Resource Not Found', 404);
-        }
-    }
-
-    /**
      * Enable/Disable Auto Routing
      * @param boolean $enable
      */
@@ -304,6 +280,36 @@ class Router
         }
     }
 
+    /**
+     *
+     * @param string $uri
+     * @param string $method
+     * @throws \Exception
+     */
+    protected function autoProcessRequest($uri, $method)
+    {
+
+        if ($this->isRegisteredRoute($uri)) {
+            throw new \Exception('Bad Request! Method Not Allowed', 405);
+        }
+
+        $notFound = !$this->autoRoute || !$this->autorunRoute($uri, $method);
+
+        if ($notFound) {
+            $notFound = !$this->folderRoute || !$this->autorunFolderRoute($uri, $method);
+        }
+
+        if ($notFound) {
+            throw new \Exception('Requested Resource Not Found', 404);
+        }
+    }
+
+    /**
+     *
+     * @param string $uri
+     * @param string $reqMethod
+     * @return boolean
+     */
     public function autorunCacheRoute($uri, $reqMethod)
     {
         if (!$this->cache) {
@@ -433,8 +439,12 @@ class Router
     protected function cleanUri(&$uri)
     {
 
-        $uri = preg_replace('/(\/)(\?)(.*)/', '$1',
-                preg_replace('/\/(.*?)\.php(.*?)\/?/', '/', $uri));
+        $uriParts = explode('/', $uri);
+
+        if (($this->folderRoute && count($uriParts) < 2) || preg_match('/^(index(\.php)?)$/i', $uri)) {
+            $uri = preg_replace('/\/(.*?)\.php(.*?)\/?/', '/', $uri);
+        }
+        $uri = preg_replace('/(\/)(\?)(.*)/', '$1', $uri);
 
         $uri = strtolower(preg_replace('/\?.*/', '', $uri));
 

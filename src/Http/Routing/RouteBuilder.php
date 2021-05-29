@@ -22,6 +22,8 @@ trait RouteBuilder
      */
     public function any($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $origUri = $uri;
+
         $callStack = debug_backtrace(false);
 
         $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
@@ -33,6 +35,7 @@ trait RouteBuilder
         $methods = RequestMethod::methods();
 
         $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, $requirements);
+        $routeParam->setOriginalUri($origUri);
 
         $this->addRouteParam($uri, $routeParam, $methods);
 
@@ -49,6 +52,8 @@ trait RouteBuilder
      */
     public function delete($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $origUri = $uri;
+
         $callStack = debug_backtrace(false);
 
         $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
@@ -60,6 +65,7 @@ trait RouteBuilder
         $this->deleteRoutes[$uri] = $uri;
 
         $routeParam = $this->buildRouteParam(RequestMethod::DELETE, $uri, $callback, $middleware, $requirements);
+        $routeParam->setOriginalUri($origUri);
 
         $this->addRouteParam($uri, $routeParam, [RequestMethod::DELETE]);
 
@@ -77,6 +83,8 @@ trait RouteBuilder
      */
     public function except(array $exclude, $uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $origUri = $uri;
+
         $callStack = debug_backtrace(false);
 
         $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
@@ -89,6 +97,8 @@ trait RouteBuilder
         $methods = array_diff(RequestMethod::methods(), $excluded);
 
         $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, $requirements);
+        $routeParam->setOriginalUri($origUri);
+
         $this->addRouteParam($uri, $routeParam, $methods);
 
         return $routeParam;
@@ -105,9 +115,11 @@ trait RouteBuilder
      */
     public function folder($uri, $callback = null, array $middleware = array(), array $reqMethods = array())
     {
-        $callStack = debug_backtrace(false);
+        $origUri = $uri;
 
-        $this->updateRouteInfo($uri, $middleware, [], $callStack);
+        $callStack = debug_backtrace(false);
+        $requirements = [];
+        $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
 
         $this->removePreceedingSlashFromUri($uri);
 
@@ -127,8 +139,9 @@ trait RouteBuilder
             throw new \Exception('Invalid Http Request methods');
         }
 
-        $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, []);
-        $routeParam->setIsFolder(true);
+        $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, $requirements);
+        $routeParam->setOriginalUri($origUri)->setIsFolder(true);
+
         $this->addRouteParam($uri, $routeParam, $methods);
 
         return $routeParam;
@@ -144,6 +157,8 @@ trait RouteBuilder
      */
     public function get($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $origUri = $uri;
+
         $callStack = debug_backtrace(false);
 
         $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
@@ -155,6 +170,7 @@ trait RouteBuilder
         $this->getRoutes[$uri] = $uri;
 
         $routeParam = $this->buildRouteParam(RequestMethod::GET, $uri, $callback, $middleware, $requirements);
+        $routeParam->setOriginalUri($origUri);
 
         $this->addRouteParam($uri, $routeParam, [RequestMethod::GET]);
 
@@ -182,6 +198,8 @@ trait RouteBuilder
      */
     public function patch($uri, $callback = null, array$middleware = array(), array $requirements = array())
     {
+        $origUri = $uri;
+
         $callStack = debug_backtrace(false);
 
         $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
@@ -193,6 +211,7 @@ trait RouteBuilder
         $this->patchRoutes[$uri] = $uri;
 
         $routeParam = $this->buildRouteParam(RequestMethod::PATCH, $uri, $callback, $middleware, $requirements);
+        $routeParam->setOriginalUri($origUri);
 
         $this->addRouteParam($uri, $routeParam, [RequestMethod::PATCH]);
 
@@ -209,6 +228,8 @@ trait RouteBuilder
      */
     public function post($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $origUri = $uri;
+
         $callStack = debug_backtrace(false);
 
         $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
@@ -220,6 +241,7 @@ trait RouteBuilder
         $this->postRoutes[$uri] = $uri;
 
         $routeParam = $this->buildRouteParam(RequestMethod::POST, $uri, $callback, $middleware, $requirements);
+        $routeParam->setOriginalUri($origUri);
 
         $this->addRouteParam($uri, $routeParam, [RequestMethod::POST]);
 
@@ -236,6 +258,8 @@ trait RouteBuilder
      */
     public function put($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
+        $origUri = $uri;
+
         $callStack = debug_backtrace(false);
 
         $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
@@ -247,6 +271,7 @@ trait RouteBuilder
         $this->putRoutes[$uri] = $uri;
 
         $routeParam = $this->buildRouteParam(RequestMethod::PUT, $uri, $callback, $middleware, $requirements);
+        $routeParam->setOriginalUri($origUri);
 
         $this->addRouteParam($uri, $routeParam, [RequestMethod::PUT]);
 

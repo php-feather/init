@@ -10,6 +10,9 @@ namespace Feather\Init\Http\Routing;
 class RouteParam
 {
 
+    /** @var string* */
+    protected $originalUri;
+
     /** @var string * */
     protected $uri;
 
@@ -70,10 +73,23 @@ class RouteParam
     /**
      *
      * @param bool $isFolder
+     * @return $this
      */
     public function setIsFolder(bool $isFolder)
     {
         $this->isFolder = $isFolder;
+        return $this;
+    }
+
+    /**
+     *
+     * @param string $uri
+     * @return $this
+     */
+    public function setOriginalUri($uri)
+    {
+        $this->originalUri = $uri;
+        return $this;
     }
 
     /**
