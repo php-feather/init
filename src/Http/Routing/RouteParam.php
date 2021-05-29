@@ -1,6 +1,6 @@
 <?php
 
-namespace Feather\Init\Http\Router;
+namespace Feather\Init\Http\Routing;
 
 /**
  * Description of RouteParam

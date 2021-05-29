@@ -1,9 +1,9 @@
 <?php
 
-namespace Feather\Init\Http\Router\Resolver;
+namespace Feather\Init\Http\Routing\Resolver;
 
 use Feather\Cache\ICache;
-use Feather\Init\Http\Router\Route;
+use Feather\Init\Http\Routing\Route;
 
 /**
  * Description of CacheResolver
@@ -24,7 +24,7 @@ class CacheResolver extends RegisteredResolver
 
     /**
      *
-     * @return \Feather\Init\Http\Router\Route|null
+     * @return \Feather\Init\Http\Routing\Route|null
      */
     public function resolve()
     {

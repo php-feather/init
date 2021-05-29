@@ -1,17 +1,17 @@
 <?php
 
-namespace Feather\Init\Http\Router;
+namespace Feather\Init\Http\Routing;
 
 use Feather\Init\Controllers\Controller;
 use Feather\Cache\ICache;
 use Feather\Init\Http\Request;
 use Feather\Init\Http\Response;
 use Feather\Init\Http\RequestMethod;
-use Feather\Init\Http\Router\Resolver\AutoResolver;
-use Feather\Init\Http\Router\Resolver\CacheResolver;
-use Feather\Init\Http\Router\Resolver\FolderResolver;
-use Feather\Init\Http\Router\Resolver\RegisteredResolver;
-use Feather\Init\Http\Router\Matcher\RegisteredMatcher;
+use Feather\Init\Http\Routing\Resolver\AutoResolver;
+use Feather\Init\Http\Routing\Resolver\CacheResolver;
+use Feather\Init\Http\Routing\Resolver\FolderResolver;
+use Feather\Init\Http\Routing\Resolver\RegisteredResolver;
+use Feather\Init\Http\Routing\Matcher\RegisteredMatcher;
 
 /**
  * Description of Router
@@ -70,16 +70,16 @@ class Router
     /** @var boolean * */
     protected $routeFallback = true;
 
-    /** @var \Feather\Init\Http\Router\Resolver\AutoResolver * */
+    /** @var \Feather\Init\Http\Routing\Resolver\AutoResolver * */
     protected $autoResolver;
 
-    /** @var \Feather\Init\Http\Router\Resolver\CacheResolver * */
+    /** @var \Feather\Init\Http\Routing\Resolver\CacheResolver * */
     protected $cacheResolver;
 
-    /** @var \Feather\Init\Http\Router\Resolver\FolderResolver * */
+    /** @var \Feather\Init\Http\Routing\Resolver\FolderResolver * */
     protected $folderResolver;
 
-    /** @var Feather\Init\Http\Router\Resolver\RegisteredResolver * */
+    /** @var Feather\Init\Http\Routing\Resolver\RegisteredResolver * */
     protected $registeredResolver;
 
     /** @var boolean * */
@@ -97,7 +97,7 @@ class Router
     /** @var string * */
     protected $folderRouteBasepath = '';
 
-    /** @var \Feather\Init\Http\Router\Router * */
+    /** @var \Feather\Init\Http\Routing\Router * */
     private static $self;
 
     private function __construct()
@@ -111,7 +111,7 @@ class Router
 
     /**
      *
-     * @return \Feather\Init\Http\Router
+     * @return \Feather\Init\Http\Routing\Router
      */
     public static function getInstance()
     {
@@ -267,7 +267,7 @@ class Router
     /**
      *
      * @param string $uri
-     * @param \Feather\Init\Http\Router\RouteParam $routeParam
+     * @param \Feather\Init\Http\Routing\RouteParam $routeParam
      * @param array $methods
      */
     protected function addRouteParam($uri, RouteParam $routeParam, array $methods, $isFolder = false)
@@ -382,7 +382,7 @@ class Router
     }
 
     /**
-     * @param \Feather\Init\Http\Router\Route $route
+     * @param \Feather\Init\Http\Routing\Route $route
      * @param string $uri
      * @param string $reqMethod
      * @return boolean
@@ -396,7 +396,7 @@ class Router
 
     /**
      *
-     * @param \Feather\Init\Http\Router\Route $route
+     * @param \Feather\Init\Http\Routing\Route $route
      * @param string $uri
      * @param string $reqMethod
      * @return boolean

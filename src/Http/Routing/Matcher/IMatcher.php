@@ -1,6 +1,6 @@
 <?php
 
-namespace Feather\Init\Http\Router\Matcher;
+namespace Feather\Init\Http\Routing\Matcher;
 
 /**
  *

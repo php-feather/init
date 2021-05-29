@@ -1,6 +1,6 @@
 <?php
 
-namespace Feather\Init\Http\Router\Resolver;
+namespace Feather\Init\Http\Routing\Resolver;
 
 /**
  *
@@ -11,7 +11,7 @@ interface IResolver
 
     /**
      *
-     * @return \Feather\Init\Http\Router\Route|null
+     * @return \Feather\Init\Http\Routing\Route|null
      */
     public function resolve();
 }

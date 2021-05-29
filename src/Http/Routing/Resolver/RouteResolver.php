@@ -1,6 +1,6 @@
 <?php
 
-namespace Feather\Init\Http\Router\Resolver;
+namespace Feather\Init\Http\Routing\Resolver;
 
 use Feather\Init\Http\RequestMethod;
 

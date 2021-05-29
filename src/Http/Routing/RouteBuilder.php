@@ -1,6 +1,6 @@
 <?php
 
-namespace Feather\Init\Http\Router;
+namespace Feather\Init\Http\Routing;
 
 use Feather\Init\Http\RequestMethod;
 
@@ -18,7 +18,7 @@ trait RouteBuilder
      * @param string|\Closure $callback
      * @param array $middleware
      * @param array $requirements
-     * @return \Feather\Init\Http\Router\RouteParam
+     * @return \Feather\Init\Http\Routing\RouteParam
      */
     public function any($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
@@ -45,7 +45,7 @@ trait RouteBuilder
      * @param string|\Closure $callback
      * @param array $middleware
      * @param array $requirements
-     * @return \Feather\Init\Http\Router\RouteParam
+     * @return \Feather\Init\Http\Routing\RouteParam
      */
     public function delete($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
@@ -73,7 +73,7 @@ trait RouteBuilder
      * @param string|\Closure $callback
      * @param array $middleware
      * @param array $requirements
-     * @return \Feather\Init\Http\Router\RouteParam
+     * @return \Feather\Init\Http\Routing\RouteParam
      */
     public function except(array $exclude, $uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
@@ -100,7 +100,7 @@ trait RouteBuilder
      * @param string $callback Actual folder path. null if uri is the same as the actual path
      * @param array $middleware
      * @param array $reqMethods Array of Http Methods. if empty, all methods (get, post, ...) are supported
-     * @return \Feather\Init\Http\Router\RouteParam
+     * @return \Feather\Init\Http\Routing\RouteParam
      * @throws \Exception
      */
     public function folder($uri, $callback = null, array $middleware = array(), array $reqMethods = array())
@@ -140,7 +140,7 @@ trait RouteBuilder
      * @param string|\Closure $callback
      * @param array $middleware
      * @param array $requirements
-     * @return \Feather\Init\Http\Router\RouteParam
+     * @return \Feather\Init\Http\Routing\RouteParam
      */
     public function get($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
@@ -178,7 +178,7 @@ trait RouteBuilder
      * @param string|\Closure $callback
      * @param array $middleware
      * @param array $requirements
-     * @return \Feather\Init\Http\Router\RouteParam
+     * @return \Feather\Init\Http\Routing\RouteParam
      */
     public function patch($uri, $callback = null, array$middleware = array(), array $requirements = array())
     {
@@ -205,7 +205,7 @@ trait RouteBuilder
      * @param string|\Closure $callback
      * @param array $middleware
      * @param array $requirements
-     * @return \Feather\Init\Http\Router\RouteParam
+     * @return \Feather\Init\Http\Routing\RouteParam
      */
     public function post($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
@@ -232,7 +232,7 @@ trait RouteBuilder
      * @param string|\Closure $callback
      * @param array $middleware
      * @param array $requirements
-     * @return \Feather\Init\Http\Router\RouteParam
+     * @return \Feather\Init\Http\Routing\RouteParam
      */
     public function put($uri, $callback = null, array $middleware = array(), array $requirements = array())
     {
@@ -295,7 +295,7 @@ trait RouteBuilder
 
     /**
      *
-     * @param \Feather\Init\Http\Router\RouteParam $routeParam
+     * @param \Feather\Init\Http\Routing\RouteParam $routeParam
      * @param string $reqMethod Request method
      * @param string $uri Request uri
      * @return \Feather\Init\Http\Route|\Feather\Init\Http\ClosureRoute|null
@@ -325,7 +325,7 @@ trait RouteBuilder
      * @param type $callback
      * @param array $middleware
      * @param array $requirements
-     * @return \Feather\Init\Http\Router\RouteParam
+     * @return \Feather\Init\Http\Routing\RouteParam
      */
     protected function buildRouteParam($reqMethod, $uri, $callback = null, array $middleware = array(), array $requirements = array())
     {

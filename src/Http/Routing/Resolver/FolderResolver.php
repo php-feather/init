@@ -1,9 +1,9 @@
 <?php
 
-namespace Feather\Init\Http\Router\Resolver;
+namespace Feather\Init\Http\Routing\Resolver;
 
-use Feather\Init\Http\Router\FolderRoute;
-use Feather\Init\Http\Router\RouteParam;
+use Feather\Init\Http\Routing\FolderRoute;
+use Feather\Init\Http\Routing\RouteParam;
 
 /**
  * Description of FolderResolver

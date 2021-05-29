@@ -1,10 +1,10 @@
 <?php
 
-namespace Feather\Init\Http\Router\Resolver;
+namespace Feather\Init\Http\Routing\Resolver;
 
-use Feather\Init\Http\Router\RouteParam;
-use Feather\Init\Http\Router\ClosureRoute;
-use Feather\Init\Http\Router\Route;
+use Feather\Init\Http\Routing\RouteParam;
+use Feather\Init\Http\Routing\ClosureRoute;
+use Feather\Init\Http\Routing\Route;
 
 /**
  * Description of RegisteredResolver
@@ -14,7 +14,7 @@ use Feather\Init\Http\Router\Route;
 class RegisteredResolver extends AutoResolver
 {
 
-    /** @var \Feather\Init\Http\Router\RouteParam * */
+    /** @var \Feather\Init\Http\Routing\RouteParam * */
     protected $routeParam;
 
     /** @var string Registered uri/uri pattern) * */
@@ -93,7 +93,7 @@ class RegisteredResolver extends AutoResolver
 
     /**
      *
-     * @return \Feather\Init\Http\Router\Route|null
+     * @return \Feather\Init\Http\Routing\Route|null
      */
     protected function parseUri()
     {
@@ -110,7 +110,7 @@ class RegisteredResolver extends AutoResolver
 
     /**
      *
-     * @return \Feather\Init\Http\Router\ClosureRoute
+     * @return \Feather\Init\Http\Routing\ClosureRoute
      */
     protected function setClosureRoute()
     {
@@ -128,7 +128,7 @@ class RegisteredResolver extends AutoResolver
 
     /**
      *
-     * @return \Feather\Init\Http\Router\Route|null
+     * @return \Feather\Init\Http\Routing\Route|null
      */
     protected function setRoute()
     {

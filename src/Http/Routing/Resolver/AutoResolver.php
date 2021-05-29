@@ -1,8 +1,8 @@
 <?php
 
-namespace Feather\Init\Http\Router\Resolver;
+namespace Feather\Init\Http\Routing\Resolver;
 
-use Feather\Init\Http\Router\Route;
+use Feather\Init\Http\Routing\Route;
 
 /**
  * Description of RouteResolver
@@ -14,7 +14,7 @@ class AutoResolver extends RouteResolver
 
     /**
      *
-     * @return \Feather\Init\Http\Router\Route|null
+     * @return \Feather\Init\Http\Routing\Route|null
      */
     public function resolve()
     {
@@ -59,7 +59,7 @@ class AutoResolver extends RouteResolver
     /**
      *
      * @param array $uriParts
-     * @return \Feather\Init\Http\Router\Route|null
+     * @return \Feather\Init\Http\Routing\Route|null
      */
     protected function buildRoute(array $uriParts)
     {
