@@ -25,6 +25,9 @@ class RouteParam
     /** @var array * */
     protected $requirements = [];
 
+    /** @var bool * */
+    protected $isFolder;
+
     /**
      *
      * @param string $name
@@ -62,6 +65,15 @@ class RouteParam
             $this->middleware = [$middleware];
         }
         return $this;
+    }
+
+    /**
+     *
+     * @param bool $isFolder
+     */
+    public function setIsFolder(bool $isFolder)
+    {
+        $this->isFolder = $isFolder;
     }
 
     /**

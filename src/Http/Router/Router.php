@@ -9,6 +9,7 @@ use Feather\Init\Http\Response;
 use Feather\Init\Http\RequestMethod;
 use Feather\Init\Http\Router\Resolver\AutoResolver;
 use Feather\Init\Http\Router\Resolver\CacheResolver;
+use Feather\Init\Http\Router\Resolver\FolderResolver;
 use Feather\Init\Http\Router\Resolver\RegisteredResolver;
 use Feather\Init\Http\Router\Matcher\RegisteredMatcher;
 
@@ -24,6 +25,9 @@ class Router
 
     /** @var array * */
     protected $routes = array();
+
+    /** @var array * */
+    protected $folderRoutes = array();
 
     /** @var array * */
     protected $routesParams = array();
@@ -72,13 +76,28 @@ class Router
     /** @var \Feather\Init\Http\Router\Resolver\CacheResolver * */
     protected $cacheResolver;
 
+    /** @var \Feather\Init\Http\Router\Resolver\FolderResolver * */
+    protected $folderResolver;
+
     /** @var Feather\Init\Http\Router\Resolver\RegisteredResolver * */
     protected $registeredResolver;
 
     /** @var boolean * */
     protected $autoRoute = true;
+
+    /** @var boolean * */
+    protected $folderRoute = true;
+
+    /** @var string * */
     protected $ctrlNamespace = "Feather\\Init\\Controllers\\";
+
+    /** @var string * */
     protected $ctrlPath = '';
+
+    /** @var string * */
+    protected $folderRouteBasepath = '';
+
+    /** @var \Feather\Init\Http\Router\Router * */
     private static $self;
 
     private function __construct()
@@ -87,6 +106,7 @@ class Router
         $this->autoResolver = new AutoResolver();
         $this->registeredResolver = new RegisteredResolver();
         $this->cacheResolver = new CacheResolver();
+        $this->folderResolver = new FolderResolver();
     }
 
     /**
@@ -139,11 +159,29 @@ class Router
             return $route->run();
         }
 
+        return $this->autoProcessRequest($uri, $method);
+    }
+
+    /**
+     *
+     * @param string $uri
+     * @param string $method
+     * @throws \Exception
+     */
+    protected function autoProcessRequest($uri, $method)
+    {
+
         if ($this->isRegisteredRoute($uri)) {
             throw new \Exception('Bad Request! Method Not Allowed', 405);
         }
 
-        if (!$this->autoRoute || !$this->autoRunRoute($uri, $method)) {
+        $notFound = !$this->autoRoute || !$this->autorunRoute($uri, $method);
+
+        if ($notFound) {
+            $notFound = !$this->folderRoute || !$this->autorunFolderRoute($uri, $method);
+        }
+
+        if ($notFound) {
             throw new \Exception('Requested Resource Not Found', 404);
         }
     }
@@ -204,6 +242,17 @@ class Router
     }
 
     /**
+     *
+     * @param string $absRootPath Absolute path of parent directory for folder routing
+     * @return $this
+     */
+    public function setFolderRoutePath($absRootPath)
+    {
+        $this->folderRouteBasepath = $absRootPath;
+        return $this;
+    }
+
+    /**
      * Enable/Disable Default Controller fallback
      * Resolve request to default controller if no match found
      * This is a last resort
@@ -220,10 +269,14 @@ class Router
      * @param \Feather\Init\Http\Router\RouteParam $routeParam
      * @param array $methods
      */
-    protected function addRouteParam($uri, RouteParam $routeParam, array $methods)
+    protected function addRouteParam($uri, RouteParam $routeParam, array $methods, $isFolder = false)
     {
 
         $this->routesParams[$uri] = $routeParam;
+
+        if ($routeParam->isFolder) {
+            $this->folderRoutes[$uri] = $routeParam;
+        }
 
         foreach ($methods as $method) {
 
@@ -250,7 +303,7 @@ class Router
         }
     }
 
-    public function autoRunCacheRoute($uri, $reqMethod)
+    public function autorunCacheRoute($uri, $reqMethod)
     {
         if (!$this->cache) {
             return false;
@@ -282,10 +335,10 @@ class Router
      * @param string $reqMethod
      * @return boolean
      */
-    protected function autoRunRoute($uri, $reqMethod)
+    protected function autorunRoute($uri, $reqMethod)
     {
 
-        if (($res = $this->autoRunCacheRoute($uri, $reqMethod)) !== false) {
+        if (($res = $this->autorunCacheRoute($uri, $reqMethod)) !== false) {
             return true;
         }
 
@@ -293,6 +346,31 @@ class Router
                 ->setUri($uri)
                 ->setControllerParams($this->ctrlNamespace, $this->ctrlPath, $this->defaultController)
                 ->setRouteFallback($this->routeFallback)
+                ->resolve();
+
+        if ($route) {
+            return $this->executeAutoRunRoute($route, $uri, $reqMethod);
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param string $uri
+     * @param string $reqMethod
+     * @return boolean
+     */
+    protected function autorunFolderRoute($uri, $reqMethod)
+    {
+        if (($res = $this->autorunCacheRoute($uri, $reqMethod)) !== false) {
+            return true;
+        }
+
+        $route = $this->folderResolver->setUri($uri)
+                ->setRequestMethod($reqMethod)
+                ->setBasepath($this->folderRouteBasepath)
+                ->setRegisteredRoutes($this->folderRoutes)
                 ->resolve();
 
         if ($route) {
@@ -358,6 +436,8 @@ class Router
                 preg_replace('/\/(.*?)\.php(.*?)\/?/', '/', $uri));
 
         $uri = strtolower(preg_replace('/\?.*/', '', $uri));
+
+        $uri = preg_replace('/(\.php)$/i', '', $uri);
 
         $len = strlen($uri);
 

@@ -85,23 +85,51 @@ trait RouteBuilder
 
         $this->cleanUri($uri);
 
-        $methods = RequestMethod::methods();
+        $excluded = array_map('strtoupper', $exclude);
+        $methods = array_diff(RequestMethod::methods(), $excluded);
 
-        foreach ($exclude as $method) {
-            $indx = array_search(strtoupper($method), $methods);
-            if ($indx >= 0) {
-                unset($methods[$indx]);
-            }
+        $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, $requirements);
+        $this->addRouteParam($uri, $routeParam, $methods);
+
+        return $routeParam;
+    }
+
+    /**
+     *
+     * @param string $uri Friendly or masked
+     * @param string $callback Actual folder path. null if uri is the same as the actual path
+     * @param array $middleware
+     * @param array $reqMethods Array of Http Methods. if empty, all methods (get, post, ...) are supported
+     * @return \Feather\Init\Http\Router\RouteParam
+     * @throws \Exception
+     */
+    public function folder($uri, $callback = null, array $middleware = array(), array $reqMethods = array())
+    {
+        $callStack = debug_backtrace(false);
+
+        $this->updateRouteInfo($uri, $middleware, [], $callStack);
+
+        $this->removePreceedingSlashFromUri($uri);
+
+        $this->cleanUri($uri);
+
+        if (!empty($reqMethods)) {
+            $methods = array_intersect(array_map('strtoupper', $reqMethods), RequestMethod::methods());
+        } else {
+            $methods = RequestMethod::methods();
         }
 
-        if (!empty($methods)) {
-
-            $methods = array_values($methods);
-
-            $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, $requirements);
-
-            $this->addRouteParam($uri, $routeParam, $methods);
+        if ($callback == null) {
+            $callback = $uri;
         }
+
+        if (empty($methods)) {
+            throw new \Exception('Invalid Http Request methods');
+        }
+
+        $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, []);
+        $routeParam->setIsFolder(true);
+        $this->addRouteParam($uri, $routeParam, $methods);
 
         return $routeParam;
     }
@@ -274,17 +302,20 @@ trait RouteBuilder
      */
     protected function buildRoute(RouteParam $routeParam, $reqMethod, $uri)
     {
+
+        if ($routeParam->isFolder) {
+            return $this->folderResolver->setRouteParam($routeParam)
+                            ->setRequestMethod($reqMethod)
+                            ->setUri($uri)
+                            ->resolve();
+        }
+
         return $this->registeredResolver->setRouteParam($routeParam)
                         ->setControllerParams($this->ctrlNamespace, $this->ctrlPath, $this->defaultController)
                         ->setRequestMethod($reqMethod)
                         ->setRouteFallback($this->routeFallback)
                         ->setUri($uri)
                         ->resolve();
-        /* if ($routeParam->callback == NULL) {
-          return $this->parseUri($routeParam);
-          } else {
-          return $this->setRoute($routeParam->method, $routeParam->uri, $routeParam->callback, $routeParam->middleware, $routeParam->requirements);
-          } */
     }
 
     /**
