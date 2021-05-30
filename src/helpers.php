@@ -6,7 +6,7 @@
  * @param boolean $ci_earch Case insensitive search - true to enable
  * @return boolean
  */
-function feather_is_dir(&$dirname, $ci_earch = true)
+function feather_is_dir(&$dirname, $ci_search = true)
 {
 
     if (is_dir($dirname)) {
@@ -19,7 +19,7 @@ function feather_is_dir(&$dirname, $ci_earch = true)
 
     $parentDir = dirname($dirname);
 
-    $dir = preg_replace('/\/|\\/', '', str_replace($parentDir, '', $dirname));
+    $dir = preg_replace('/\/|\\\/', '', str_replace($parentDir, '', $dirname));
 
     $folders = feather_dir_folders($parentDir);
 

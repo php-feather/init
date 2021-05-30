@@ -182,13 +182,16 @@ class FolderResolver extends RegisteredResolver
             return $file;
         }
 
-
-
-        if (feather_is_dir($uri) && $this->defaultFile) {
+        $isDir = feather_is_dir($uri);
+        if ($isDir && $this->defaultFile) {
             $file = preg_replace('/\/+/', '/', $uri . '/' . $this->defaultFile);
             if (feather_file_exists($file)) {
                 return $file;
             }
+        }
+
+        if (!$isDir) {
+            throw new Exception('Requested Resource Not Found', 404);
         }
 
         throw new \Exception('Forbidden', 403);
