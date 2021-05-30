@@ -97,6 +97,9 @@ class Router
     /** @var string * */
     protected $folderRouteBasepath = '';
 
+    /** @var string * */
+    protected $defaultFile;
+
     /** @var \Feather\Init\Http\Routing\Router * */
     private static $self;
 
@@ -221,11 +224,13 @@ class Router
      * Enable/Disable Auto Routing
      * @param boolean $enable
      * @param string $folderAbspath Absolute path of parent directory for folder routing
+     * @param string $defuaultFile Default file to run if directory is accessed. Defaults to index.php
      */
-    public function setFolderRouting($enable, $folderAbspath = '')
+    public function setFolderRouting($enable, $folderAbspath = '', $defaultFile = 'index.php')
     {
         $this->folderRoute = $enable;
         $this->folderRouteBasepath = $folderAbspath;
+        $this->defaultFile = $defaultFile;
         return $this;
     }
 
@@ -377,6 +382,7 @@ class Router
         $route = $this->folderResolver->setUri($uri)
                 ->setRequestMethod($reqMethod)
                 ->setBasepath($this->folderRouteBasepath)
+                ->setDefaultFile($this->defaultFile)
                 ->setRegisteredRoutes($this->folderRoutes)
                 ->resolve();
 

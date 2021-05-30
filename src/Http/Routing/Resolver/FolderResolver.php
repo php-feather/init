@@ -17,6 +17,9 @@ class FolderResolver extends RegisteredResolver
     /** @var string * */
     protected $basePath;
 
+    /** @var string * */
+    protected $defaultFile = 'index.php';
+
     /** @var array * */
     protected $registeredRoutes = [];
 
@@ -26,44 +29,82 @@ class FolderResolver extends RegisteredResolver
         return $this->buildRoute();
     }
 
+    /**
+     *
+     * @param string $basePath
+     * @return $this
+     */
     public function setBasepath($basePath)
     {
         $this->basePath = preg_match('/\/$/', $basePath) ? $basePath : $basePath . '/';
         return $this;
     }
 
+    /**
+     *
+     * @param string $defaultFile
+     * @return $this
+     */
+    public function setDefaultFile($defaultFile)
+    {
+        $this->defaultFile = $this->appendExtension($defaultFile);
+        return $this;
+    }
+
+    /**
+     *
+     * @param array $routes Registered routes
+     * @return $this
+     */
     public function setRegisteredRoutes(array $routes = [])
     {
         $this->registeredRoutes = $routes;
         return $this;
     }
 
+    /**
+     *
+     * @param type $uri
+     * @return type
+     */
     protected function appendExtension($uri)
     {
         return preg_match('/(\.php)$/', $uri) ? $uri : $uri . '.php';
     }
 
+    /**
+     *
+     * @param array $uriParts
+     * @return \Feather\Init\Http\Routing\FolderRoute|null
+     */
     protected function buildRoute(array $uriParts = [])
     {
         if ($this->routeParam) {
             $controller = $this->getFilepath();
             if (feather_file_exists($controller)) {
                 $route = new FolderRoute($this->reqMethod, $controller);
-                return $route->setMiddleware($this->routeParam->middleware);
+                return $route->setMiddleware($this->routeParam->middleware)
+                                ->setRequirements($this->routeParam->requirements)
+                                ->setParamValues($this->getParamsFromUri());
             }
             return null;
         } else {
 
-            $filepath = preg_replace('/\/+/', '/', $this->basePath . $this->appendExtension($this->uri));
+            $filepath = $this->uriToFilePath($this->uri);
 
             if (feather_file_exists($filepath)) {
-                return new FolderRoute($this->reqMethod, $filepath);
+                $route = new FolderRoute($this->reqMethod, $filepath);
+                return $route;
             }
 
             return null;
         }
     }
 
+    /**
+     *
+     * @return string|null
+     */
     protected function findKey()
     {
         $uriParts = explode('/', $this->uri);
@@ -88,31 +129,69 @@ class FolderResolver extends RegisteredResolver
         return $key;
     }
 
+    /**
+     *
+     */
+    protected function findRouteParam()
+    {
+        if (!$this->routeParam && ($key = $this->findKey())) {
+            $this->routeParam = $this->registeredRoutes[$key];
+        }
+    }
+
+    /**
+     *
+     * @return string
+     */
     protected function getFilepath()
     {
         $targetUri = $this->routeParam->callback;
         $uri = $this->uri;
 
         if (preg_match('/(\.php)$/i', $targetUri)) {
-            return $targetUri;
+            return $this->uriToFilePath($targetUri);
         }
 
         if ($uri == $targetUri) {
-            return $this->basePath . $this->appendExtension($uri);
+            return $this->uriToFilePath($uri);
         }
 
         $origPos = stripos($uri, $this->routeParam->originalUri) + strlen($this->routeParam->originalUri);
 
         $relUri = $targetUri . '/' . substr($uri, $origPos);
 
-        return preg_replace('/\/+/', '/', $this->basePath . $this->appendExtension($relUri));
+        return $this->uriToFilePath($relUri);
     }
 
-    protected function findRouteParam()
+    /**
+     *
+     * @param string $uri
+     * @return string
+     * @throws \Exception
+     */
+    protected function uriToFilePath($uri)
     {
-        if (!$this->routeParam && ($key = $this->findKey())) {
-            $this->routeParam = $this->registeredRoutes[$key];
+        $base = substr($this->basePath, 0, strlen($this->basePath) - 2);
+        if (stripos($uri, $base) !== 0) {
+            $uri = preg_replace('/\/+/', '/', $this->basePath . '/' . $uri);
         }
+
+        $file = $this->appendExtension($uri);
+
+        if (feather_file_exists($file)) {
+            return $file;
+        }
+
+
+
+        if (feather_is_dir($uri) && $this->defaultFile) {
+            $file = preg_replace('/\/+/', '/', $uri . '/' . $this->defaultFile);
+            if (feather_file_exists($file)) {
+                return $file;
+            }
+        }
+
+        throw new \Exception('Forbidden', 403);
     }
 
 }

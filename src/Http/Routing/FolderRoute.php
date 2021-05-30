@@ -13,9 +13,16 @@ class FolderRoute extends Route
     public function run()
     {
         try {
+
+            $this->validateParamsValues();
+
             $closure = \Closure::bind(function() {
                         if (!file_exists($this->controller)) {
                             throw new \Exception('Requested Resource Not Found', 404);
+                        }
+                        //declare url params
+                        foreach ($this->paramValues as $name => $value) {
+                            $$name = $value;
                         }
 
                         include_once $this->controller;
