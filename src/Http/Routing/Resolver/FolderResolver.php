@@ -191,7 +191,7 @@ class FolderResolver extends RegisteredResolver
         }
 
         if (!$isDir) {
-            throw new Exception('Requested Resource Not Found', 404);
+            throw new \Exception('Requested Resource Not Found', 404);
         }
 
         throw new \Exception('Forbidden', 403);
