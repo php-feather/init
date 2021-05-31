@@ -80,6 +80,10 @@ function feather_dir_folders($directory)
 
     $folders = [];
 
+    if (!is_dir($dirname)) {
+        return $folders;
+    }
+
     $dirContents = scandir($directory);
 
     if (!$dirContents) {
@@ -105,6 +109,10 @@ function feather_dir_files($directory)
 {
 
     $files = [];
+
+    if (!is_dir($dirname)) {
+        return $files;
+    }
 
     $dirContents = scandir($directory);
 
