@@ -80,7 +80,7 @@ function feather_dir_folders($directory)
 
     $folders = [];
 
-    if (!is_dir($dirname)) {
+    if (!is_dir($directory)) {
         return $folders;
     }
 
@@ -110,7 +110,7 @@ function feather_dir_files($directory)
 
     $files = [];
 
-    if (!is_dir($dirname)) {
+    if (!is_dir($directory)) {
         return $files;
     }
 
