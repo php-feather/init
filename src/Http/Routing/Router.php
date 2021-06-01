@@ -163,7 +163,7 @@ class Router
                 return $route->run();
             }
 
-            throw new Exception('Requested Resource Not Found', 404);
+            throw new \Exception('Requested Resource Not Found', 404);
         }
 
         return $this->autoProcessRequest($uri, $method);
