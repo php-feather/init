@@ -329,11 +329,12 @@ trait RouteBuilder
     {
 
         if ($routeParam->isFolder) {
-            return $this->folderResolver->setRouteParam($routeParam)
+            return $this->folderRoute ? $this->folderResolver->setRouteParam($routeParam)
                             ->setRequestMethod($reqMethod)
                             ->setBasepath($this->folderRouteBasepath)
                             ->setUri($uri)
-                            ->resolve();
+                            ->resolve() : null;
+            ;
         }
 
         return $this->registeredResolver->setRouteParam($routeParam)

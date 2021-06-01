@@ -171,7 +171,7 @@ class FolderResolver extends RegisteredResolver
      */
     protected function uriToFilePath($uri)
     {
-        $base = substr($this->basePath, 0, strlen($this->basePath) - 2);
+        $base = substr($this->basePath, 0, strlen($this->basePath) - 1);
         if (stripos($uri, $base) !== 0) {
             $uri = preg_replace('/\/+/', '/', $this->basePath . '/' . $uri);
         }

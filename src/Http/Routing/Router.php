@@ -159,7 +159,11 @@ class Router
             $routeParam->setRequestMethod($methodType);
             $route = $this->buildRoute($routeParam, $methodType, $uri);
 
-            return $route->run();
+            if ($route) {
+                return $route->run();
+            }
+
+            throw new Exception('Requested Resource Not Found', 404);
         }
 
         return $this->autoProcessRequest($uri, $method);
