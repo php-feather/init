@@ -3,6 +3,7 @@
 namespace Feather\Init\Http\Routing\Resolver;
 
 use Feather\Init\Http\RequestMethod;
+use Feather\Support\Util\ClassFinder;
 
 /**
  * Description of RouteResolver
@@ -42,12 +43,12 @@ abstract class RouteResolver implements IResolver
             $fullPath2 = $this->ctrlPath . $c . 'Controller.php';
 
             if (feather_file_exists($fullPath) && strcasecmp(basename($fullPath), $c . '.php') == 0) {
-                $class = $this->ctrlNamespace . \Feather\Init\ClassFinder::findClass($fullPath);
+                $class = $this->ctrlNamespace . ClassFinder::findClass($fullPath);
                 return new $class;
             }
 
             if (feather_file_exists($fullPath2) && strcasecmp(basename($fullPath2), $c . 'Controller.php') == 0) {
-                $class = $this->ctrlNamespace . \Feather\Init\ClassFinder::findClass($fullPath2);
+                $class = $this->ctrlNamespace . ClassFinder::findClass($fullPath2);
                 return new $class;
             }
         }

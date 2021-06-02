@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5851d019784eb39b2d54167b3ee6ade8",
+    "content-hash": "10a3544e52b5e2585a98870878bb7767",
     "packages": [
         {
             "name": "minime/annotations",
@@ -122,12 +122,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-feather/cache.git",
-                "reference": "abe37fafd10ad932f18ab4e8546e020511be60e5"
+                "reference": "900f4a4b2b724915bcbbd6b365474f7d39f0347b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-feather/cache/zipball/abe37fafd10ad932f18ab4e8546e020511be60e5",
-                "reference": "abe37fafd10ad932f18ab4e8546e020511be60e5",
+                "url": "https://api.github.com/repos/php-feather/cache/zipball/900f4a4b2b724915bcbbd6b365474f7d39f0347b",
+                "reference": "900f4a4b2b724915bcbbd6b365474f7d39f0347b",
                 "shasum": ""
             },
             "require": {
@@ -156,7 +156,7 @@
                 "issues": "https://github.com/php-feather/cache/issues",
                 "source": "https://github.com/php-feather/cache/tree/master"
             },
-            "time": "2021-04-25T19:17:48+00:00"
+            "time": "2021-05-24T00:07:05+00:00"
         },
         {
             "name": "php-feather/security",
@@ -244,6 +244,53 @@
                 "source": "https://github.com/php-feather/session/tree/master"
             },
             "time": "2021-04-25T19:45:33+00:00"
+        },
+        {
+            "name": "php-feather/support",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-feather/support.git",
+                "reference": "22be23e0bda416e2555d195c16a623ffb881e6b4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-feather/support/zipball/22be23e0bda416e2555d195c16a623ffb881e6b4",
+                "reference": "22be23e0bda416e2555d195c16a623ffb881e6b4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Feather\\Support\\": "src/Support"
+                },
+                "files": [
+                    "src/Support/helpers.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Francis Carbah",
+                    "email": "afrounit@hotmail.com"
+                }
+            ],
+            "description": "Feather Support - Library",
+            "support": {
+                "issues": "https://github.com/php-feather/support/issues",
+                "source": "https://github.com/php-feather/support/tree/main"
+            },
+            "time": "2021-06-02T02:41:23+00:00"
         },
         {
             "name": "predis/predis",
@@ -367,7 +414,8 @@
     "stability-flags": {
         "php-feather/session": 20,
         "php-feather/cache": 20,
-        "php-feather/security": 20
+        "php-feather/security": 20,
+        "php-feather/support": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

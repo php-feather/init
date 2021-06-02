@@ -20,6 +20,7 @@
         "php-feather/session": "dev-master",
         "php-feather/cache": "dev-master",
         "php-feather/security": "dev-master",
+        "php-feather/support": "dev-main",
         "minime/annotations": "^3.1"
     }
 }
