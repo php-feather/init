@@ -68,9 +68,9 @@ class FormRequest extends Request implements IFormRequest, \Feather\Init\Middlew
 
     public function __construct()
     {
-        $this->validator = new Validator($this->input->all(), $this->rules, $this->messages);
-        $this->response = \Feather\Init\Http\Response::getInstance();
         parent::__construct();
+        $this->response = \Feather\Init\Http\Response::getInstance();
+        $this->validator = new Validator($this->input->all(), $this->rules, $this->messages);
     }
 
     /**
