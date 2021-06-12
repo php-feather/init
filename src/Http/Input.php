@@ -66,7 +66,7 @@ class Input
 
         $this->setCookies();
 
-        $this->all = new ParameterBag(array_merge($this->get->bag(), $this->post->bag()));
+        $this->all = new ParameterBag(array_merge($this->get->getItems(), $this->post->getItems()));
     }
 
     /**
@@ -81,6 +81,17 @@ class Input
         }
 
         return static::$self;
+    }
+
+    /**
+     *
+     * @param array $items
+     */
+    public function addItems(array $items)
+    {
+        $this->get->addItems($items);
+        $this->post->addItems($items);
+        $this->all->addItems($items);
     }
 
     /**

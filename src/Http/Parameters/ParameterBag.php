@@ -2,16 +2,15 @@
 
 namespace Feather\Init\Http\Parameters;
 
+use Feather\Support\Util\Bag;
+
 /**
  * Description of ParameterBag
  *
  * @author fcarbah
  */
-class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
+class ParameterBag extends Bag
 {
-
-    /** @var array * */
-    protected $_items = array();
 
     /**
      *
@@ -22,34 +21,10 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
         if (is_object($input)) {
             $this->setObject($input);
         } else if (is_array($input)) {
-            $this->_items = $input;
+            $this->items = $input;
         } else {
-            $this->_items[] = $input;
+            $this->items[] = $input;
         }
-    }
-
-    /**
-     *
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        if (isset($this->_items[$name])) {
-            return $this->_items[$name];
-        }
-
-        return null;
-    }
-
-    /**
-     *
-     * @param string $name
-     * @param mixed $value
-     */
-    public function __set($name, $value)
-    {
-        $this->_items[$name] = $value;
     }
 
     /**
@@ -62,7 +37,7 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
     {
 
         if (is_array($input)) {
-            $this->_items = array_merge($this->_items, $input);
+            $this->items = array_merge($this->items, $input);
         } else if (is_object($input)) {
             $this->setObject($input);
         } else {
@@ -73,15 +48,6 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
     }
 
     /**
-     *
-     * @return array
-     */
-    public function bag()
-    {
-        return $this->_items;
-    }
-
-    /**
      * Get boolean value of parameter name
      * @param string $name
      * @return boolean
@@ -89,23 +55,6 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
     public function boolean($name)
     {
         return boolval($this->{$name});
-    }
-
-    /**
-     *
-     * @return int
-     */
-    public function count()
-    {
-        return count($this->_items);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function current()
-    {
-        return current($this->_items);
     }
 
     /**
@@ -134,7 +83,7 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
      */
     public function key()
     {
-        return key($this->_items);
+        return key($this->items);
     }
 
     /**
@@ -144,7 +93,7 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
      */
     public function merge(ParameterBag $bag)
     {
-        $this->_items = array_merge($this->_items, $bag->bag());
+        $this->items = array_merge($this->items, $bag->getItems());
         return $this;
     }
 
@@ -165,78 +114,11 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
     public function toString()
     {
         $string = '';
-        foreach ($this->_items as $key => $val) {
+        foreach ($this->items as $key => $val) {
             $string .= $key . '=' . $val . '&';
         }
 
         return substr($string, 0, -1);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function next(): void
-    {
-        next($this->_items);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rewind(): void
-    {
-        reset($this->_items);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function valid(): bool
-    {
-        $key = key($this->_items);
-        return $key !== null && $key !== false;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function offsetExists($offset): bool
-    {
-        return array_key_exists($offset, $this->_items);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function offsetGet($offset)
-    {
-        return $this->{$offset};
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function offsetSet($offset, $value): void
-    {
-        $this->_items[$offset] = $value;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function offsetUnset($offset): void
-    {
-        if ($this->offsetExists($offset)) {
-            unset($this->_items[$offset]);
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        return json_encode($this->_items);
     }
 
     /**
@@ -245,9 +127,8 @@ class ParameterBag implements \Iterator, \ArrayAccess, \JsonSerializable
      */
     protected function setObject($object)
     {
-
         foreach (get_object_vars($object) as $key => $value) {
-            $this->_items[$key] = $value;
+            $this->items[$key] = $value;
         }
     }
 

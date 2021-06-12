@@ -106,6 +106,24 @@ class Request
     }
 
     /**
+     * Append items to request parameters
+     * @param array $items
+     */
+    public function addItemsToRequestBag(array $items)
+    {
+        $this->input->addItems($items);
+    }
+
+    /**
+     * Append items to request cookies
+     * @param array $items
+     */
+    public function addItemsToCookie(array $items)
+    {
+        $this->input->cookie()->addItems($items);
+    }
+
+    /**
      *  Returns ParameterBag of all request data key/value pairs or specific value of specified by name
      * @param string $name name of parameter value  to retrieve
      * @default mixed default value to return if param name not found

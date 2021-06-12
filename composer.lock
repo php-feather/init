@@ -122,17 +122,21 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-feather/cache.git",
-                "reference": "900f4a4b2b724915bcbbd6b365474f7d39f0347b"
+                "reference": "92c8dfa2697760593efa064873ed85168652e38d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-feather/cache/zipball/900f4a4b2b724915bcbbd6b365474f7d39f0347b",
-                "reference": "900f4a4b2b724915bcbbd6b365474f7d39f0347b",
+                "url": "https://api.github.com/repos/php-feather/cache/zipball/92c8dfa2697760593efa064873ed85168652e38d",
+                "reference": "92c8dfa2697760593efa064873ed85168652e38d",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0",
+                "php-feather/support": "dev-main",
                 "predis/predis": "^1.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
             },
             "default-branch": true,
             "type": "library",
@@ -156,7 +160,7 @@
                 "issues": "https://github.com/php-feather/cache/issues",
                 "source": "https://github.com/php-feather/cache/tree/master"
             },
-            "time": "2021-05-24T00:07:05+00:00"
+            "time": "2021-06-04T21:33:35+00:00"
         },
         {
             "name": "php-feather/security",
@@ -164,17 +168,20 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-feather/security.git",
-                "reference": "b4ca159d74b45c37ea7af868b77a3386bca6b284"
+                "reference": "41284010556089df6605716d794dbd9086625b7b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-feather/security/zipball/b4ca159d74b45c37ea7af868b77a3386bca6b284",
-                "reference": "b4ca159d74b45c37ea7af868b77a3386bca6b284",
+                "url": "https://api.github.com/repos/php-feather/security/zipball/41284010556089df6605716d794dbd9086625b7b",
+                "reference": "41284010556089df6605716d794dbd9086625b7b",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0",
                 "php-feather/session": "dev-master"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
             },
             "default-branch": true,
             "type": "library",
@@ -201,7 +208,7 @@
                 "issues": "https://github.com/php-feather/security/issues",
                 "source": "https://github.com/php-feather/security/tree/master"
             },
-            "time": "2020-12-27T01:12:41+00:00"
+            "time": "2021-06-12T13:53:14+00:00"
         },
         {
             "name": "php-feather/session",
@@ -209,17 +216,21 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-feather/session.git",
-                "reference": "049db3fe76507efaa6ba3144e0a99eda32713b9e"
+                "reference": "b9bb67e707cf2068f465934379334a84de6677c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-feather/session/zipball/049db3fe76507efaa6ba3144e0a99eda32713b9e",
-                "reference": "049db3fe76507efaa6ba3144e0a99eda32713b9e",
+                "url": "https://api.github.com/repos/php-feather/session/zipball/b9bb67e707cf2068f465934379334a84de6677c0",
+                "reference": "b9bb67e707cf2068f465934379334a84de6677c0",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0",
+                "php-feather/support": "dev-main",
                 "predis/predis": "^1.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
             },
             "default-branch": true,
             "type": "library",
@@ -243,7 +254,7 @@
                 "issues": "https://github.com/php-feather/session/issues",
                 "source": "https://github.com/php-feather/session/tree/master"
             },
-            "time": "2021-04-25T19:45:33+00:00"
+            "time": "2021-06-05T01:47:55+00:00"
         },
         {
             "name": "php-feather/support",
@@ -251,12 +262,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-feather/support.git",
-                "reference": "22be23e0bda416e2555d195c16a623ffb881e6b4"
+                "reference": "1487ca171eddeff696d19f6034e24b1eb44ec90d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-feather/support/zipball/22be23e0bda416e2555d195c16a623ffb881e6b4",
-                "reference": "22be23e0bda416e2555d195c16a623ffb881e6b4",
+                "url": "https://api.github.com/repos/php-feather/support/zipball/1487ca171eddeff696d19f6034e24b1eb44ec90d",
+                "reference": "1487ca171eddeff696d19f6034e24b1eb44ec90d",
                 "shasum": ""
             },
             "require": {
@@ -290,7 +301,7 @@
                 "issues": "https://github.com/php-feather/support/issues",
                 "source": "https://github.com/php-feather/support/tree/main"
             },
-            "time": "2021-06-02T02:41:23+00:00"
+            "time": "2021-06-02T21:06:52+00:00"
         },
         {
             "name": "predis/predis",
