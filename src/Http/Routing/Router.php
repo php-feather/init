@@ -150,6 +150,11 @@ class Router
 
         $methodType = strtoupper($method);
 
+        $cacheRoute = $this->loadCacheRoute($uri, $method);
+        if ($cacheRoute) {
+            return $cacheRoute->run();
+        }
+
         $key = $this->findRouteKey($methodType, $uri);
 
         if ($key) {
@@ -160,6 +165,7 @@ class Router
             $route = $this->buildRoute($routeParam, $methodType, $uri);
 
             if ($route) {
+                $this->cacheAutoRoute($route, $uri, $method);
                 return $route->run();
             }
 
@@ -321,24 +327,7 @@ class Router
      */
     public function autorunCacheRoute($uri, $reqMethod)
     {
-        if (!$this->cache) {
-            return false;
-        }
-
-        $cacheRoutes = $this->cache->get(static::AUTOROUTE_CACHE_KEY);
-
-        $this->autoRoutes = $cacheRoutes ? json_decode($cacheRoutes, true) : [];
-
-        if (empty($this->autoRoutes)) {
-            return false;
-        }
-
-        $route = $this->cacheResolver->setRequestMethod($reqMethod)
-                ->setUri($uri)
-                ->setCache($this->autoRoutes)
-                ->resolve();
-
-        if ($route) {
+        if (($route = $this->loadCacheRoute($uri, $reqMethod))) {
             return $this->executeAutoRunRoute($route, $uri, $reqMethod);
         }
 
@@ -395,19 +384,6 @@ class Router
         }
 
         return false;
-    }
-
-    /**
-     * @param \Feather\Init\Http\Routing\Route $route
-     * @param string $uri
-     * @param string $reqMethod
-     * @return boolean
-     */
-    protected function executeAutoRunRoute(Route $route, $uri, $reqMethod)
-    {
-        $this->cacheAutoRoute($route, $uri, $reqMethod);
-        $route->run();
-        return true;
     }
 
     /**
@@ -492,6 +468,19 @@ class Router
     }
 
     /**
+     * @param \Feather\Init\Http\Routing\Route $route
+     * @param string $uri
+     * @param string $reqMethod
+     * @return boolean
+     */
+    protected function executeAutoRunRoute(Route $route, $uri, $reqMethod)
+    {
+        $this->cacheAutoRoute($route, $uri, $reqMethod);
+        $route->run();
+        return true;
+    }
+
+    /**
      *
      * @param string $method Request Method
      * @param string uri Request Uri
@@ -536,6 +525,34 @@ class Router
         }
 
         return false;
+    }
+
+    /**
+     *
+     * @param string $uri
+     * @param string $reqMethod
+     * @return \Feather\Init\Http\Routing\Route|null
+     */
+    protected function loadCacheRoute($uri, $reqMethod)
+    {
+        if (!$this->cache) {
+            return null;
+        }
+
+        $cacheRoutes = $this->cache->get(static::AUTOROUTE_CACHE_KEY);
+
+        $this->autoRoutes = $cacheRoutes ? json_decode($cacheRoutes, true) : [];
+
+        if (empty($this->autoRoutes)) {
+            return null;
+        }
+
+        $route = $this->cacheResolver->setRequestMethod($reqMethod)
+                ->setUri($uri)
+                ->setCache($this->autoRoutes)
+                ->resolve();
+
+        return $route;
     }
 
     /**
