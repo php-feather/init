@@ -88,7 +88,7 @@ class RouteParam
      */
     public function setOriginalUri($uri)
     {
-        $this->originalUri = array_filter(explode('/', $uri));
+        $this->originalUri = implode('/', array_filter(explode('/', $uri)));
         return $this;
     }
 
