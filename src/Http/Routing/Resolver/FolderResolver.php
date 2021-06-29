@@ -117,7 +117,11 @@ class FolderResolver extends RegisteredResolver
         $key = null;
 
         while (count($uriParts) > 0) {
-            $tempUri = implode('/', $uriParts);
+            $tempUri = implode('/', array_filter($uriParts, function($part) {
+                        if ($part != '.php') {
+                            return $part;
+                        }
+                    }));
 
             if (($key = RegisteredMatcher::getMatch($tempUri, $this->registeredRoutes))) {
                 return $key;
