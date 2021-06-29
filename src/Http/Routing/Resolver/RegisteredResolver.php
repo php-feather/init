@@ -53,7 +53,11 @@ class RegisteredResolver extends AutoResolver
         foreach ($uriParts as $part) {
             $matches = [];
             if (preg_match('/{(.*?)}/', $part, $matches)) {
-                $params[] = $matches[1];
+                $key = $matches[1];
+                if (strpos($key, ':') === 0) {
+                    $key = substr($key, 1);
+                }
+                $params[] = $key;
             }
         }
 
@@ -84,6 +88,9 @@ class RegisteredResolver extends AutoResolver
 
         foreach ($indexes as $key => $index) {
             if (isset($requestPaths[$index])) {
+                if (strpos($key, ':') === 0) {
+                    $key = substr($key, 1);
+                }
                 $params[$key] = $requestPaths[$index];
             }
         }

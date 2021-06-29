@@ -425,7 +425,7 @@ class Router
     protected function cleanUri(&$uri)
     {
 
-        $uriParts = explode('/', $uri);
+        $uriParts = array_filter(explode('/', $uri));
 
         if (($this->folderRoute && count($uriParts) < 2) || preg_match('/^(index(\.php)?)$/i', $uri)) {
             $uri = preg_replace('/\/(.*?)\.php(.*?)\/?/', '/', $uri);
