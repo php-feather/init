@@ -4,7 +4,7 @@ namespace Feather\Init\Http\Routing\Resolver;
 
 use Feather\Init\Http\Routing\FolderRoute;
 use Feather\Init\Http\Routing\RouteParam;
-use Feather\Init\Http\Routing\Matcher\RegisteredMatcher;
+use Feather\Init\Http\Routing\Matcher\FolderMatcher;
 
 /**
  * Description of FolderResolver
@@ -119,7 +119,7 @@ class FolderResolver extends RegisteredResolver
         while (count($uriParts) > 0) {
             $tempUri = implode('/', $uriParts);
 
-            if (($key = RegisteredMatcher::getMatch($tempUri, $this->registeredRoutes))) {
+            if (($key = FolderMatcher::getMatch($tempUri, $this->registeredRoutes))) {
                 return $key;
             }
 
