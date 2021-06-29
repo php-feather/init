@@ -114,7 +114,7 @@ class Route
     {
 
         foreach ($middleWares as $mw) {
-            $this->middleWare[] = $this->mwResolver->resolve($key);
+            $this->middleWare[] = $this->mwResolver->resolve($mw);
         }
 
         return $this;
