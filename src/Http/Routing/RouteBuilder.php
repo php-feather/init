@@ -110,15 +110,16 @@ trait RouteBuilder
      * @param string $callback Actual folder path. null if uri is the same as the actual path
      * @param array $middleware
      * @param array $reqMethods Array of Http Methods. if empty, all methods (get, post, ...) are supported
+     * @param array $requirements
      * @return \Feather\Init\Http\Routing\RouteParam
      * @throws \Exception
      */
-    public function folder($uri, $callback = null, array $middleware = array(), array $reqMethods = array())
+    public function folder($uri, $callback = null, array $middleware = array(), array $reqMethods = array(), array $requirements = array())
     {
         $origUri = $uri;
 
         $callStack = debug_backtrace(false);
-        $requirements = [];
+
         $this->updateRouteInfo($uri, $middleware, $requirements, $callStack);
 
         $this->removePreceedingSlashFromUri($uri);

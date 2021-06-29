@@ -14,6 +14,7 @@ use Minime\Annotations\Cache\FileCache;
 use Feather\Init\Http\Request;
 use Feather\Init\Http\RequestMethod;
 use Feather\Init\Http\Response;
+use Feather\Init\Middleware\MiddlewareResolver;
 
 define('A_STORAGE', dirname(__FILE__, 2) . '/storage/');
 
@@ -61,6 +62,9 @@ class Route
     /** @var array * */
     protected $request;
 
+    /** @var \Feather\Init\MiddlewareResolver * */
+    protected $mwResolver;
+
     /**
      *
      * @param string $requestMethod
@@ -79,6 +83,7 @@ class Route
         }
         $this->params = is_array($params) ? $params : array($params);
         $this->request = Request::getInstance();
+        $this->mwResolver = new MiddlewareResolver();
     }
 
     public function __get($name)
@@ -109,7 +114,7 @@ class Route
     {
 
         foreach ($middleWares as $mw) {
-            $this->middleWare[] = new $mw();
+            $this->middleWare[] = $this->mwResolver->resolve($key);
         }
 
         return $this;
