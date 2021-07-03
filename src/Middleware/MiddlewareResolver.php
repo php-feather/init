@@ -41,7 +41,7 @@ class MiddlewareResolver
             return $middleware;
         }
 
-        throw new Exception("No registered middleware for \"{$key}\"");
+        throw new \Exception("No registered middleware for \"{$key}\"");
     }
 
 }
