@@ -153,7 +153,7 @@ class RouteParam
      */
     protected function buildParams()
     {
-        $parts = explode('/', $this->originalUri);
+        $parts = explode('/', $this->uri);
 
         foreach ($parts as $indx => $part) {
             $matches = [];
