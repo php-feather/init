@@ -72,7 +72,9 @@ class RegisteredResolver extends AutoResolver
         foreach ($regParams as $param) {
             $key = $param['name'];
             $indx = $param['index'];
-            $params[$key] = $requestPaths[$indx];
+            if (isset($requestPaths[$indx])) {
+                $params[$key] = $requestPaths[$indx];
+            }
         }
 
         return $params;
