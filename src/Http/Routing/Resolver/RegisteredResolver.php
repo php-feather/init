@@ -50,16 +50,9 @@ class RegisteredResolver extends AutoResolver
         $uriParts = explode('/', $this->uri);
         $params = array();
 
-        foreach ($uriParts as $part) {
-            $matches = [];
-            if (preg_match('/{(.*?)}/', $part, $matches)) {
-                $key = $matches[1];
-                if (strpos($key, ':') === 0) {
-                    $key = substr($key, 1);
-                }
-                $params[] = $key;
-            }
-        }
+        $regParams = $this->routeParam->getParams();
+
+        $params = array_column($regParams, 'name');
 
         return $params;
     }
@@ -71,28 +64,15 @@ class RegisteredResolver extends AutoResolver
     protected function getParamsFromUri()
     {
         $params = array();
-        $indexes = array();
 
         $requestPaths = explode('/', $this->uri);
 
-        $routePaths = explode('/', $this->routeParam->uri);
+        $regParams = $this->routeParam->getParams();
 
-        foreach ($routePaths as $key => $path) {
-
-            $matches = [];
-
-            if (preg_match('/{(.*?)}/', $path, $matches)) {
-                $indexes[$matches[1]] = $key;
-            }
-        }
-
-        foreach ($indexes as $key => $index) {
-            if (isset($requestPaths[$index])) {
-                if (strpos($key, ':') === 0) {
-                    $key = substr($key, 1);
-                }
-                $params[$key] = $requestPaths[$index];
-            }
+        foreach ($regParams as $param) {
+            $key = $param['name'];
+            $indx = $param['index'];
+            $params[$key] = $requestPaths[$indx];
         }
 
         return $params;

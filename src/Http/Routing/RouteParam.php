@@ -28,6 +28,12 @@ class RouteParam
     /** @var array * */
     protected $requirements = [];
 
+    /** @var array * */
+    protected $params = [];
+
+    /** @var bool * */
+    protected $paramsSet = false;
+
     /** @var bool * */
     protected $isFolder;
 
@@ -42,6 +48,23 @@ class RouteParam
             return $this->{$name};
         }
         return null;
+    }
+
+    /**
+     * Get list of required and optional parameters in a registered uri
+     * @return array
+     */
+    public function getParams()
+    {
+        if ($this->paramsSet) {
+            return $this->params;
+        }
+
+        $this->buildParams();
+
+        $this->paramsSet = true;
+
+        return $this->params;
     }
 
     /**
@@ -123,6 +146,33 @@ class RouteParam
     {
         $this->requirements = array_merge($this->requirements, $requirements);
         return $this;
+    }
+
+    /**
+     * Parse uri and set uri parameters
+     */
+    protected function buildParams()
+    {
+        $parts = explode('/', $this->originalUri);
+
+        foreach ($parts as $indx => $part) {
+            $matches = [];
+            if (preg_match('/({:)(.*?)(})/', $part, $matches)) {
+                $this->params[] = [
+                    'name' => $matches[2],
+                    'required' => false,
+                    'macro' => $matches[0],
+                    'index' => $indx
+                ];
+            } elseif (preg_match('/({)(.*?)(})/', $part, $matches)) {
+                $this->params[] = [
+                    'name' => $matches[2],
+                    'required' => true,
+                    'macro' => $matches[0],
+                    'index' => $indx
+                ];
+            }
+        }
     }
 
 }

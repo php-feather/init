@@ -159,12 +159,39 @@ class FolderResolver extends RegisteredResolver
         if ($uri == $targetUri) {
             return $this->uriToFilePath($uri);
         }
+        $origUri = preg_replace('/(.*?)({)(.*)/', '$1', $this->routeParam->originalUri);
+        $origPos = stripos($uri, $this->routeParam->originalUri) + strlen($origUri); //strlen($this->routeParam->originalUri);
 
-        $origPos = stripos($uri, $this->routeParam->originalUri) + strlen($this->routeParam->originalUri);
+        $endPath = substr($uri, $origPos);
 
-        $relUri = $targetUri . '/' . substr($uri, $origPos);
+        $relUri = $endPath ? $targetUri . '/' . $endPath : $targetUri;
 
         return $this->uriToFilePath($relUri);
+    }
+
+    /**
+     * Parse uri for params
+     * @param string $uri
+     * @return string|null
+     */
+    protected function parseUriToPath($uri)
+    {
+        $uriParts = explode('/', $uri);
+
+        if (count($uriParts) < 2 || !$this->routeParam) {
+            return null;
+        }
+
+        $params = $this->routeParam->getParams();
+
+        foreach ($params as $param) {
+            if (count($uriParts) < 2) {
+                break;
+            }
+            array_pop($uriParts);
+        }
+
+        return $this->uriToFilePath(implode('/', $uriParts));
     }
 
     /**
@@ -192,6 +219,10 @@ class FolderResolver extends RegisteredResolver
             if (feather_file_exists($file)) {
                 return $file;
             }
+        }
+
+        if (($file = $this->parseUriToPath($uri))) {
+            return $file;
         }
 
         if (!$isDir) {
