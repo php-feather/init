@@ -90,7 +90,7 @@ class HeaderBag implements \IteratorAggregate, \Countable
      */
     public function getIterator(): \Traversable
     {
-        return $this->headers;
+        return new \ArrayIterator($this->headers);
     }
 
     /**
