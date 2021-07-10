@@ -3,3 +3,4 @@ nbproject/
 vendor/
 src/storage/*
 !src/storage/.gitkeep
+.phpunit*

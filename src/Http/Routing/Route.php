@@ -302,16 +302,13 @@ class Route
         }
 
         if ($res instanceof Response) {
-            return strtoupper(Request::getInstance()->method == RequestMethod::HEAD) ? $res->sendHeadersOnly() : $res->send();
-        }
-
-        if (strtoupper(Request::getInstance()->method == RequestMethod::HEAD)) {
+            $res->send();
+        } else {
             $resp = Response::getInstance();
-            $resp->setHeaders(headers_list());
-            return $resp->sendHeadersOnly();
+            $resp->setHeaders(headers_list())
+                    ->setContent($res)
+                    ->send();
         }
-
-        return $res;
     }
 
     /**

@@ -53,11 +53,13 @@ class Input
 
 
         foreach ($_POST as $key => $data) {
-            $this->post[$key] = filter_input(INPUT_POST, $key);
+            $filter = $this->getRequestParamFilterType($data);
+            $this->post[$key] = filter_input(INPUT_POST, $key, $filter) ?: filter_var($data, $filter);
         }
 
         foreach ($_GET as $key => $data) {
-            $this->get[$key] = filter_input(INPUT_GET, $key);
+            $filter = $this->getRequestParamFilterType($data);
+            $this->get[$key] = filter_input(INPUT_GET, $key, $filter) ?: filter_var($data, $filter);
         }
 
         $this->setFiles();
@@ -272,7 +274,7 @@ class Input
             $_POST[$key] = $data;
         }
 
-        static::getInstance();
+        return static::getInstance();
     }
 
     /**
@@ -330,6 +332,29 @@ class Input
 
     /**
      *
+     * @param mixed $value
+     * @return int
+     */
+    protected function getRequestParamFilterType($value)
+    {
+
+        if (is_float($value)) {
+            return FILTER_SANITIZE_NUMBER_FLOAT;
+        }
+
+        if (is_numeric($value)) {
+            return FILTER_SANITIZE_NUMBER_INT;
+        }
+
+        if (is_string($value)) {
+            return FILTER_SANITIZE_STRING;
+        }
+
+        return FILTER_DEFAULT;
+    }
+
+    /**
+     *
      * @param string $key file parameter name
      * @param array $files multiple upload files
      * @return array
@@ -376,7 +401,7 @@ class Input
         $this->cookies = new ParameterBag;
 
         foreach ($_COOKIE as $key => $value) {
-            $this->cookies[$key] = filter_input(INPUT_COOKIE, $key);
+            $this->cookies[$key] = filter_input(INPUT_COOKIE, $key, $this->getRequestParamFilterType($value));
         }
     }
 
@@ -412,7 +437,13 @@ class Input
     protected function setQuery()
     {
         $data = array();
-        parse_str($_SERVER['QUERY_STRING'], $data);
+        parse_str($_SERVER['QUERY_STRING'] ?? '', $data);
+
+        foreach ($data as $key => $val) {
+            $filter = $this->getRequestParamFilterType($val);
+            $data[$key] = filter_var($val, $filter);
+        }
+
         $this->query = new ParameterBag($data);
     }
 

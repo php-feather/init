@@ -15,15 +15,25 @@ namespace Feather\Init\Http;
 class Response
 {
 
+    use ResponseHeaderTrait;
+
     private static $self;
+
+    /** @var string * */
     protected $content;
-    protected $headers = [];
+
+    /** @var Feather\Init\Http\HeaderBag * */
+    protected $headers;
+
+    /** @var array * */
     protected $cookies = [];
-    protected $statusCode;
+
+    /** @var int * */
+    protected $statusCode = 200;
 
     private function __construct()
     {
-
+        $this->headers = new HeaderBag();
     }
 
     /**
@@ -156,6 +166,14 @@ class Response
      */
     public function send()
     {
+        $request = Request::getInstance();
+        if ($request->method == RequestMethod::HEAD) {
+            $this->cookies = [];
+            $this->content = '';
+        } elseif ($request->method == RequestMethod::OPTIONS) {
+            $this->content = '';
+        }
+
         $this->sendCookies();
         http_response_code($this->statusCode);
         $this->sendHeaders();
@@ -172,21 +190,29 @@ class Response
         $this->sendHeaders();
     }
 
+    public function setContent(?string $content)
+    {
+        $this->content = $content ?? '';
+        return $this;
+    }
+
     /**
      *
      * @param string $name
      * @param string|int $value
-     * @param string $expires DateTime
+     * @param int $expires Time in seconds to expire. 0 means when session close
      * @param string $path
      * @param string $domain
      * @param bool $secure
+     * @return $this
      */
-    public function setCookie($name, $value, $expires, $path = '/', $domain = '', bool $secure = false)
+    public function setCookie($name, $value, int $expires = 0, $path = '/', $domain = null, bool $secure = false, bool $httpOnly = true, bool $raw = false, $smaeSite = 'lax')
     {
 
         $this->cookies[] = [
-            'name' => $name, 'value' => $value, 'expires' => $expires, 'path' => $path, 'domain' => $domain, 'secure' => $secure
+            new Cookie($name, $domain, $expires, $path, $domain, $secure, $httpOnly, $raw, $sameSite)
         ];
+        return $this;
     }
 
     /**
@@ -194,21 +220,19 @@ class Response
      * @param string $header
      * @param string $value
      * @param bool $replace
-     * @return void
+     * @return $this
      */
     public function setHeader($header, $value, bool $replace = true)
     {
-        $key = $this->reformatHeaderKey($header);
-        if (!$replace && isset($this->headers[$key])) {
-            return;
-        }
-        $this->headers[$key] = $value;
+        $this->headers->set($header, $value, $replace);
+        return $this;
     }
 
     /**
      *
      * @param array $headers Http Headers
      * @param bool $replace
+     * @return $this
      */
     public function setHeaders($headers, bool $replace = true)
     {
@@ -228,6 +252,8 @@ class Response
                 $this->setHeader(strtolower($key), $val, $replace);
             }
         }
+
+        return $this;
     }
 
     /**
@@ -237,22 +263,7 @@ class Response
     public function setStatusCode(int $code)
     {
         $this->statusCode = $code;
-    }
-
-    /**
-     *
-     * @param string $key
-     * @return string
-     */
-    protected function reformatHeaderKey($key)
-    {
-        $keyParts = explode('-', $key);
-
-        if (count($keyParts) > 1) {
-            return ucfirst($keyParts[0]) . '-' . ucfirst($keyParts[1]);
-        }
-
-        return ucfirst($keyParts[0]);
+        return $this;
     }
 
     /**
@@ -269,7 +280,7 @@ class Response
     protected function sendCookies()
     {
         foreach ($this->cookies as $cookie) {
-            setCookie($cookie['name'], $cookie['value'], $cookie['expires'], $cookie['path'], $cookie['domain'], $cookie['secure']);
+            header('Set-Cookie: ' . $cookie);
         }
     }
 
@@ -284,7 +295,7 @@ class Response
         }
 
         foreach ($this->headers as $key => $value) {
-            header("$key:$value");
+            header("$key: $value");
         }
     }
 

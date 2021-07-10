@@ -22,5 +22,8 @@
         "php-feather/security": "dev-master",
         "php-feather/support": "dev-main",
         "minime/annotations": "^3.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0.0"
     }
 }
