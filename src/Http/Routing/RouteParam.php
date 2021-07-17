@@ -51,6 +51,33 @@ class RouteParam
     }
 
     /**
+     *
+     * @return string|Closure
+     */
+    public function getCallback()
+    {
+        return $this->callback;
+    }
+
+    /**
+     * List of route middlewares
+     * @return array
+     */
+    public function getMiddleware()
+    {
+        return $this->middleware;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getOriginalUri()
+    {
+        return $this->uri;
+    }
+
+    /**
      * Get list of required and optional parameters in a registered uri
      * @return array
      */
@@ -65,6 +92,24 @@ class RouteParam
         $this->paramsSet = true;
 
         return $this->params;
+    }
+
+    /**
+     * List of route requirements
+     * @return array
+     */
+    public function getRequirements()
+    {
+        return $this->requirements;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getUri()
+    {
+        return $this->uri;
     }
 
     /**

@@ -202,7 +202,7 @@ class Request
      *
      * @return string
      */
-    protected function isAjax()
+    public function isAjax()
     {
         return $this->isAjax;
     }

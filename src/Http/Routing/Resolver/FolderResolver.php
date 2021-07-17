@@ -21,6 +21,12 @@ class FolderResolver extends RegisteredResolver
     protected $defaultFile = 'index.php';
 
     /** @var array * */
+    protected $routeRequirements = [];
+
+    /** @var array * */
+    protected $routeMiddlewares = [];
+
+    /** @var array * */
     protected $registeredRoutes = [];
 
     public function resolve()
@@ -101,6 +107,22 @@ class FolderResolver extends RegisteredResolver
         }
     }
 
+    protected function buildNewUri(RouteParam $routeParam)
+    {
+        $this->routeMiddlewares = array_merge($this->routeMiddlewares, $routeParam->getMiddleware());
+        $this->routeRequirements = array_merge($this->routeRequirements, $routeParam->getRequirements());
+        $callback = $routeParam->getCallback();
+
+        if (is_string($callback)) {
+
+            $replaceCount = count(explode('/', $routeParam->getUri()));
+            $replaceUri = explode('/', $callback);
+            $origUriParts = explode('/', $this->uri);
+            array_splice($origUriParts, 0, $replaceCount, $replaceUri);
+            $this->uri = implode('/', $origUriParts);
+        }
+    }
+
     /**
      *
      * @return string|null
@@ -115,7 +137,7 @@ class FolderResolver extends RegisteredResolver
         });
 
         $key = null;
-
+        $firstRun = true;
         while (count($uriParts) > 0) {
             $tempUri = implode('/', array_filter($uriParts, function($part) {
                         if ($part != '.php') {
@@ -123,11 +145,22 @@ class FolderResolver extends RegisteredResolver
                         }
                     }));
 
-            if (($key = RegisteredMatcher::getMatch($tempUri, $this->registeredRoutes))) {
-                return $key;
+            $key = RegisteredMatcher::getMatch($tempUri, $this->registeredRoutes);
+
+            if ($key) {
+                if ($firstRun) {
+                    return $key;
+                } else {
+                    $routeParam = $this->registeredRoutes[$key];
+                    $this->buildNewUri($routeParam);
+                    $key = null;
+                    return $this->findKey();
+                }
             }
 
             array_pop($uriParts);
+
+            $firstRun = false;
         }
 
         return $key;
@@ -140,6 +173,8 @@ class FolderResolver extends RegisteredResolver
     {
         if (!$this->routeParam && ($key = $this->findKey())) {
             $this->routeParam = $this->registeredRoutes[$key];
+            $this->routeParam->setMiddleware(array_merge($this->routeParam->getMiddleware(), $this->routeMiddlewares));
+            $this->routeParam->setRequirements(array_merge($this->routeParam->getRequirements(), $this->routeRequirements));
         }
     }
 
@@ -160,7 +195,7 @@ class FolderResolver extends RegisteredResolver
             return $this->uriToFilePath($uri);
         }
         $origUri = preg_replace('/(.*?)({)(.*)/', '$1', $this->routeParam->originalUri);
-        $origPos = stripos($uri, $this->routeParam->originalUri) + strlen($origUri); //strlen($this->routeParam->originalUri);
+        $origPos = stripos($uri, $this->routeParam->originalUri) + strlen($origUri);
 
         $endPath = substr($uri, $origPos);
 
