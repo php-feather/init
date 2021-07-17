@@ -138,8 +138,6 @@ class Router
             $method = RequestMethod::GET;
         }
 
-        $this->removeQueryString($uri);
-
         $this->removePreceedingSlashFromUri($uri);
 
         $this->cleanUri($uri);

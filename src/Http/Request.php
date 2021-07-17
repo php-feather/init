@@ -25,6 +25,9 @@ class Request
     protected $uri;
 
     /** @var string * */
+    protected $path;
+
+    /** @var string * */
     protected $method;
 
     /** @var string * */
@@ -71,16 +74,17 @@ class Request
 
         $this->host = $_SERVER['HTTP_HOST'];
         $this->uri = $_SERVER['REQUEST_URI'];
+        $this->path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $this->method = $method ? strtoupper($method) : $_SERVER['REQUEST_METHOD'];
         $this->userAgent = $_SERVER['HTTP_USER_AGENT'];
         $this->serverIp = $_SERVER['SERVER_ADDR'];
-        $this->remoteIp = $_SERVER['REMOTE_ADDR'];
         $this->scheme = $_SERVER['REQUEST_SCHEME'];
         $this->time = $_SERVER['REQUEST_TIME'];
         $this->protocol = $_SERVER['SERVER_PROTOCOL'];
         $this->isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ? TRUE : FALSE;
         $this->cookie = isset($_SERVER['HTTP_COOKIE']) ? $_SERVER['HTTP_COOKIE'] : null;
         $this->queryStr = $_SERVER['QUERY_STRING'];
+        $this->setClientIp();
         $this->setServerParameters();
         $this->setPreviousRequest();
     }
@@ -168,6 +172,96 @@ class Request
     }
 
     /**
+     *
+     * @return string
+     */
+    public function getClientIp()
+    {
+        return $this->remoteIp;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getHost()
+    {
+        return $this->host;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getHttpMethod()
+    {
+        return $this->method;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    protected function isAjax()
+    {
+        return $this->isAjax;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getProtocol()
+    {
+        return $this->protocol;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    protected function getScheme()
+    {
+        return $this->scheme;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getServerIp()
+    {
+        return $this->serverIp;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getUri()
+    {
+        return $this->uri;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getUserAgent()
+    {
+        return $this->userAgent;
+    }
+
+    /**
      *  Returns list of Uploaded files
      * @param string $name name of parameter value  to retrieve
      * @default mixed default value to return if param name not found
@@ -207,6 +301,22 @@ class Request
     public static function previousUri()
     {
         return Session::get(PREV_REQ_KEY);
+    }
+
+    /**
+     * Set client IP
+     */
+    protected function setClientIp()
+    {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            //ip from share internet
+            $this->remoteIp = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            //ip pass from proxy
+            $this->remoteIp = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $this->remoteIp = $_SERVER['REMOTE_ADDR'];
+        }
     }
 
     /**
