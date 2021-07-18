@@ -21,12 +21,27 @@ class Response
     /** @var array * */
     protected $cookies = [];
 
+    /** @var string * */
+    protected $charset = 'UTF-8';
+
     /** @var int * */
     protected $statusCode = 200;
+
+    /** @var string * */
+    protected $statusText = 'OK';
+
+    /** @var string * */
+    protected $httpProtocolVersion = '1.1';
 
     private function __construct()
     {
         $this->headers = new HeaderBag();
+    }
+
+    public function __toString()
+    {
+        return "HTTP {$this->httpProtocolVersion} {$this->statusCode} " . $this->statusText . "\r\n"
+                . $this->headers . "\r\n" . $this->content;
     }
 
     /**
@@ -48,6 +63,15 @@ class Response
     public function redirect($location)
     {
         header('Location: ' . $location);
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getCharset()
+    {
+        return $this->charset;
     }
 
     /**
@@ -79,11 +103,83 @@ class Response
 
     /**
      *
+     * @return string
+     */
+    public function getProtocolVersion()
+    {
+        return $this->httpProtocolVersion;
+    }
+
+    /**
+     *
      * @return int
      */
     public function getStatusCode()
     {
         return $this->statusCode;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function isClientError()
+    {
+        return $this->statusCode >= 400 && $this->statusCode < 500;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function isInformational()
+    {
+        return $this->statusCode >= 100 && $this->statusCode < 200;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function isInvalid()
+    {
+        return $this->statusCode < 100 && $this->statusCode >= 600;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function isOk()
+    {
+        return $this->statusCode === 200;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function isRedirect()
+    {
+        return $this->statusCode >= 300 && $this->statusCode < 400;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function isServerError()
+    {
+        return $this->statusCode >= 500 && $this->statusCode < 600;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function isSuccess()
+    {
+        return $this->statusCode >= 200 && $this->statusCode < 300;
     }
 
     /**
@@ -111,11 +207,11 @@ class Response
      */
     public function renderJson($data, array $headers = [], int $statusCode = 200)
     {
-        $defaultHeaders = ['Content-Type' => 'application/json'];
+        $defaultHeaders = ['Content-Type' => 'application/json; charset=UTF-8'];
         $this->originalContent = $data;
         $this->content = json_encode($data);
-        $this->setHeaders(array_merge($defaultHeaders, $headers));
-        $this->statusCode = $statusCode;
+        $this->setHeaders(array_merge($headers, $defaultHeaders));
+        $this->setStatusCode($statusCode);
         return $this;
     }
 
@@ -128,11 +224,11 @@ class Response
      */
     public function renderView($content, array $headers = [], $statusCode = 200)
     {
-        $defaultHeaders = ['Content-Type' => 'text/html'];
+        $defaultHeaders = ['Content-Type' => 'text/html; charset=' . $this->charset];
         $this->originalContent = $content;
         $this->content = $content;
         $this->setHeaders(array_merge($defaultHeaders, $headers));
-        $this->statusCode = $statusCode;
+        $this->setStatusCode($statusCode);
         return $this;
     }
 
@@ -150,7 +246,7 @@ class Response
         }
         $this->setHeaders($headers);
         $this->content = $data;
-        $this->statusCode = $statusCode;
+        $this->setStatusCode($statusCode);
         return $this;
     }
 
@@ -159,15 +255,7 @@ class Response
      */
     public function send()
     {
-        $request = Request::getInstance();
-        if ($request->method == RequestMethod::HEAD) {
-            $this->cookies = [];
-            $this->content = '';
-        } elseif ($request->method == RequestMethod::OPTIONS) {
-            $len = $this->content ? strlen($this->content) : 0;
-            $this->setHeader('Content-Length', $len);
-            $this->content = '';
-        }
+        $this->prepare();
 
         $this->sendCookies();
         http_response_code($this->statusCode);
@@ -180,7 +268,9 @@ class Response
      */
     protected function sendBody()
     {
-        echo $this->content;
+        if ($this->content) {
+            echo $this->content;
+        }
     }
 
     /**
@@ -188,8 +278,13 @@ class Response
      */
     protected function sendCookies()
     {
+        $isPhp73 = version_compare(PHP_VERSION, '7.3.0', '>=');
         foreach ($this->cookies as $cookie) {
-            header('Set-Cookie: ' . $cookie);
+            if ($isPhp73) {
+                $cookie->send();
+            } else {
+                header('Set-Cookie: ' . $cookie);
+            }
         }
     }
 
@@ -280,6 +375,12 @@ class Response
         return $this;
     }
 
+    public function setCharset(string $charset)
+    {
+        $this->charset = $charset;
+        return $this;
+    }
+
     /**
      *
      * @param string|null $content
@@ -301,7 +402,7 @@ class Response
      * @param bool $secure
      * @return $this
      */
-    public function setCookie($name, $value, int $expires = 0, $path = '/', $domain = null, bool $secure = false, bool $httpOnly = true, bool $raw = false, $smaeSite = 'lax')
+    public function setCookie($name, $value, int $expires = 0, $path = '/', $domain = null, bool $secure = false, bool $httpOnly = true, bool $raw = false, $sameSite = 'lax')
     {
 
         $this->cookies[] = [
@@ -481,6 +582,17 @@ class Response
 
     /**
      *
+     * @param string $version
+     * @return $this
+     */
+    public function setProtocolVersion(string $version)
+    {
+        $this->httpProtocolVersion = $version;
+        return $this;
+    }
+
+    /**
+     *
      * @return $this
      */
     public function setPublic()
@@ -510,7 +622,45 @@ class Response
     public function setStatusCode(int $code)
     {
         $this->statusCode = $code;
+        $this->statusText = HttpCode::$statusTexts[$code] ?? 'Unknown';
         return $this;
+    }
+
+    /**
+     * Prepare response
+     */
+    protected function prepare()
+    {
+
+        $request = Request::getInstance();
+
+        $len = $this->content ? strlen($this->content) : 0;
+
+        if ($request->method == RequestMethod::HEAD) {
+            $this->cookies = [];
+            $this->content = null;
+        } elseif ($request->method == RequestMethod::OPTIONS) {
+            $this->content = null;
+        }
+
+        if ($request->isSecure()) {
+            foreach ($this->cookies as $cookie) {
+                $cookie->setSecure();
+            }
+        }
+
+        if ($len > 0) {
+            $this->setHeader('Content-Length', "$len");
+        }
+
+        if ($this->headers->has('Transfer-Encoding')) {
+            $this->headers->remove('Content-Length');
+        }
+
+        if ($this->httpProtocolVersion == '1.0' && strpos($this->headers->get('Cache-Control'), 'no-cache') !== false) {
+            $this->headers->set('pragma', 'no-cache');
+            $this->headers->set('expires', -1);
+        }
     }
 
 }

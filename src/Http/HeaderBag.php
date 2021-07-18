@@ -23,6 +23,32 @@ class HeaderBag implements \IteratorAggregate, \Countable
      *
      * @param array $headers
      */
+    public function __construct(array $headers = [])
+    {
+        $this->add($headers);
+    }
+
+    public function __toString()
+    {
+        $headers = $this->headers;
+        ksort($headers);
+
+        $max = max(array_map('strlen', array_keys($headers))) + 1;
+
+        $content = '';
+
+        foreach ($headers as $name => $value) {
+            $name = ucwords($name, '-');
+            $content .= "$name: $value\r\n";
+        }
+
+        return $content;
+    }
+
+    /**
+     *
+     * @param array $headers
+     */
     public function add(array $headers)
     {
         foreach ($headers as $key => $value) {
@@ -68,7 +94,7 @@ class HeaderBag implements \IteratorAggregate, \Countable
      * @param string $key
      * @return boolean
      */
-    public function hasKey($key)
+    public function has($key)
     {
         return array_key_exists($this->formatKey($key), $this->headers);
     }
@@ -102,7 +128,7 @@ class HeaderBag implements \IteratorAggregate, \Countable
     {
         $fKey = $this->formatKey($key);
 
-        if ($fKey != 'cache-control' && !$this->hasKey($fKey)) {
+        if ($fKey != 'cache-control' && !$this->has($fKey)) {
             return false;
         }
 
@@ -151,7 +177,7 @@ class HeaderBag implements \IteratorAggregate, \Countable
     public function set($key, $value, $replace = true)
     {
         $fKey = strtolower(str_replace('_', '-', $key));
-        $exist = $this->hasKey($fKey);
+        $exist = $this->has($fKey);
 
         if (!$exist || ($exist && $replace)) {
             $this->headers[$fKey] = $value;
@@ -167,7 +193,8 @@ class HeaderBag implements \IteratorAggregate, \Countable
     {
         $fKey = str_replace('_', '-', $key);
         $this->cacheHeaders[$fKey] = $value;
-        $this->set(static::CACHE_CTRL_KEY, Utils::arrayToStr(ksort($this->cacheHeaders)));
+        ksort($this->cacheHeaders);
+        $this->set(static::CACHE_CTRL_KEY, Utils::arrayToStr($this->cacheHeaders));
     }
 
     /**

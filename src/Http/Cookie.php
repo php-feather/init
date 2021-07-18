@@ -91,7 +91,7 @@ class Cookie
             $str .= '=deleted; expires=' . gmdate('D, d-M-Y H:i:s T', time() - 31536001) . '; Max-Age=0';
         } else {
             $str .= "=$this->value";
-            $str .= $this->expires === 0 ? '' : '; expires=' . gmdate('D, d-M-Y H:i:s T', $this->expires) . '; Max-Age=' . time() - $this->expires;
+            $str .= $this->expires === 0 ? '' : '; expires=' . gmdate('D, d-M-Y H:i:s T', $this->expires) . '; Max-Age=' . (time() - $this->expires);
         }
 
         if ($this->path) {
@@ -118,11 +118,44 @@ class Cookie
     }
 
     /**
-     * @todo Se cookie
+     * Send cookie
      */
     public function send()
     {
 
+        $options = [
+            'expires' => $this->expires ?? 0
+        ];
+
+        if ($this->path) {
+            $options['path'] = $this->path;
+        }
+
+        if ($this->domain) {
+            $options['domain'] = $this->domain;
+        }
+
+        if ($this->secure) {
+            $options['secure'] = true;
+        }
+
+        if ($this->httpOnly) {
+            $options['httponly'] = true;
+        }
+
+        if ($this->sameSite) {
+            $options['samesite'] = $this->sameSite;
+        }
+
+        setcookie($this->name, $this->value, $options);
+    }
+
+    /**
+     *
+     */
+    public function setSecure()
+    {
+        $this->secure = true;
     }
 
     /**
@@ -159,11 +192,6 @@ class Cookie
         $this->name = $name;
     }
 
-    protected function setValue($value, $raw)
-    {
-        $this->value = $raw ? $value : rawurlencode($raw);
-    }
-
     /**
      *
      * @param string $sameSite
@@ -183,6 +211,16 @@ class Cookie
             throw new \InvalidArgumentException('The "samesite" parameter value is not valid');
         }
         $this->sameSite = $sameSite;
+    }
+
+    /**
+     *
+     * @param type $value
+     * @param type $raw
+     */
+    protected function setValue($value, $raw)
+    {
+        $this->value = $raw ? $value : rawurlencode($raw);
     }
 
 }

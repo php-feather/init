@@ -202,15 +202,6 @@ class Request
      *
      * @return string
      */
-    public function isAjax()
-    {
-        return $this->isAjax;
-    }
-
-    /**
-     *
-     * @return string
-     */
     public function getPath()
     {
         return $this->path;
@@ -259,6 +250,30 @@ class Request
     public function getUserAgent()
     {
         return $this->userAgent;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function isAjax()
+    {
+        return $this->isAjax;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function isSecure()
+    {
+        if (!empty($_SERVER['https']))
+            return true;
+
+        if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+            return true;
+
+        return false;
     }
 
     /**
