@@ -32,8 +32,11 @@ class CacheResolver extends RegisteredResolver
         $cacheUri = null;
 
         foreach ($this->cacheRoutes as $key => $data) {
+
             $cinfo = json_decode($data, true);
-            if (stripos($this->uri, $key) !== false && $cinfo['method'] == $this->reqMethod) {
+            $methods = is_array($cinfo['method']) ? $cinfo['method'] : [$cinfo['method']];
+
+            if (strcasecmp($this->uri, $key) === 0 && in_array($this->reqMethod, $cinfo)) {
                 $cacheInfo = $cinfo;
                 $cacheUri = $key;
                 break;
@@ -43,9 +46,6 @@ class CacheResolver extends RegisteredResolver
         if (!$cacheInfo) {
             return null;
         }
-
-        //$newUri = preg_replace('/(^\/)|(\/$)/', '', preg_replace("/$cacheUri/i", '', $this->uri));
-        //$params = explode('/', $newUri);
 
         $route = unserialize($cacheInfo['route']);
 

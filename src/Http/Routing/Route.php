@@ -65,6 +65,9 @@ class Route
     /** @var \Feather\Init\MiddlewareResolver * */
     protected $mwResolver;
 
+    /** @var array supported HttpMethods * */
+    protected $supportedMethods = [];
+
     /**
      *
      * @param string $requestMethod
@@ -92,6 +95,15 @@ class Route
             return $this->{$name};
         }
         return null;
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function getSupportedHttpMethods()
+    {
+        return $this->supportedMethods;
     }
 
     /**
@@ -145,11 +157,34 @@ class Route
     /**
      *
      * @param string $reqMethod
+     * @throws \Exception
      * @return $this
      */
     public function setRequestMethod($reqMethod)
     {
-        $this->requestMethod = $reqMethod;
+        $method = strtoupper($reqMethod);
+        if (!in_array($method, RequestMethod::methods())) {
+            throw new \Exception("Request Method $reqMethod is not supported");
+        }
+        $this->requestMethod = $method;
+        $this->supportedMethods[$method] = $method;
+        return $this;
+    }
+
+    /**
+     *
+     * @param array $methods
+     * @return $this
+     */
+    public function setSupportedHttpMethods(array $methods)
+    {
+        foreach ($methods as $method) {
+            $reqMethod = strtoupper($method);
+            if (in_array($reqMethod, \Feather\Init\Http\RequestMethod::methods())) {
+                $this->supportedMethods[$reqMethod] = $reqMethod;
+            }
+        }
+
         return $this;
     }
 

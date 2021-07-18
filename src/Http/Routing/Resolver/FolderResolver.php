@@ -91,7 +91,8 @@ class FolderResolver extends RegisteredResolver
                 $route = new FolderRoute($this->reqMethod, $controller);
                 return $route->setMiddleware($this->routeParam->middleware)
                                 ->setRequirements($this->routeParam->requirements)
-                                ->setParamValues($this->getParamsFromUri());
+                                ->setParamValues($this->getParamsFromUri())
+                                ->setSupportedHttpMethods($this->routeParam->getSupportedHttpMethods());
             }
             return null;
         } else {

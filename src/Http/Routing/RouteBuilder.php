@@ -36,6 +36,7 @@ trait RouteBuilder
 
         $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, $requirements);
         $routeParam->setOriginalUri($origUri);
+        $routeParam->setSupportedHttpMethods($methods);
 
         $this->addRouteParam($uri, $routeParam, $methods);
 
@@ -98,6 +99,7 @@ trait RouteBuilder
 
         $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, $requirements);
         $routeParam->setOriginalUri($origUri);
+        $routeParam->setSupportedHttpMethods($methods);
 
         $this->addRouteParam($uri, $routeParam, $methods);
 
@@ -142,6 +144,7 @@ trait RouteBuilder
 
         $routeParam = $this->buildRouteParam($methods[0], $uri, $callback, $middleware, $requirements);
         $routeParam->setOriginalUri($origUri)->setIsFolder(true);
+        $routeParam->setSupportedHttpMethods($methods);
 
         $this->addRouteParam($uri, $routeParam, $methods);
 

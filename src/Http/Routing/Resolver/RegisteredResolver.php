@@ -91,7 +91,8 @@ class RegisteredResolver extends AutoResolver
         if ($route) {
             $route->setMiddleware($this->routeParam->middleware)
                     ->setRequirements($this->routeParam->requirements)
-                    ->setParamValues($this->getParamsArgs());
+                    ->setParamValues($this->getParamsArgs())
+                    ->setSupportedHttpMethods($this->routeParam->getSupportedHttpMethods());
         }
 
         return $route;
@@ -110,7 +111,8 @@ class RegisteredResolver extends AutoResolver
 
         $route->setMiddleware($this->routeParam->middleware)
                 ->setRequirements($this->routeParam->requirements)
-                ->setParamValues($this->getParamsFromUri());
+                ->setParamValues($this->getParamsFromUri())
+                ->setSupportedHttpMethods($this->routeParam->getSupportedHttpMethods());
 
         return $route;
     }
@@ -143,7 +145,8 @@ class RegisteredResolver extends AutoResolver
             $route = new Route($this->routeParam->method, $controller, $action, $params);
             $route->setMiddleware($this->routeParam->middleware)
                     ->setRequirements($this->routeParam->requirements)
-                    ->setParamValues($this->getParamsFromUri());
+                    ->setParamValues($this->getParamsFromUri())
+                    ->setSupportedHttpMethods($this->routeParam->getSupportedHttpMethods());
 
             return $route;
         }

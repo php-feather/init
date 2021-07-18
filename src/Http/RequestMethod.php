@@ -5,7 +5,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 namespace Feather\Init\Http;
 
 /**
@@ -13,7 +12,9 @@ namespace Feather\Init\Http;
  *
  * @author fcarbah
  */
-class RequestMethod {
+class RequestMethod
+{
+
     const POST = 'POST';
     const GET = 'GET';
     const PUT = 'PUT';
@@ -21,14 +22,18 @@ class RequestMethod {
     const PATCH = 'PATCH';
     const HEAD = 'HEAD';
     const OPTIONS = 'OPTIONS';
-    
-    public static function methods(){
+
+    public static function methods()
+    {
         return [
-            RequestMethod::DELETE,
-            RequestMethod::GET,
-            RequestMethod::PATCH,
-            RequestMethod::POST,
-            RequestMethod::PUT
+            static::DELETE,
+            static::GET,
+            static::HEAD,
+            static::OPTIONS,
+            static::PATCH,
+            static::POST,
+            static::PUT
         ];
     }
+
 }

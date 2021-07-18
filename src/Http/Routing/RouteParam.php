@@ -37,6 +37,9 @@ class RouteParam
     /** @var bool * */
     protected $isFolder;
 
+    /** @var array * */
+    protected $supportedMethods = [];
+
     /**
      *
      * @param string $name
@@ -95,12 +98,30 @@ class RouteParam
     }
 
     /**
+     *
+     * @return string
+     */
+    public function getRequestMethod()
+    {
+        return $this->method;
+    }
+
+    /**
      * List of route requirements
      * @return array
      */
     public function getRequirements()
     {
         return $this->requirements;
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function getSupportedHttpMethods()
+    {
+        return $this->supportedMethods;
     }
 
     /**
@@ -167,7 +188,24 @@ class RouteParam
      */
     public function setRequestMethod($method)
     {
-        $this->method = $method;
+        $reqMethod = strtoupper($method);
+        if (!in_array($reqMethod, \Feather\Init\Http\RequestMethod::methods())) {
+            throw new \Exception("Request Method $method is not supported");
+        }
+        $this->method = $reqMethod;
+        $this->supportedMethods[$reqMethod] = $reqMethod;
+        return $this;
+    }
+
+    public function setSupportedHttpMethods(array $methods)
+    {
+        foreach ($methods as $method) {
+            $reqMethod = strtoupper($method);
+            if (in_array($reqMethod, \Feather\Init\Http\RequestMethod::methods())) {
+                $this->supportedMethods[$reqMethod] = $reqMethod;
+            }
+        }
+
         return $this;
     }
 

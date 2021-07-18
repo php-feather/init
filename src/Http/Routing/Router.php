@@ -159,7 +159,7 @@ class Router
             $route = $this->buildRoute($routeParam, $methodType, $uri);
 
             if ($route) {
-                $this->cacheAutoRoute($route, $uri, $method);
+                $this->cacheAutoRoute($route, $uri);
                 return $route->run();
             }
 
@@ -322,7 +322,7 @@ class Router
     public function autorunCacheRoute($uri, $reqMethod)
     {
         if (($route = $this->loadCacheRoute($uri, $reqMethod))) {
-            return $this->executeAutoRunRoute($route, $uri, $reqMethod);
+            return $this->executeAutoRunRoute($route, $uri);
         }
 
         return false;
@@ -348,7 +348,7 @@ class Router
                 ->resolve();
 
         if ($route) {
-            return $this->executeAutoRunRoute($route, $uri, $reqMethod);
+            return $this->executeAutoRunRoute($route, $uri);
         }
 
         return false;
@@ -374,7 +374,7 @@ class Router
                 ->resolve();
 
         if ($route) {
-            return $this->executeAutoRunRoute($route, $uri, $reqMethod);
+            return $this->executeAutoRunRoute($route, $uri);
         }
 
         return false;
@@ -384,10 +384,9 @@ class Router
      *
      * @param \Feather\Init\Http\Routing\Route $route
      * @param string $uri
-     * @param string $reqMethod
      * @return boolean
      */
-    protected function cacheAutoRoute(Route $route, $uri, $reqMethod)
+    protected function cacheAutoRoute(Route $route, $uri)
     {
 
         if (!$this->cache) {
@@ -395,15 +394,21 @@ class Router
         }
 
         $info = [
-            'method' => $reqMethod,
+            'method' => $route->getSupportedHttpMethods(),
             'uri' => $uri,
             'route' => serialize($route)
         ];
 
         $key = strtolower($uri);
 
+        $info['hash'] = md5(json_encode($info));
+
+
         if (isset($this->autoRoutes[$key])) {
-            return true;
+            $info = json_decode($this->autoRoutes[$key], true);
+            if (isset($info['hash']) && $info['hash'] === $info['hash']) {
+                return true;
+            }
         }
 
         $this->autoRoutes[$key] = json_encode($info);
@@ -428,7 +433,7 @@ class Router
 
         $uri = strtolower(preg_replace('/\?.*/', '', $uri));
 
-        $uri = preg_replace('/(\.php)$/i', '', $uri);
+        //$uri = preg_replace('/(\.php)$/i', '', $uri);
 
         $len = strlen($uri);
 
@@ -464,12 +469,11 @@ class Router
     /**
      * @param \Feather\Init\Http\Routing\Route $route
      * @param string $uri
-     * @param string $reqMethod
      * @return boolean
      */
-    protected function executeAutoRunRoute(Route $route, $uri, $reqMethod)
+    protected function executeAutoRunRoute(Route $route, $uri)
     {
-        $this->cacheAutoRoute($route, $uri, $reqMethod);
+        $this->cacheAutoRoute($route, $uri);
         $route->run();
         return true;
     }
