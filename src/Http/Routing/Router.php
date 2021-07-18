@@ -389,7 +389,7 @@ class Router
     protected function cacheAutoRoute(Route $route, $uri)
     {
 
-        if (!$this->cache) {
+        if (!$this->cache || $route->getController() instanceof \Closure) {
             return false;
         }
 

@@ -99,6 +99,15 @@ class Route
 
     /**
      *
+     * @return \Feather\Init\Controllers\Controller|\Closure|string
+     */
+    public function getController()
+    {
+        return $this->controller;
+    }
+
+    /**
+     *
      * @return array
      */
     public function getSupportedHttpMethods()
