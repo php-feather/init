@@ -68,7 +68,7 @@ class Input
 
         $this->setCookies();
 
-        $this->all = new ParameterBag(array_merge($this->get->getItems(), $this->post->getItems()));
+        $this->all = new ParameterBag(array_merge($this->get->all(), $this->post->all()));
     }
 
     /**
