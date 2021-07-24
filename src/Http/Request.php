@@ -1,10 +1,5 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 namespace Feather\Init\Http;
 
 use Feather\Session\Session;
@@ -57,6 +52,28 @@ class Request
     /** @var string * */
     protected $queryStr;
 
+    /** @var string * */
+    protected $contentType;
+
+    /** @var array * */
+    protected $contentTypes = [
+        'atom' => ['application/atom+xml'],
+        'css' => ['text/css'],
+        'form' => ['application/x-www-form-urlencoded'],
+        'html' => ['text/html', 'application/xhtml+xml'],
+        'js' => ['application/javascript', 'application/x-javascript', 'text/javascript'],
+        'json' => ['application/json', 'application/x-json'],
+        'jsonld' => ['application/ld+json'],
+        'jsonp' => ['application/json'],
+        'rdf' => ['application/rdf+xml'],
+        'rss' => ['application/rss+xml'],
+        'txt' => ['text/plain'],
+        'xml' => ['text/xml', 'application/xml', 'application/x-xml'],
+    ];
+
+    /** @var array * */
+    protected $acceptableHeadrs = [];
+
     /** @var \Feather\Init\Http\Input * */
     protected $input;
 
@@ -87,6 +104,8 @@ class Request
         $this->setClientIp();
         $this->setServerParameters();
         $this->setPreviousRequest();
+        $this->setAcceptableHeaders();
+        $this->setContentType();
     }
 
     /**
@@ -172,12 +191,30 @@ class Request
     }
 
     /**
+     * Request Accept Headers
+     * @return array
+     */
+    public function getAccepatableHeaders()
+    {
+        return $this->acceptableHeadrs;
+    }
+
+    /**
      *
      * @return string
      */
     public function getClientIp()
     {
         return $this->remoteIp;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getContentType()
+    {
+        return $this->contentType;
     }
 
     /**
@@ -316,6 +353,37 @@ class Request
     public static function previousUri()
     {
         return Session::get(PREV_REQ_KEY);
+    }
+
+    /**
+     * set acceptable headers
+     */
+    protected function setAcceptableHeaders()
+    {
+        $accept = $this->server->get('HTTP_ACCEPT');
+        if ($accept) {
+            $this->acceptableHeadrs = explode(',', $accept);
+        }
+    }
+
+    /**
+     * set content type
+     */
+    protected function setContentType()
+    {
+        $contentType = $this->server->get('CONTENT_TYPE');
+
+        $mimeType = null;
+
+        if (false !== $pos = strpos($contentType, ';')) {
+            $mimeType = trim(substr($contentType, 0, $pos));
+        }
+
+        foreach ($this->contentTypes as $types) {
+            if (in_array($contentType, $types) || ($mimeType !== null && in_array($mimeType, $types))) {
+                $this->contentType = implode('; ', $types);
+            }
+        }
     }
 
     /**

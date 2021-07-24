@@ -132,6 +132,15 @@ class Response
      *
      * @return bool
      */
+    public function isEmpty()
+    {
+        return in_array($this->statusCode, [204, 304]);
+    }
+
+    /**
+     *
+     * @return bool
+     */
     public function isInformational()
     {
         return $this->statusCode >= 100 && $this->statusCode < 200;
@@ -651,6 +660,25 @@ class Response
 
         if ($len > 0) {
             $this->setHeader('Content-Length', "$len");
+        }
+
+        $this->prepareHeaders($request);
+    }
+
+    /**
+     * Add or Remove headers based on response
+     * @param \Feather\Init\Http\Request $request
+     */
+    protected function prepareHeaders(Request $request)
+    {
+        if ($this->isInformational() || $this->isEmpty()) {
+            $this->setContent('');
+            $this->headers->remove('CONTENT-TYPE');
+            $this->headers->remove('CONTENT-LENGTH');
+            ini_set('default_mimetype', '');
+        } else if (!$this->headers->has('Content-Type')) {
+            $contentType = $request->getContentType();
+            $this->setHeader('Content-Type', $contentType ?? 'text/html');
         }
 
         if ($this->headers->has('Transfer-Encoding')) {
