@@ -42,7 +42,7 @@ class FolderResolver extends RegisteredResolver
     {
         $this->findRouteParam();
 
-        if (!$this->validRequestMethod) {
+        if (!$this->routeParam && !$this->validRequestMethod) {
             throw new \Exception('Method Not Allowed', HttpCode::METHOD_NOT_ALLOWED);
         }
 
