@@ -5,6 +5,7 @@ namespace Feather\Init\Http\Routing\Resolver;
 use Feather\Init\Http\Routing\FolderRoute;
 use Feather\Init\Http\Routing\RouteParam;
 use Feather\Init\Http\Routing\Matcher\RegisteredMatcher;
+use Feather\Init\Http\HttpCode;
 
 /**
  * Description of FolderResolver
@@ -26,12 +27,25 @@ class FolderResolver extends RegisteredResolver
     /** @var array * */
     protected $routeMiddlewares = [];
 
+    /** @var boolean * */
+    protected $validRequestMethod = true;
+
     /** @var array * */
     protected $registeredRoutes = [];
 
+    /**
+     *
+     * @return \Feather\Init\Http\Routing\FolderRoute|null
+     * @throws \Exception
+     */
     public function resolve()
     {
         $this->findRouteParam();
+
+        if (!$this->validRequestMethod) {
+            throw new \Exception('Method Not Allowed', HttpCode::METHOD_NOT_ALLOWED);
+        }
+
         return $this->buildRoute();
     }
 
@@ -153,6 +167,12 @@ class FolderResolver extends RegisteredResolver
                     return $key;
                 } else {
                     $routeParam = $this->registeredRoutes[$key];
+
+                    if (!in_array($this->reqMethod, $routeParam->getSupportedHttpMethods())) {
+                        $this->validRequestMethod = false;
+                        return null;
+                    }
+
                     $this->buildNewUri($routeParam);
                     $key = null;
                     return $this->findKey();
@@ -262,10 +282,10 @@ class FolderResolver extends RegisteredResolver
         }
 
         if (!$isDir) {
-            throw new \Exception('Requested Resource Not Found', 404);
+            throw new \Exception('Requested Resource Not Found', HttpCode::NOT_FOUND);
         }
 
-        throw new \Exception('Forbidden', 403);
+        throw new \Exception('Forbidden', HttpCode::FORBIDDEN);
     }
 
 }

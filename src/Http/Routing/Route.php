@@ -15,6 +15,7 @@ use Feather\Init\Http\Request;
 use Feather\Init\Http\RequestMethod;
 use Feather\Init\Http\Response;
 use Feather\Init\Middleware\MiddlewareResolver;
+use Feather\Init\Http\HttpCode;
 
 define('A_STORAGE', dirname(__FILE__, 2) . '/storage/');
 
@@ -237,9 +238,9 @@ class Route
                     $next = $formRequest->run($next);
                 }
             } elseif ($this->fallback) {
-                throw new \Exception('Requested Resource Not Found', 404);
+                throw new \Exception('Requested Resource Not Found', HttpCode::NOT_FOUND);
             } else {
-                throw new \Exception('Bad Request', 400);
+                throw new \Exception('Bad Request', HttpCode::BAD_REQUEST);
             }
 
             $next = $this->runMiddlewares($next);

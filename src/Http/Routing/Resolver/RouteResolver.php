@@ -15,10 +15,21 @@ abstract class RouteResolver implements IResolver
 
     protected $defaultController;
     protected $routeFallback;
+
+    /** @var string * */
     protected $ctrlPath;
+
+    /** @var string * */
     protected $ctrlNamespace;
+
+    /** @var string * */
     protected $uri;
+
+    /** @var string * */
     protected $reqMethod;
+
+    /** @var int * */
+    protected $status = 200;
 
     /**
      *
@@ -118,6 +129,15 @@ abstract class RouteResolver implements IResolver
     {
         $this->routeFallback = $routeFallback;
         return $this;
+    }
+
+    /**
+     *
+     * @return int
+     */
+    public function getStatus()
+    {
+        return $this->status;
     }
 
     /**

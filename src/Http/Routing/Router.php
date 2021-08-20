@@ -12,6 +12,7 @@ use Feather\Init\Http\Routing\Resolver\CacheResolver;
 use Feather\Init\Http\Routing\Resolver\FolderResolver;
 use Feather\Init\Http\Routing\Resolver\RegisteredResolver;
 use Feather\Init\Http\Routing\Matcher\RegisteredMatcher;
+use Feather\Init\Http\HttpCode;
 
 /**
  * Description of Router
@@ -163,7 +164,7 @@ class Router
                 return $route->run();
             }
 
-            throw new \Exception('Requested Resource Not Found', 404);
+            throw new \Exception('Requested Resource Not Found', HttpCode::NOT_FOUND);
         }
 
         return $this->autoProcessRequest($uri, $method);
@@ -299,7 +300,7 @@ class Router
     {
 
         if ($this->isRegisteredRoute($uri)) {
-            throw new \Exception('Bad Request! Method Not Allowed', 405);
+            throw new \Exception('Method Not Allowed', HttpCode::METHOD_NOT_ALLOWED);
         }
 
         $notFound = !$this->autoRoute || !$this->autorunRoute($uri, $method);
@@ -309,7 +310,7 @@ class Router
         }
 
         if ($notFound) {
-            throw new \Exception('Requested Resource Not Found', 404);
+            throw new \Exception('Requested Resource Not Found', HttpCode::NOT_FOUND);
         }
     }
 
@@ -505,7 +506,7 @@ class Router
             case RequestMethod::PUT:
                 return RegisteredMatcher::getMatch($uri, $this->putRoutes);
             default:
-                throw new \Exception('Bad Request', 405);
+                throw new \Exception('Method Not Allowed', HttpCode::METHOD_NOT_ALLOWED);
         }
     }
 
