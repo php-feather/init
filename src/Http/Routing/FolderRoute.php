@@ -21,9 +21,7 @@ class FolderRoute extends Route
                             throw new \Exception('Requested Resource Not Found', 404);
                         }
                         //declare url params
-                        foreach ($this->paramValues as $name => $value) {
-                            $$name = $value;
-                        }
+                        extract($this->paramValues);
 
                         include_once $this->controller;
                     }, $this);

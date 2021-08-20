@@ -344,12 +344,11 @@ class Route
     {
         if ($res instanceof \Closure) {
 
-            if (ob_get_level() < 1) {
+            $level = ob_get_level();
+            if ($level < 1) {
                 ob_start();
             }
-            $res();
-
-            $res = ob_get_clean();
+            $res = $level > 0 ? $res() : ob_end_clean();
         }
 
         if ($res instanceof Response) {
