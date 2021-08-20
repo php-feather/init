@@ -343,7 +343,13 @@ class Route
     protected function sendResponse($res)
     {
         if ($res instanceof \Closure) {
-            $res = $res();
+
+            if (ob_get_level() < 1) {
+                ob_start();
+            }
+            $res();
+
+            $res = ob_get_clean();
         }
 
         if ($res instanceof Response) {
