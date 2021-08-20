@@ -348,12 +348,18 @@ class Route
             if ($level < 1) {
                 ob_start();
             }
-            $res = $level > 0 ? $res() : ob_end_clean();
+            $res = $res();
         }
 
         if ($res instanceof Response) {
             $res->send();
         } else {
+
+            if (!$res) {
+                $res = ob_get_contents();
+                ob_end_clean();
+            }
+
             $resp = Response::getInstance();
             $resp->setHeaders(headers_list())
                     ->setContent($res)
