@@ -72,7 +72,8 @@ class HeaderBag implements \IteratorAggregate, \Countable
      */
     public function get($key)
     {
-        return $this->headers[$key] ?? null;
+        $fKey = $this->formatKey($key);
+        return $this->headers[$fKey] ?? null;
     }
 
     /**

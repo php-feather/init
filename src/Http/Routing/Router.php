@@ -329,6 +329,14 @@ class Router
     }
 
     /**
+     * Allow for re-initialization of Router
+     */
+    public static function tearDown()
+    {
+        static::$self = null;
+    }
+
+    /**
      *
      * @param string $uri
      * @param string $reqMethod

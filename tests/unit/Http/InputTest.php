@@ -29,6 +29,7 @@ class InputTest extends TestCase
     public static function tearDownAfterClass()
     {
         static::$input = null;
+        Input::tearDown();
     }
 
     /**

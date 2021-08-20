@@ -43,32 +43,45 @@ class Input
     /** @var \Feather\Init\Http\Parameters\ParameterBag * */
     protected $query;
 
-    private function __construct()
+    /**
+     *
+     * @param array $get
+     * @param array $post
+     * @param array $files
+     * @param array $cookies
+     */
+    private function __construct(array $get = [], array $post = [], array $files = [], array $cookies = [])
     {
 
         $this->get = new ParameterBag;
         $this->post = new ParameterBag;
+        $this->cookies = new ParameterBag;
         $this->files = new ParameterBag;
         $this->invalidFiles = new ParameterBag;
 
+        $this->setFiles($files);
 
-        foreach ($_POST as $key => $data) {
-            $filter = $this->getRequestParamFilterType($data);
-            $this->post[$key] = filter_input(INPUT_POST, $key, $filter) ?: filter_var($data, $filter);
+        $this->setRequestParams($get, $post);
+
+        $this->setCookies($cookies);
+    }
+
+    /**
+     *
+     * @param array $getParams
+     * @param array $postParams
+     * @param array $files
+     * @param array $cookies
+     * @return \Feather\Init\Http\Input
+     */
+    public static function create(array $getParams = [], array $postParams = [], array $files = [], array $cookies)
+    {
+
+        if (static::$self == null) {
+            static::$self = new Input($getParams, $postParams, $files, $cookies);
         }
 
-        foreach ($_GET as $key => $data) {
-            $filter = $this->getRequestParamFilterType($data);
-            $this->get[$key] = filter_input(INPUT_GET, $key, $filter) ?: filter_var($data, $filter);
-        }
-
-        $this->setFiles();
-
-        $this->setQuery();
-
-        $this->setCookies();
-
-        $this->all = new ParameterBag(array_merge($this->get->all(), $this->post->all()));
+        return static::$self;
     }
 
     /**
@@ -79,7 +92,7 @@ class Input
     {
 
         if (static::$self == null) {
-            static::$self = new Input();
+            static::$self = new Input($_GET, $_POST, $_FILES, $_COOKIE);
         }
 
         return static::$self;
@@ -395,25 +408,23 @@ class Input
     /**
      * set Request cookies
      */
-    protected function setCookies()
+    protected function setCookies(array $cookies)
     {
-
-        $this->cookies = new ParameterBag;
-
-        foreach ($_COOKIE as $key => $value) {
-            $this->cookies[$key] = filter_input(INPUT_COOKIE, $key, $this->getRequestParamFilterType($value));
+        foreach ($cookies as $key => $value) {
+            $this->cookies[$key] = filter_var($value, $this->getRequestParamFilterType($value));
         }
     }
 
     /**
      * Build Uploaded Files
+     * @param array $files
      */
-    protected function setFiles()
+    protected function setFiles(array $files)
     {
 
         $files = [];
 
-        foreach ($_FILES as $key => $data) {
+        foreach ($files as $key => $data) {
 
             if (is_array($data['name'])) {
                 $this->setFileArray($key, $data);
@@ -432,19 +443,31 @@ class Input
     }
 
     /**
-     * Set Request query params
+     *
+     * @param array $get
+     * @param array $post
      */
-    protected function setQuery()
+    protected function setRequestParams(array $get, array $post)
     {
-        $data = array();
-        parse_str($_SERVER['QUERY_STRING'] ?? '', $data);
-
-        foreach ($data as $key => $val) {
-            $filter = $this->getRequestParamFilterType($val);
-            $data[$key] = filter_var($val, $filter);
+        foreach ($post as $key => $data) {
+            $filter = $this->getRequestParamFilterType($data);
+            $this->post[$key] = filter_var($data, $filter);
         }
 
-        $this->query = new ParameterBag($data);
+        foreach ($get as $key => $data) {
+            $filter = $this->getRequestParamFilterType($data);
+            $this->get[$key] = filter_var($data, $filter);
+        }
+
+        $this->all = new ParameterBag(array_merge($this->get->all(), $this->post->all()));
+    }
+
+    /**
+     * Allow for re-initialization of Input
+     */
+    public static function tearDown()
+    {
+        static::$self = null;
     }
 
 }

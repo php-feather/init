@@ -83,24 +83,24 @@ class Request
     /** @var \Feather\Init\Http\Request * */
     private static $self;
 
-    protected function __construct()
+    protected function __construct(array $getParams = [], array $postParams = [], array $serverParams = [], array $cookies = [], array $files = [])
     {
 
-        $this->input = Input::getInstance();
+        $this->input = Input::getInstance($getParams, $postParams, $serverParams, $cookies, $files);
         $method = $this->input->post('__method');
 
-        $this->host = $_SERVER['HTTP_HOST'];
-        $this->uri = $_SERVER['REQUEST_URI'];
-        $this->path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $this->method = $method ? strtoupper($method) : $_SERVER['REQUEST_METHOD'];
-        $this->userAgent = $_SERVER['HTTP_USER_AGENT'];
-        $this->serverIp = $_SERVER['SERVER_ADDR'];
-        $this->scheme = $_SERVER['REQUEST_SCHEME'];
-        $this->time = $_SERVER['REQUEST_TIME'];
-        $this->protocol = $_SERVER['SERVER_PROTOCOL'];
-        $this->isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ? TRUE : FALSE;
-        $this->cookie = isset($_SERVER['HTTP_COOKIE']) ? $_SERVER['HTTP_COOKIE'] : null;
-        $this->queryStr = $_SERVER['QUERY_STRING'];
+        $this->host = $_SERVER['HTTP_HOST'] ?? '';
+        $this->uri = $_SERVER['REQUEST_URI'] ?? '';
+        $this->path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+        $this->method = $method ? strtoupper($method) : ($_SERVER['REQUEST_METHOD'] ?? '');
+        $this->userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $this->serverIp = $_SERVER['SERVER_ADDR'] ?? '';
+        $this->scheme = $_SERVER['REQUEST_SCHEME'] ?? '';
+        $this->time = $_SERVER['REQUEST_TIME'] ?? '';
+        $this->protocol = $_SERVER['SERVER_PROTOCOL'] ?? '';
+        $this->isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') && strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') == 'xmlhttprequest' ? TRUE : FALSE;
+        $this->cookie = $_SERVER['HTTP_COOKIE'] ?? null;
+        $this->queryStr = $_SERVER['QUERY_STRING'] ?? '';
         $this->setClientIp();
         $this->setServerParameters();
         $this->setPreviousRequest();
@@ -110,12 +110,30 @@ class Request
 
     /**
      *
+     * @param array $getParams
+     * @param array $postParams
+     * @param array $serverParams
+     * @param array $cookies
+     * @param array $files
+     * @return \Feather\Init\Http\Request
+     */
+    public static function create(array $getParams = [], array $postParams = [], array $serverParams = [], array $cookies = [], array $files = [])
+    {
+        if (static::$self == null) {
+            static::$self = new Request($getParams, $postParams, $serverParams, $cookies, $files);
+        }
+
+        return static::$self;
+    }
+
+    /**
+     *
      * @return \Feather\Init\Http\Request
      */
     public static function getInstance()
     {
         if (static::$self == NULL) {
-            static::$self = new static();
+            static::$self = new Request($_GET, $_POST, $_SERVER, $_COOKIE, $_FILES);
         }
         return static::$self;
     }
@@ -398,7 +416,7 @@ class Request
             //ip pass from proxy
             $this->remoteIp = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } else {
-            $this->remoteIp = $_SERVER['REMOTE_ADDR'];
+            $this->remoteIp = $_SERVER['REMOTE_ADDR'] ?? '';
         }
     }
 
@@ -430,6 +448,14 @@ class Request
             $data[$key] = filter_input(INPUT_SERVER, $key);
         }
         $this->server = new ParameterBag($data);
+    }
+
+    /**
+     * Allow for re-initialization of Request
+     */
+    public static function tearDown()
+    {
+        static::$self = null;
     }
 
 }

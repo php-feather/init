@@ -2,6 +2,8 @@
 
 namespace Feather\Init\Http;
 
+use Feather\Init\Http\File\File;
+
 /**
  * Description of Response
  *
@@ -57,12 +59,33 @@ class Response
     }
 
     /**
-     * Url to redirect to
-     * @param string $location
+     * Send file as download to browser
+     * @param string $filepath Absolute path of file
+     * @param array $headers
+     * @param string|null $filename Name of file including extension, if not supplied the filename of the file is used
      */
-    public function redirect($location)
+    public function download(string $filepath, array $headers = [], ?string $filename = null)
     {
-        header('Location: ' . $location);
+        if (feather_file_exists($filepath)) {
+            $file = new File($filepath);
+
+            $filename = $filename ?: $file->getFilename(true);
+
+            $defaultHeaders = [
+                'Content-Description' => 'File Transfer',
+                'Content-Type' => $file->getMimeType(),
+                'Content-Length' => $file->getSize(),
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Transfer-Encoding' => 'binary',
+                'Expires' => '0',
+            ];
+
+            $this->setHeaders(array_merge($defaultHeaders, $headers));
+            $this->setContent('');
+            $this->send();
+            readfile($filepath);
+            exit();
+        }
     }
 
     /**
@@ -84,7 +107,7 @@ class Response
     }
 
     /**
-     *
+     * 
      * @return array
      */
     public function getCookies()
@@ -93,8 +116,8 @@ class Response
     }
 
     /**
-     * Key/Value pairs of headers
-     * @return array
+     *  Get response Headers
+     * @return \Feather\Init\Http\HeaderBag
      */
     public function getHeaders()
     {
@@ -117,6 +140,15 @@ class Response
     public function getStatusCode()
     {
         return $this->statusCode;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getStatusText()
+    {
+        return $this->statusText;
     }
 
     /**
@@ -192,6 +224,15 @@ class Response
     }
 
     /**
+     * Url to redirect to
+     * @param string $location
+     */
+    public function redirect($location)
+    {
+        header('Location: ' . $location);
+    }
+
+    /**
      *
      * @param mixed $content
      * @param array $headers Http Headers
@@ -201,9 +242,9 @@ class Response
     {
 
         if (is_array($content) || is_object($content)) {
-            $this->renderJson($content, $headers, $statusCode);
+            return $this->renderJson($content, $headers, $statusCode);
         } else {
-            $this->renderView($content, $headers, $statusCode);
+            return $this->renderView($content, $headers, $statusCode);
         }
     }
 
@@ -219,7 +260,7 @@ class Response
         $defaultHeaders = ['Content-Type' => 'application/json; charset=UTF-8'];
         $this->originalContent = $data;
         $this->content = json_encode($data);
-        $this->setHeaders(array_merge($headers, $defaultHeaders));
+        $this->setHeaders(array_merge($defaultHeaders, $headers));
         $this->setStatusCode($statusCode);
         return $this;
     }
@@ -250,9 +291,7 @@ class Response
      */
     public function rawOutput($data, $statusCode = 200, array $headers = array())
     {
-        if (ob_get_level() > 0) {
-            ob_clean();
-        }
+        $this->cleanBuffer();
         $this->setHeaders($headers);
         $this->content = $data;
         $this->setStatusCode($statusCode);
@@ -411,7 +450,7 @@ class Response
      * @param bool $secure
      * @return $this
      */
-    public function setCookie($name, $value, int $expires = 0, $path = '/', $domain = null, bool $secure = false, bool $httpOnly = true, bool $raw = false, $sameSite = 'lax')
+    public function setCookie(string $name, $value, int $expires = 0, $path = '/', ?string $domain = null, bool $secure = false, bool $httpOnly = true, bool $raw = false, ?string $sameSite = 'lax')
     {
 
         $this->cookies[] = [
@@ -633,6 +672,24 @@ class Response
         $this->statusCode = $code;
         $this->statusText = HttpCode::$statusTexts[$code] ?? 'Unknown';
         return $this;
+    }
+
+    /**
+     * Allow for re-initialization of Response
+     */
+    public static function tearDown()
+    {
+        static::$self = null;
+    }
+
+    /**
+     *
+     */
+    protected function cleanBuffer()
+    {
+        if (ob_get_level() > 0) {
+            ob_clean();
+        }
     }
 
     /**
