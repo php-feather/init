@@ -258,8 +258,6 @@ class Router
     protected function addRouteParam($uri, RouteParam $routeParam, array $methods, $isFolder = false)
     {
 
-        $this->routesParams[$uri] = $routeParam;
-
         if ($routeParam->isFolder) {
             $this->folderRoutes[$uri] = $routeParam;
         }
@@ -285,7 +283,9 @@ class Router
                 default:
                     break;
             }
-            $this->routes[$method . '_' . $uri] = $uri;
+            $key = $method . '_' . $uri;
+            $this->routesParams[$key] = $routeParam;
+            $this->routes[$key] = $key;
         }
     }
 
