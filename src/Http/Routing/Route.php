@@ -378,7 +378,7 @@ class Route
             }
 
             if (!$isValid) {
-                throw new \RuntimeException(sprintf('The value "%s" supplied for %s url parameter "%s" is not valid', $value, $paramType, $param), 105);
+                throw new \RuntimeException(sprintf('The value "%s" supplied for %s url parameter "%s" is not valid', $value, $paramType, $param), HttpCode::BAD_REQUEST);
             }
         }
     }
