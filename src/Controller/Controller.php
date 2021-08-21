@@ -11,6 +11,8 @@ use Feather\Session\Session;
 use Feather\Init\Http\Input;
 use Feather\Init\Http\Request;
 use Feather\Init\Http\Response;
+use Feather\View\IView;
+use Feather\Support\Container\IContainer;
 
 /**
  * Description of Controller
@@ -31,6 +33,8 @@ abstract class Controller
 
     /** @var \Feather\Init\Http\Response * */
     protected $response;
+
+    /** @var array * */
     protected $oldData;
 
     /** @var array * */
@@ -41,7 +45,15 @@ abstract class Controller
 
     /** @var boolean * */
     public $validateAnnotations = true;
+
+    /** @var string * */
     private $failedMiddleware;
+
+    /** @var \Feather\View\IView|string * */
+    protected $viewEngine = 'native';
+
+    /** @var \Feather\Support\Container\IContainer * */
+    protected $container;
 
     public function __construct()
     {
@@ -154,6 +166,17 @@ abstract class Controller
 
     /**
      *
+     * @param IContainer $container
+     * @return $this
+     */
+    public function setContainer(IContainer $container)
+    {
+        $this->container = $container;
+        return $this;
+    }
+
+    /**
+     *
      * @param string $template template file
      * @param array $data
      * @param int $status
@@ -163,7 +186,7 @@ abstract class Controller
     protected function renderView($template, array $data = [], int $status = 200, array $headers = [])
     {
         $data = $this->appendData($data);
-        return $this->response->renderView(view($template, $data), $headers, $status);
+        return $this->response->renderView(view($template, $data, $this->viewEngine), $headers, $status);
     }
 
     /**
