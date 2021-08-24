@@ -89,21 +89,21 @@ class Request
         $this->input = Input::getInstance($getParams, $postParams, $serverParams, $cookies, $files);
         $method = $this->input->post('__method');
 
-        $this->host = $_SERVER['HTTP_HOST'] ?? '';
-        $this->uri = $_SERVER['REQUEST_URI'] ?? '';
-        $this->path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
-        $this->method = $method ? strtoupper($method) : ($_SERVER['REQUEST_METHOD'] ?? '');
-        $this->userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-        $this->serverIp = $_SERVER['SERVER_ADDR'] ?? '';
-        $this->scheme = $_SERVER['REQUEST_SCHEME'] ?? '';
-        $this->time = $_SERVER['REQUEST_TIME'] ?? '';
-        $this->protocol = $_SERVER['SERVER_PROTOCOL'] ?? '';
-        $this->isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') && strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') == 'xmlhttprequest' ? TRUE : FALSE;
-        $this->cookie = $_SERVER['HTTP_COOKIE'] ?? null;
-        $this->queryStr = $_SERVER['QUERY_STRING'] ?? '';
-        $this->setClientIp();
-        $this->setServerParameters();
-        $this->setPreviousRequest();
+        $this->host = $serverParams['HTTP_HOST'] ?? '';
+        $this->uri = $serverParams['REQUEST_URI'] ?? '';
+        $this->path = parse_url($serverParams['REQUEST_URI'] ?? '', PHP_URL_PATH);
+        $this->method = $method ? strtoupper($method) : ($serverParams['REQUEST_METHOD'] ?? '');
+        $this->userAgent = $serverParams['HTTP_USER_AGENT'] ?? '';
+        $this->serverIp = $serverParams['SERVER_ADDR'] ?? '';
+        $this->scheme = $serverParams['REQUEST_SCHEME'] ?? '';
+        $this->time = $serverParams['REQUEST_TIME'] ?? '';
+        $this->protocol = $serverParams['SERVER_PROTOCOL'] ?? '';
+        $this->isAjax = !empty($serverParams['HTTP_X_REQUESTED_WITH'] ?? '') && strtolower($serverParams['HTTP_X_REQUESTED_WITH'] ?? '') == 'xmlhttprequest' ? TRUE : FALSE;
+        $this->cookie = $serverParams['HTTP_COOKIE'] ?? null;
+        $this->queryStr = $serverParams['QUERY_STRING'] ?? '';
+        $this->setServerParameters($serverParams);
+        $this->setClientIp($serverParams);
+        $this->setPreviousRequest($serverParams);
         $this->setAcceptableHeaders();
         $this->setContentType();
     }
@@ -322,10 +322,10 @@ class Request
      */
     public function isSecure()
     {
-        if (!empty($_SERVER['https']))
+        if (!empty($this->server->get('https')))
             return true;
 
-        if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+        if (!empty($this->server->get('HTTP_X_FORWARDED_PROTO')) && $this->server->get('HTTP_X_FORWARDED_PROTO') == 'https')
             return true;
 
         return false;
@@ -407,26 +407,26 @@ class Request
     /**
      * Set client IP
      */
-    protected function setClientIp()
+    protected function setClientIp(array $serverParams)
     {
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        if (!empty($serverParams['HTTP_CLIENT_IP'])) {
             //ip from share internet
-            $this->remoteIp = $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $this->remoteIp = $serverParams['HTTP_CLIENT_IP'];
+        } elseif (!empty($serverParams['HTTP_X_FORWARDED_FOR'])) {
             //ip pass from proxy
-            $this->remoteIp = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            $this->remoteIp = $serverParams['HTTP_X_FORWARDED_FOR'];
         } else {
-            $this->remoteIp = $_SERVER['REMOTE_ADDR'] ?? '';
+            $this->remoteIp = $serverParams['REMOTE_ADDR'] ?? '';
         }
     }
 
     /**
      * Set previous url
      */
-    protected function setPreviousRequest()
+    protected function setPreviousRequest(array $serverParams)
     {
 
-        $referrer = isset($_SERVER['HTTP_REFERER']) ? preg_replace('/(http\:\/\/)(.*?)(\/.*)/i', '$3', $_SERVER['HTTP_REFERER']) : null;
+        $referrer = isset($serverParams['HTTP_REFERER']) ? preg_replace('/(http\:\/\/)(.*?)(\/.*)/i', '$3', $serverParams['HTTP_REFERER']) : null;
 
         $prev = $referrer == null ? Session::get(CUR_REQ_KEY) : $referrer;
 
