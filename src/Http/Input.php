@@ -451,12 +451,12 @@ class Input
     {
         foreach ($post as $key => $data) {
             $filter = $this->getRequestParamFilterType($data);
-            $this->post[$key] = filter_var($data, $filter);
+            $this->post[$key] = is_array($data) ? filter_var_array($data, $filter) : filter_var($data, $filter);
         }
 
         foreach ($get as $key => $data) {
             $filter = $this->getRequestParamFilterType($data);
-            $this->get[$key] = filter_var($data, $filter);
+            $this->get[$key] = is_array($data) ? filter_var_array($data, $filter) : filter_var($data, $filter);
         }
 
         $this->all = new ParameterBag(array_merge($this->get->all(), $this->post->all()));

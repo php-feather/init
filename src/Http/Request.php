@@ -86,7 +86,7 @@ class Request
     protected function __construct(array $getParams = [], array $postParams = [], array $serverParams = [], array $cookies = [], array $files = [])
     {
 
-        $this->input = Input::getInstance($getParams, $postParams, $serverParams, $cookies, $files);
+        $this->input = Input::create($getParams, $postParams, $files, $cookies);
         $method = $this->input->post('__method');
 
         $this->host = $serverParams['HTTP_HOST'] ?? '';
