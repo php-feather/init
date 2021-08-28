@@ -422,8 +422,6 @@ class Input
     protected function setFiles(array $files)
     {
 
-        $files = [];
-
         foreach ($files as $key => $data) {
 
             if (is_array($data['name'])) {
