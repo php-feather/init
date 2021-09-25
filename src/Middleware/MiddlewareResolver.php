@@ -10,8 +10,8 @@ namespace Feather\Init\Middleware;
 class MiddlewareResolver
 {
 
-    /** @var \Feather\Init\Middleware\IMiddlewareProvider * */
-    protected $provider;
+    /** @var array * */
+    protected $registeredMiddlewares = [];
 
     /**
      *
@@ -30,7 +30,7 @@ class MiddlewareResolver
             return new $key;
         }
 
-        $middleware = $this->provider->provide($key);
+        $middleware = $this->loadMiddleware($key);
 
         if ($middleware instanceof Middleware) {
             return $middleware;
@@ -41,13 +41,35 @@ class MiddlewareResolver
 
     /**
      *
-     * @param \Feather\Init\Middleware\IMiddlewareProvider $provider
+     * @param array $middlewares
      * @return $this
      */
-    public function setProvider(IMiddlewareProvider $provider)
+    public function registerMiddlewares(array $middlewares)
     {
-        $this->provider = $provider;
+        $this->registeredMiddlewares = $middlewares;
         return $this;
+    }
+
+    /**
+     *
+     * @param string $key
+     * @return \Feather\Init\Middleware\IMiddleware
+     * @throws \Exception
+     */
+    protected function loadMiddleware(string $key)
+    {
+
+        $mw = $this->registeredMiddlewares[$key] ?? null;
+
+        if (!$mw) {
+            throw new \Exception("No registered middleware for \"{$key}\"");
+        }
+
+        if ($mw instanceof IMiddleware) {
+            return $mw;
+        }
+
+        return new $mw;
     }
 
 }
