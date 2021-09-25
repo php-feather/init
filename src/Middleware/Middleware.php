@@ -1,10 +1,5 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 namespace Feather\Init\Middleware;
 
 use Feather\Init\Http\Request;
@@ -24,10 +19,20 @@ abstract class Middleware implements IMiddleware
 
     /** @var \Feather\Init\Http\Response * */
     protected $response;
+
+    /** @var int * */
     protected $responseCode = 400;
+
+    /** @var array * */
     protected $responseHeaders = [];
+
+    /** @var string * */
     protected $errorMessage = '';
+
+    /** @var string * */
     protected $redirectUri = '';
+
+    /** @var bool * */
     protected $pass = true;
 
     public function __construct()

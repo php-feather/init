@@ -1,10 +1,5 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 namespace Feather\Init\Http\Routing;
 
 use Feather\Init\Controllers\Controller;
@@ -60,11 +55,11 @@ class Route
     /** @var boolean * */
     protected $fallback = false;
 
-    /** @var array * */
+    /** @var \Feather\Init\Http\Request * */
     protected $request;
 
     /** @var \Feather\Init\MiddlewareResolver * */
-    protected $mwResolver;
+    protected static $mwResolver;
 
     /** @var array supported HttpMethods * */
     protected $supportedMethods = [];
@@ -87,7 +82,6 @@ class Route
         }
         $this->params = is_array($params) ? $params : array($params);
         $this->request = Request::getInstance();
-        $this->mwResolver = new MiddlewareResolver();
     }
 
     public function __get($name)
@@ -136,10 +130,19 @@ class Route
     {
 
         foreach ($middleWares as $mw) {
-            $this->middleWare[] = $this->mwResolver->resolve($mw);
+            $this->middleWare[] = static::$mwResolver->resolve($mw);
         }
 
         return $this;
+    }
+
+    /**
+     *
+     * @param \Feather\Init\MiddlewareResolver $resolver
+     */
+    public static function setMiddleWareResolver(MiddlewareResolver $resolver)
+    {
+        static::$mwResolver = $resolver;
     }
 
     /**
@@ -183,6 +186,17 @@ class Route
 
     /**
      *
+     * @param array $requirements
+     * @return $this
+     */
+    public function setRequirements(array $requirements)
+    {
+        $this->requirements = $requirements;
+        return $this;
+    }
+
+    /**
+     *
      * @param array $methods
      * @return $this
      */
@@ -200,18 +214,7 @@ class Route
 
     /**
      *
-     * @param array $requirements
-     * @return $this
-     */
-    public function setRequirements(array $requirements)
-    {
-        $this->requirements = $requirements;
-        return $this;
-    }
-
-    /**
-     *
-     * @return mixed
+     * @return \Feather\Init\Http\Response
      * @throws \Exception
      */
     public function run()
@@ -338,7 +341,7 @@ class Route
     /**
      *
      * @param mixed $res
-     * @return type
+     * @return \Feather\Init\Http\Response
      */
     protected function sendResponse($res)
     {
@@ -352,7 +355,7 @@ class Route
         }
 
         if ($res instanceof Response) {
-            $res->send();
+            return $res;
         } else {
 
             if (!$res) {
@@ -362,8 +365,9 @@ class Route
 
             $resp = Response::getInstance();
             $resp->setHeaders(headers_list())
-                    ->setContent($res)
-                    ->send();
+                    ->setContent($res);
+
+            return $resp;
         }
     }
 

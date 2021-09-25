@@ -106,7 +106,6 @@ class Router
 
     private function __construct()
     {
-        $this->request = Request::getInstance();
         $this->autoResolver = new AutoResolver();
         $this->registeredResolver = new RegisteredResolver();
         $this->cacheResolver = new CacheResolver();
@@ -127,13 +126,15 @@ class Router
 
     /**
      *
-     * @param type $uri
-     * @param type $method
-     * @return mixed
+     * @param \Feather\Init\Http\Request $request
+     * @return \Feather\Init\Http\Routing\Route
      * @throws \Exception
      */
-    public function processRequest($uri, $method)
+    public function processRequest(Request $request)
     {
+        $this->request = $request;
+        $uri = $request->getPath();
+        $method = $request->getHttpMethod();
 
         if (in_array(strtoupper($method), [RequestMethod::HEAD, RequestMethod::OPTIONS])) {
             $method = RequestMethod::GET;
@@ -147,7 +148,7 @@ class Router
 
         $cacheRoute = $this->loadCacheRoute($uri, $method);
         if ($cacheRoute) {
-            return $cacheRoute->run();
+            return $cacheRoute;
         }
 
         $key = $this->findRouteKey($methodType, $uri);
@@ -161,7 +162,7 @@ class Router
 
             if ($route) {
                 $this->cacheAutoRoute($route, $uri);
-                return $route->run();
+                return $route;
             }
 
             throw new \Exception('Requested Resource Not Found', HttpCode::NOT_FOUND);
@@ -294,6 +295,7 @@ class Router
      *
      * @param string $uri
      * @param string $method
+     * @return \Feather\Init\Http\Routing\Route
      * @throws \Exception
      */
     protected function autoProcessRequest($uri, $method)
@@ -302,6 +304,22 @@ class Router
         if ($this->isRegisteredRoute($uri)) {
             throw new \Exception('Method Not Allowed', HttpCode::METHOD_NOT_ALLOWED);
         }
+
+        $route = null;
+
+        if ($this->autoRoute) {
+            $route = $this->autorunRoute($uri, $method);
+        }
+
+        if (!$route && $this->folderRoute) {
+            $route = $this->autorunFolderRoute($uri, $method);
+        }
+
+        if (!$route) {
+            throw new \Exception('Requested Resource Not Found', HttpCode::NOT_FOUND);
+        }
+
+        return $route;
 
         $notFound = !$this->autoRoute || !$this->autorunRoute($uri, $method);
 
@@ -318,7 +336,7 @@ class Router
      *
      * @param string $uri
      * @param string $reqMethod
-     * @return boolean
+     * @return \Feather\Init\Http\Routing\Route|false
      */
     public function autorunCacheRoute($uri, $reqMethod)
     {
@@ -367,12 +385,12 @@ class Router
      *
      * @param string $uri
      * @param string $reqMethod
-     * @return boolean
+     * @return \Feather\Init\Http\Routing\Route|false
      */
     protected function autorunFolderRoute($uri, $reqMethod)
     {
-        if (($res = $this->autorunCacheRoute($uri, $reqMethod)) !== false) {
-            return true;
+        if (($route = $this->autorunCacheRoute($uri, $reqMethod)) !== false) {
+            return $route;
         }
 
         $route = $this->folderResolver->setUri($uri)
@@ -478,13 +496,12 @@ class Router
     /**
      * @param \Feather\Init\Http\Routing\Route $route
      * @param string $uri
-     * @return boolean
+     * @return \Feather\Init\Http\Routing\Route
      */
     protected function executeAutoRunRoute(Route $route, $uri)
     {
         $this->cacheAutoRoute($route, $uri);
-        $route->run();
-        return true;
+        return $route;
     }
 
     /**
@@ -573,16 +590,6 @@ class Router
         } else if (trim($uri) == '') {
             $uri = '/';
         }
-    }
-
-    /**
-     * Strip query string from uri
-     * @param string $uri
-     */
-    protected function removeQueryString(&$uri)
-    {
-        $queryStr = '?' . $this->request->query()->toString();
-        $uri = str_replace($queryStr, '', $uri);
     }
 
 }

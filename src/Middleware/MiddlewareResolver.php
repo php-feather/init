@@ -10,13 +10,8 @@ namespace Feather\Init\Middleware;
 class MiddlewareResolver
 {
 
-    /** @var \Feather\Init\Middleware\MiddlewareProvider * */
+    /** @var \Feather\Init\Middleware\IMiddlewareProvider * */
     protected $provider;
-
-    public function __construct()
-    {
-        $this->provider = new MiddlewareProvider();
-    }
 
     /**
      *
@@ -35,13 +30,24 @@ class MiddlewareResolver
             return new $key;
         }
 
-        $middleware = $this->provider->load($key);
+        $middleware = $this->provider->provide($key);
 
         if ($middleware instanceof Middleware) {
             return $middleware;
         }
 
         throw new \Exception("No registered middleware for \"{$key}\"");
+    }
+
+    /**
+     *
+     * @param \Feather\Init\Middleware\IMiddlewareProvider $provider
+     * @return $this
+     */
+    public function setProvider(IMiddlewareProvider $provider)
+    {
+        $this->provider = $provider;
+        return $this;
     }
 
 }

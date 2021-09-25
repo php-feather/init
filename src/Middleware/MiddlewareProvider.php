@@ -2,6 +2,7 @@
 
 namespace Feather\Init\Middleware;
 
+use Feather\Support\Contracts\Provider;
 use Feather\Support\Container\Container;
 
 /**
@@ -9,18 +10,13 @@ use Feather\Support\Container\Container;
  *
  * @author fcarbah
  */
-class MiddlewareProvider
+abstract class MiddlewareProvider extends Provider
 {
 
-    /** @var \Feather\Support\Container\Container * */
-    protected static $container;
+    protected const KEY = 'middleware.provider';
 
-    public function __construct()
-    {
-        if (!static::$container) {
-            static::$container = new Container();
-        }
-    }
+    /** @var \Feather\Support\Container\Container * */
+    //protected static $container;
 
     /**
      *
@@ -42,15 +38,18 @@ class MiddlewareProvider
         return new $mw;
     }
 
+    public function provide()
+    {
+        return $this->container->get(static::KEY);
+    }
+
     /**
      *
      * @param array $middlewares
      */
     public function register(array $middlewares)
     {
-        foreach ($middlewares as $key => $middleware) {
-            static::$container->add($key, $middleware);
-        }
+        $this->container->add(static::KEY, $middlewares);
     }
 
 }

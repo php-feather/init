@@ -10,6 +10,11 @@ namespace Feather\Init\Http\Routing;
 class FolderRoute extends Route
 {
 
+    /**
+     *
+     * @return \Feather\Init\Http\Response
+     * @throws \Exception
+     */
     public function run()
     {
         try {
