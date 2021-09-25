@@ -107,7 +107,7 @@ class Response
     }
 
     /**
-     * 
+     *
      * @return array
      */
     public function getCookies()
@@ -224,12 +224,28 @@ class Response
     }
 
     /**
-     * Url to redirect to
+     *
      * @param string $location
+     * @param int $statusCode
+     * @param string|null $content
+     * @return $this
+     * @throws \Exception
      */
-    public function redirect($location)
+    public function redirect(string $location, int $statusCode = 302, ?string$content = '')
     {
-        header('Location: ' . $location);
+        if ($location == null) {
+            throw new \Exception('No url provided');
+        }
+
+        $this->statusCode = $statusCode;
+
+        if (!$this->isRedirect()) {
+            throw new \Exception("$statusCode is not a valid HTTP Redirect Status Code");
+        }
+
+        $this->headers->set('Location', $location);
+
+        return $this;
     }
 
     /**
