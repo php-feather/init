@@ -91,6 +91,31 @@ class HeaderBag implements \IteratorAggregate, \Countable
     }
 
     /**
+     * List of cookies (Feather\Init\Http\Cookie) from headers
+     * @return array
+     */
+    public static function getCookies()
+    {
+        $cookies = [];
+        foreach (headers_list() as $header) {
+            if (preg_match('/set-cookie:/i', $header)) {
+                $cookies[] = Utils::createCookieFromString($header);
+            }
+        }
+
+        return $cookies;
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    public function getIterator(): \Traversable
+    {
+        return new \ArrayIterator($this->headers);
+    }
+
+    /**
      *
      * @param string $key
      * @return boolean
@@ -109,15 +134,6 @@ class HeaderBag implements \IteratorAggregate, \Countable
     {
         $fKey = str_replace('_', '-', $key);
         return array_key_exists($fKey, $this->cacheHeaders);
-    }
-
-    /**
-     *
-     * {@inheritDoc}
-     */
-    public function getIterator(): \Traversable
-    {
-        return new \ArrayIterator($this->headers);
     }
 
     /**

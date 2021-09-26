@@ -19,6 +19,9 @@ class Cookie
     /** @var int * */
     protected $expires;
 
+    /** @var int * */
+    protected $expireAt;
+
     /** @var string * */
     protected $path;
 
@@ -50,7 +53,7 @@ class Cookie
      * @param string $sameSite
      * @throws \InvalidArgumentException
      */
-    public function __construct($name, $value, $expires = 0, $path = '/', $domain = null, bool $secure = null, bool $httpOnly = true, bool $raw = false, $sameSite = 'lax')
+    public function __construct($name, $value, $expires = 0, $path = '/', $domain = null, bool $secure = null, bool $httpOnly = true, bool $raw = false, $sameSite = null)
     {
 
         $this->setName($name, $raw);
@@ -63,6 +66,87 @@ class Cookie
         $this->secure = $secure;
         $this->httpOnly = $httpOnly;
         $this->raw = $raw;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getDomain()
+    {
+        return $this->getDomain();
+    }
+
+    /**
+     *
+     * @return int
+     */
+    public function getExpire()
+    {
+        return $this->expires;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function getHttpOnly()
+    {
+        return $this->httpOnly;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function getRaw()
+    {
+        return $this->raw;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getSameSite()
+    {
+        return $this->sameSite;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function getSecure()
+    {
+        return $this->secure;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getValue()
+    {
+        return $this->value;
     }
 
     /**
@@ -91,7 +175,7 @@ class Cookie
             $str .= '=deleted; expires=' . gmdate('D, d-M-Y H:i:s T', time() - 31536001) . '; Max-Age=0';
         } else {
             $str .= "=$this->value";
-            $str .= $this->expires === 0 ? '' : '; expires=' . gmdate('D, d-M-Y H:i:s T', $this->expires) . '; Max-Age=' . (time() - $this->expires);
+            $str .= $this->expires === 0 ? '' : '; expires=' . gmdate('D, d-M-Y H:i:s T', $this->expireAt) . '; Max-Age=' . ($this->expires);
         }
 
         if ($this->path) {
@@ -107,11 +191,11 @@ class Cookie
         }
 
         if ($this->httpOnly) {
-            $str .= '; httponly';
+            $str .= '; HttpOnly';
         }
 
         if ($this->sameSite) {
-            $str .= "; samesite=$this->sameSite";
+            $str .= "; SameSite=$this->sameSite";
         }
 
         return $str;
@@ -124,7 +208,7 @@ class Cookie
     {
 
         $options = [
-            'expires' => $this->expires ?? 0
+            'expires' => $this->expireAt ?? 0
         ];
 
         if ($this->path) {
@@ -164,10 +248,12 @@ class Cookie
      */
     protected function setExpire(int $expire = 0)
     {
+        $this->expires = $expire;
+
         if ($expire === 0) {
-            $this->expires = 0;
+            $this->expireAt = 0;
         } else {
-            $this->expires = time() + $expire;
+            $this->expireAt = time() + $expire;
         }
     }
 
@@ -220,7 +306,7 @@ class Cookie
      */
     protected function setValue($value, $raw)
     {
-        $this->value = $raw ? $value : rawurlencode($raw);
+        $this->value = $raw ? $value : rawurlencode($value);
     }
 
 }
