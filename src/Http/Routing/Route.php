@@ -12,7 +12,7 @@ use Feather\Init\Http\Response;
 use Feather\Init\Middleware\MiddlewareResolver;
 use Feather\Init\Http\HttpCode;
 
-define('A_STORAGE', dirname(__FILE__, 2) . '/storage/');
+define('A_STORAGE', dirname(__FILE__, 3) . '/storage/');
 
 /**
  * Description of Route
