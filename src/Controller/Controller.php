@@ -44,7 +44,7 @@ abstract class Controller
     protected $bypass = array();
 
     /** @var boolean * */
-    public $validateAnnotations = true;
+    protected $validateAnnotations = true;
 
     /** @var string * */
     private $failedMiddleware;
@@ -76,28 +76,27 @@ abstract class Controller
      * @param string $location Uri to redirect to
      * @param array $data
      * @param bool $withInput
-     * @return void
+     * @return \Feather\Init\Http\Response
      */
     public function redirect($location, array $data = array(), bool $withInput = false)
     {
 
-        $redirectData = ['data' => $data,];
+        $res = $this->response->with($data);
 
         if ($withInput) {
-            $redirectData['get'] = $this->input->get();
-            $redirectData['post'] = $this->input->post();
+            $res->withInput();
         }
 
         $this->saveSession($redirectData);
 
-        return $this->response->redirect($location, $data, $withInput);
+        return $res->redirect($location);
     }
 
     /**
      *
      * @param array $data
      * @param bool $withInput
-     * @return void
+     * @return \Feather\Init\Http\Response
      */
     public function redirectBack(array $data = array(), bool $withInput = false)
     {
@@ -115,7 +114,7 @@ abstract class Controller
         $this->__init();
 
         if ($this->oldData) {
-            $data = array_merge($data, $this->oldData['data']);
+            $data = array_merge($data, $this->oldData['data'] ?? []);
         }
         return $data;
     }
@@ -125,7 +124,7 @@ abstract class Controller
      */
     protected function __init()
     {
-        $this->oldData = $this->retrieveFromSession();
+        $this->oldData = $this->response->retrieveFromSession();
         $this->populateOldInput();
     }
 
@@ -177,6 +176,15 @@ abstract class Controller
 
     /**
      *
+     * @return bool
+     */
+    public function shouldValidateAnnotation()
+    {
+        return $this->validateAnnotations;
+    }
+
+    /**
+     *
      * @param string $template template file
      * @param array $data
      * @param int $status
@@ -211,27 +219,6 @@ abstract class Controller
             $post = isset($this->oldData['post']) ? $this->oldData['post'] : array();
             Input::fill($get, $post);
         }
-    }
-
-    /**
-     *
-     * @param string $key
-     * @param bool $remove
-     * @return mixed
-     */
-    protected function retrieveFromSession($key = REDIRECT_DATA_KEY, bool $remove = true)
-    {
-        return Session::get($key, $remove);
-    }
-
-    /**
-     *
-     * @param mixed $data
-     * @param string $key
-     */
-    protected function saveSession($data, $key = REDIRECT_DATA_KEY)
-    {
-        Session::save($data, $key);
     }
 
 }

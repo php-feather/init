@@ -12,6 +12,8 @@ use Feather\Init\Http\File\File;
 class Response
 {
 
+    use ResponseTrait;
+
     private static $self;
 
     /** @var string * */

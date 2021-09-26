@@ -2,7 +2,7 @@
 
 namespace Feather\Init\Http\Routing;
 
-use Feather\Init\Controllers\Controller;
+use Feather\Init\Controller\Controller;
 use Minime\Annotations\Reader;
 use Minime\Annotations\Parser;
 use Minime\Annotations\Cache\FileCache;
@@ -22,7 +22,7 @@ define('A_STORAGE', dirname(__FILE__, 2) . '/storage/');
 class Route
 {
 
-    /** @var * */
+    /** @var \Feather\Init\Controller\Controller|\Closure|string * */
     protected $controller;
 
     /** @var string Controller method name * */
@@ -67,7 +67,7 @@ class Route
     /**
      *
      * @param string $requestMethod
-     * @param \Feather\Init\Controllers\Controller|\Closure $controller
+     * @param \Feather\Init\Controllers\Controller|\Closure|string $controller
      * @param string $method
      * @param array $params
      */
@@ -223,6 +223,8 @@ class Route
 
             $this->validateParamsValues();
 
+            $this->validateRequestMethod();
+
             if ($this->isCallBack) {
                 $closure = function() {
                     return call_user_func_array($this->controller, $this->paramValues);
@@ -298,31 +300,6 @@ class Route
     }
 
     /**
-     * Check if request method is valid for resource
-     * @return boolean
-     */
-    protected function isValidRequestMethod()
-    {
-
-        $reader = new Reader(new Parser, new FileCache(A_STORAGE));
-        $annotations = $reader->getMethodAnnotations(get_class($this->controller), $this->method);
-
-        $methods = RequestMethod::methods();
-        $isValid = true;
-
-        foreach ($methods as $method) {
-
-            if (($annotations->get(strtolower($method)) || $annotations->get($method)) && $this->request->method != $method) {
-                $isValid = false;
-            } else if (($annotations->get(strtolower($method)) || $annotations->get($method)) && $this->request->method == $method) {
-                return true;
-            }
-        }
-
-        return $isValid;
-    }
-
-    /**
      * Run middlewares
      * @param \Feather\Init\Http\Response|\Closure $next
      * @return \Feather\Init\Http\Response|\Closure $next
@@ -391,6 +368,34 @@ class Route
                 throw new \RuntimeException(sprintf('The value "%s" supplied for %s url parameter "%s" is not valid', $value, $paramType, $param), HttpCode::BAD_REQUEST);
             }
         }
+    }
+
+    /**
+     * Check if request method is valid for resource
+     * @throws \Exception
+     * @return boolean
+     */
+    protected function validateRequestMethod()
+    {
+        $isValid = true;
+
+        if ($this->controller instanceof Controller && $this->controller->shouldValidateAnnotation()) {
+            $reader = new Reader(new Parser, new FileCache(A_STORAGE));
+            $annotations = $reader->getMethodAnnotations(get_class($this->controller), $this->method);
+
+            $methods = RequestMethod::methods();
+
+            foreach ($methods as $method) {
+
+                if (($annotations->get(strtolower($method)) || $annotations->get($method)) && $this->request->method != $method) {
+                    throw new \Exception('Method Not Allowed', HttpCode::METHOD_NOT_ALLOWED);
+                } else if (($annotations->get(strtolower($method)) || $annotations->get($method)) && $this->request->method == $method) {
+                    return true;
+                }
+            }
+        }
+
+        return $isValid;
     }
 
 }
