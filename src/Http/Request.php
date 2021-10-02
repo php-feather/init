@@ -149,8 +149,9 @@ class Request
     /**
      * Append items to request parameters
      * @param array $items
+     * @param bool $update True - replace existing keys, False - do not overwrite existing keys
      */
-    public function addItemsToRequestBag(array $items)
+    public function addItemsToRequestBag(array $items, bool $update = true)
     {
         $this->input->addItems($items);
     }
@@ -158,10 +159,15 @@ class Request
     /**
      * Append items to request cookies
      * @param array $items
+     * @param bool $update True - replace existing keys, False - do not overwrite existing keys
      */
-    public function addItemsToCookie(array $items)
+    public function addItemsToCookieBag(array $items, bool $update = true)
     {
-        $this->input->cookie()->addItems($items);
+        if ($update) {
+            $this->input->cookie()->update($items);
+        } else {
+            $this->input->cookie()->addItems($items);
+        }
     }
 
     /**

@@ -101,12 +101,19 @@ class Input
     /**
      *
      * @param array $items
+     * @param bool $update True - replace existing keys, False - do not overwrite existing keys
      */
-    public function addItems(array $items)
+    public function addItems(array $items, bool $update = true)
     {
-        $this->get->addItems($items);
-        $this->post->addItems($items);
-        $this->all->addItems($items);
+        if ($update) {
+            $this->get->update($items);
+            $this->post->update($items);
+            $this->all->update($items);
+        } else {
+            $this->get->addItems($items);
+            $this->post->addItems($items);
+            $this->all->addItems($items);
+        }
     }
 
     /**
@@ -285,6 +292,10 @@ class Input
 
         foreach ($post as $key => $data) {
             $_POST[$key] = $data;
+        }
+
+        if (static::$self instanceof Input) {
+            static::tearDown();
         }
 
         return static::getInstance();
