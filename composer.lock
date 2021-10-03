@@ -1053,12 +1053,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-feather/support.git",
-                "reference": "38da77b4758ae07ef88c959447a6278c379dfbac"
+                "reference": "37b34ff86d7c0745cdac2e7768b43d3155a98b88"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-feather/support/zipball/38da77b4758ae07ef88c959447a6278c379dfbac",
-                "reference": "38da77b4758ae07ef88c959447a6278c379dfbac",
+                "url": "https://api.github.com/repos/php-feather/support/zipball/37b34ff86d7c0745cdac2e7768b43d3155a98b88",
+                "reference": "37b34ff86d7c0745cdac2e7768b43d3155a98b88",
                 "shasum": ""
             },
             "require": {
@@ -1092,7 +1092,7 @@
                 "issues": "https://github.com/php-feather/support/issues",
                 "source": "https://github.com/php-feather/support/tree/main"
             },
-            "time": "2021-10-03T14:38:34+00:00"
+            "time": "2021-10-03T15:16:29+00:00"
         },
         {
             "name": "php-feather/view",

@@ -4,13 +4,14 @@ namespace Feather\Init\Http;
 
 use Feather\Session\Session;
 use Feather\Init\Http\Parameters\ParameterBag;
+use Feather\Support\Contracts\IRequestParamBag;
 
 /**
  * Description of Request
  *
  * @author fcarbah
  */
-class Request
+class Request implements IRequestParamBag
 {
 
     /** @var string * */
@@ -80,6 +81,9 @@ class Request
     /** @var \Feather\Init\Http\Parameters\ParameterBag * */
     protected $server;
 
+    /** @var \Feather\Init\Http\Parameters\ParameterBag * */
+    protected $headers;
+
     /** @var \Feather\Init\Http\Request * */
     private static $self;
 
@@ -104,6 +108,7 @@ class Request
         $this->setServerParameters($serverParams);
         $this->setClientIp($serverParams);
         $this->setPreviousRequest($serverParams);
+        $this->setHeaders();
         $this->setAcceptableHeaders();
         $this->setContentType();
     }
@@ -151,7 +156,7 @@ class Request
      * @param array $items
      * @param bool $update True - replace existing keys, False - do not overwrite existing keys
      */
-    public function addItemsToRequestBag(array $items, bool $update = true)
+    public function addItems(array $items, bool $update = true)
     {
         $this->input->addItems($items);
     }
@@ -315,6 +320,22 @@ class Request
 
     /**
      *
+     * @param string $name
+     * @param mixed $default
+     * @return \Feather\Init\Http\Parameters\ParameterBag|mixed
+     */
+    public function header($name = null, $default = null)
+    {
+        if ($name !== null) {
+            $name = strtolower($name);
+            return $this->headers->{$name} ?? $default;
+        }
+
+        return $this->headers;
+    }
+
+    /**
+     *
      * @return string
      */
     public function isAjax()
@@ -380,6 +401,21 @@ class Request
     }
 
     /**
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return \Feather\Init\Http\Parameters\ParameterBag|mixed
+     */
+    public function server($key = null, $default = null)
+    {
+        if ($key !== null) {
+            return $this->server->{$key} ?? $default;
+        }
+
+        return $this->server;
+    }
+
+    /**
      * set acceptable headers
      */
     protected function setAcceptableHeaders()
@@ -424,6 +460,31 @@ class Request
         } else {
             $this->remoteIp = $serverParams['REMOTE_ADDR'] ?? '';
         }
+    }
+
+    /**
+     * Set request headers
+     */
+    protected function setHeaders()
+    {
+        $cookies = [];
+        $headers = [];
+
+        foreach (headers_list() as $header) {
+            if (preg_match('/set-cookie:/i', $header)) {
+                $cookie = Utils::createCookieFromString($header);
+                if ($cookie instanceof Cookie) {
+                    $cookies[$cookie->getName()] = $cookie;
+                }
+            } else {
+                list($key, $value) = array_map('trim', explode(':', $header));
+                $header[strtolower($key)] = $value;
+            }
+        }
+
+        $headers['__cookies'] = $cookies;
+
+        $this->headers = new ParameterBag($headers);
     }
 
     /**

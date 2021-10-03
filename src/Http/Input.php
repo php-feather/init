@@ -18,7 +18,7 @@ use Feather\Support\Contracts\IRequestParamBag;
  *
  * @author fcarbah
  */
-class Input implements IRequestParamBag
+class Input
 {
 
     private static $self;
