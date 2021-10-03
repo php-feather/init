@@ -958,17 +958,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-feather/security.git",
-                "reference": "c563c14798ac9f7f936b7831ddd1ad4bb25a4eec"
+                "reference": "04cf0d94f15bfc4bae228cb1e5ea7c5d98a44d16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-feather/security/zipball/c563c14798ac9f7f936b7831ddd1ad4bb25a4eec",
-                "reference": "c563c14798ac9f7f936b7831ddd1ad4bb25a4eec",
+                "url": "https://api.github.com/repos/php-feather/security/zipball/04cf0d94f15bfc4bae228cb1e5ea7c5d98a44d16",
+                "reference": "04cf0d94f15bfc4bae228cb1e5ea7c5d98a44d16",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0",
-                "php-feather/session": "dev-master"
+                "php-feather/session": "dev-master",
+                "php-feather/support": "dev-main"
             },
             "require-dev": {
                 "phpunit/phpunit": "^9.5"
@@ -998,7 +999,7 @@
                 "issues": "https://github.com/php-feather/security/issues",
                 "source": "https://github.com/php-feather/security/tree/master"
             },
-            "time": "2021-10-02T16:53:32+00:00"
+            "time": "2021-10-02T21:31:43+00:00"
         },
         {
             "name": "php-feather/session",
@@ -1052,12 +1053,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-feather/support.git",
-                "reference": "22f7bb832485612184cd0e73c7466b736bd09e7d"
+                "reference": "38da77b4758ae07ef88c959447a6278c379dfbac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-feather/support/zipball/22f7bb832485612184cd0e73c7466b736bd09e7d",
-                "reference": "22f7bb832485612184cd0e73c7466b736bd09e7d",
+                "url": "https://api.github.com/repos/php-feather/support/zipball/38da77b4758ae07ef88c959447a6278c379dfbac",
+                "reference": "38da77b4758ae07ef88c959447a6278c379dfbac",
                 "shasum": ""
             },
             "require": {
@@ -1091,7 +1092,7 @@
                 "issues": "https://github.com/php-feather/support/issues",
                 "source": "https://github.com/php-feather/support/tree/main"
             },
-            "time": "2021-10-02T17:19:51+00:00"
+            "time": "2021-10-03T14:38:34+00:00"
         },
         {
             "name": "php-feather/view",

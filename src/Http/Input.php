@@ -11,13 +11,14 @@ use Feather\Init\Http\Parameters\ParameterBag;
 use Feather\Init\Http\File\UploadedFile;
 use Feather\Init\Http\File\IUploadedFile;
 use Feather\Init\Http\File\InvalidUploadedFile;
+use Feather\Support\Contracts\IRequestParamBag;
 
 /**
  * Description of Input
  *
  * @author fcarbah
  */
-class Input
+class Input implements IRequestParamBag
 {
 
     private static $self;
