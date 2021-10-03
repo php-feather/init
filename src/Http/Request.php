@@ -478,7 +478,7 @@ class Request implements IRequestParamBag
                 }
             } else {
                 list($key, $value) = array_map('trim', explode(':', $header));
-                $header[strtolower($key)] = $value;
+                $headers[strtolower($key)] = $value;
             }
         }
 
