@@ -60,6 +60,36 @@ class Utils
 
     /**
      *
+     * @param string|null $str
+     * @return boolean
+     */
+    public static function isJson(?string $str)
+    {
+        if ($str) {
+            json_decode($str);
+            return json_last_error() === JSON_ERROR_NONE;
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param string|null $str
+     * @return boolean
+     */
+    public static function isXML(?string $str)
+    {
+        if ($str) {
+            $xml = simplexml_load_string($str, 'SimpleXmlElement', LIBXML_NOERROR + LIBXML_ERR_FATAL + LIBXML_ERR_NONE);
+            return $xml != false;
+        }
+
+        return false;
+    }
+
+    /**
+     *
      * @param string $val
      * @return string
      */

@@ -752,8 +752,7 @@ class Response
             $this->headers->remove('CONTENT-LENGTH');
             ini_set('default_mimetype', '');
         } else if (!$this->headers->has('Content-Type')) {
-            $contentType = $request->getContentType();
-            $this->setHeader('Content-Type', $contentType ?? 'text/html');
+            $this->setContentType();
         }
 
         if ($this->headers->has('Transfer-Encoding')) {
@@ -764,6 +763,22 @@ class Response
             $this->headers->set('pragma', 'no-cache');
             $this->headers->set('expires', -1);
         }
+    }
+
+    /**
+     * Set header content type if not specified
+     */
+    protected function setContentType()
+    {
+        if (Utils::isJson($this->content)) {
+            $contentType = 'application/json; charset=UTF-8';
+        } elseif (Utils::isXML($this->content)) {
+            $contentType = 'text/xml';
+        } else {
+            $contentType = 'text/html; ' . 'charset=' . $this->charset;
+        }
+
+        $this->setHeader('Content-Type', $contentType);
     }
 
 }
