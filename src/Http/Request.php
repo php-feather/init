@@ -58,18 +58,18 @@ class Request implements IRequestParamBag
 
     /** @var array * */
     protected $contentTypes = [
-        'atom' => ['application/atom+xml'],
-        'css' => ['text/css'],
-        'form' => ['application/x-www-form-urlencoded'],
-        'html' => ['text/html', 'application/xhtml+xml'],
-        'js' => ['application/javascript', 'application/x-javascript', 'text/javascript'],
-        'json' => ['application/json', 'application/x-json'],
+        'atom'   => ['application/atom+xml'],
+        'css'    => ['text/css'],
+        'form'   => ['application/x-www-form-urlencoded'],
+        'html'   => ['text/html', 'application/xhtml+xml'],
+        'js'     => ['application/javascript', 'application/x-javascript', 'text/javascript'],
+        'json'   => ['application/json', 'application/x-json'],
         'jsonld' => ['application/ld+json'],
-        'jsonp' => ['application/json'],
-        'rdf' => ['application/rdf+xml'],
-        'rss' => ['application/rss+xml'],
-        'txt' => ['text/plain'],
-        'xml' => ['text/xml', 'application/xml', 'application/x-xml'],
+        'jsonp'  => ['application/json'],
+        'rdf'    => ['application/rdf+xml'],
+        'rss'    => ['application/rss+xml'],
+        'txt'    => ['text/plain'],
+        'xml'    => ['text/xml', 'application/xml', 'application/x-xml'],
     ];
 
     /** @var array * */
@@ -91,20 +91,20 @@ class Request implements IRequestParamBag
     {
 
         $this->input = Input::create($getParams, $postParams, $files, $cookies);
-        $method = $this->input->post('__method');
+        $method      = $this->input->post('__method');
 
-        $this->host = $serverParams['HTTP_HOST'] ?? '';
-        $this->uri = $serverParams['REQUEST_URI'] ?? '';
-        $this->path = parse_url($serverParams['REQUEST_URI'] ?? '', PHP_URL_PATH);
-        $this->method = $method ? strtoupper($method) : ($serverParams['REQUEST_METHOD'] ?? '');
+        $this->host      = $serverParams['HTTP_HOST'] ?? '';
+        $this->uri       = $serverParams['REQUEST_URI'] ?? '';
+        $this->path      = parse_url($serverParams['REQUEST_URI'] ?? '', PHP_URL_PATH);
+        $this->method    = $method ? strtoupper($method) : ($serverParams['REQUEST_METHOD'] ?? '');
         $this->userAgent = $serverParams['HTTP_USER_AGENT'] ?? '';
-        $this->serverIp = $serverParams['SERVER_ADDR'] ?? '';
-        $this->scheme = $serverParams['REQUEST_SCHEME'] ?? '';
-        $this->time = $serverParams['REQUEST_TIME'] ?? '';
-        $this->protocol = $serverParams['SERVER_PROTOCOL'] ?? '';
-        $this->isAjax = !empty($serverParams['HTTP_X_REQUESTED_WITH'] ?? '') && strtolower($serverParams['HTTP_X_REQUESTED_WITH'] ?? '') == 'xmlhttprequest' ? TRUE : FALSE;
-        $this->cookie = $serverParams['HTTP_COOKIE'] ?? null;
-        $this->queryStr = $serverParams['QUERY_STRING'] ?? '';
+        $this->serverIp  = $serverParams['SERVER_ADDR'] ?? '';
+        $this->scheme    = $serverParams['REQUEST_SCHEME'] ?? '';
+        $this->time      = $serverParams['REQUEST_TIME'] ?? '';
+        $this->protocol  = $serverParams['SERVER_PROTOCOL'] ?? '';
+        $this->isAjax    = !empty($serverParams['HTTP_X_REQUESTED_WITH'] ?? '') && strtolower($serverParams['HTTP_X_REQUESTED_WITH'] ?? '') == 'xmlhttprequest' ? TRUE : FALSE;
+        $this->cookie    = $serverParams['HTTP_COOKIE'] ?? null;
+        $this->queryStr  = $serverParams['QUERY_STRING'] ?? '';
         $this->setServerParameters($serverParams);
         $this->setClientIp($serverParams);
         $this->setPreviousRequest($serverParams);

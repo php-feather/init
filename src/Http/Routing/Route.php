@@ -75,12 +75,12 @@ class Route
     {
 
         $this->requestMethod = $requestMethod;
-        $this->controller = $controller;
+        $this->controller    = $controller;
 
         if (!$this->isCallBack) {
             $this->method = $method == 'null' ? $this->controller->defaultAction() : $method;
         }
-        $this->params = is_array($params) ? $params : array($params);
+        $this->params  = is_array($params) ? $params : array($params);
         $this->request = Request::getInstance();
     }
 
@@ -179,7 +179,7 @@ class Route
         if (!in_array($method, RequestMethod::methods())) {
             throw new \Exception("Request Method $reqMethod is not supported");
         }
-        $this->requestMethod = $method;
+        $this->requestMethod             = $method;
         $this->supportedMethods[$method] = $method;
         return $this;
     }
@@ -219,40 +219,36 @@ class Route
      */
     public function run()
     {
-        try {
+        $this->validateParamsValues();
 
-            $this->validateParamsValues();
+        $this->validateRequestMethod();
 
-            $this->validateRequestMethod();
+        if ($this->isCallBack) {
+            $closure = function() {
+                return call_user_func_array($this->controller, $this->paramValues);
+            };
+            $next = \Closure::bind($closure, $this);
+        } elseif (method_exists($this->controller, $this->method)) {
 
-            if ($this->isCallBack) {
-                $closure = function() {
-                    return call_user_func_array($this->controller, $this->paramValues);
-                };
-                $next = \Closure::bind($closure, $this);
-            } elseif (method_exists($this->controller, $this->method)) {
-
-                if (($formRequest = $this->getControllerMethodRequestParam()) !== null) {
-                    array_unshift($this->paramValues, $formRequest);
-                }
-                $closure = \Closure::bind(function() {
-                            return call_user_func_array(array($this->controller, $this->method), $this->paramValues);
-                        }, $this);
-                $next = $this->controller->runMiddleware($this->method, $closure);
-                if ($formRequest) {
-                    $next = $formRequest->run($next);
-                }
-            } elseif ($this->fallback) {
-                throw new \Exception('Requested Resource Not Found', HttpCode::NOT_FOUND);
-            } else {
-                throw new \Exception('Bad Request', HttpCode::BAD_REQUEST);
+            if (($formRequest = $this->getControllerMethodRequestParam()) !== null) {
+                array_unshift($this->paramValues, $formRequest);
             }
-
-            $next = $this->runMiddlewares($next);
-            return $this->sendResponse($next);
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage(), $e->getCode());
+            $closure = \Closure::bind(function() {
+                        return call_user_func_array(array($this->controller, $this->method), $this->paramValues);
+                    }, $this);
+            $next = $this->controller->runMiddleware($this->method, $closure);
+            if ($formRequest) {
+                $next = $formRequest->run($next);
+            }
+        } elseif ($this->fallback) {
+            throw new \Exception('Requested Resource Not Found', HttpCode::NOT_FOUND);
+        } else {
+            throw new \Exception('Bad Request', HttpCode::BAD_REQUEST);
         }
+
+        $next = $this->runMiddlewares($next);
+
+        return $this->sendResponse($next);
     }
 
     /**
@@ -261,7 +257,7 @@ class Route
      */
     protected function getControllerMethodRequestParam()
     {
-        $reflectionFunc = new \ReflectionMethod($this->controller, $this->method);
+        $reflectionFunc   = new \ReflectionMethod($this->controller, $this->method);
         $reflectionParams = $reflectionFunc->getParameters();
 
         if (empty($reflectionParams)) {
@@ -269,7 +265,7 @@ class Route
         }
         $paramType = $reflectionParams[0]->getType();
         if ($paramType instanceof \ReflectionNamedType) {
-            $class = $paramType->getName();
+            $class    = $paramType->getName();
             $instance = new $class();
             if ($instance instanceof \Feather\Init\Security\FormRequest) {
                 return $instance;
@@ -356,11 +352,11 @@ class Route
     {
         foreach ($this->paramValues as $param => $value) {
             if (strpos($param, ':') === 0 && $value) {
-                $param = substr($param, 1);
-                $isValid = $this->isValidParamValue($param, $value);
+                $param     = substr($param, 1);
+                $isValid   = $this->isValidParamValue($param, $value);
                 $paramType = 'optional';
             } else {
-                $isValid = $this->isValidParamValue($param, $value);
+                $isValid   = $this->isValidParamValue($param, $value);
                 $paramType = 'required';
             }
 
@@ -380,7 +376,7 @@ class Route
         $isValid = true;
 
         if ($this->controller instanceof Controller && $this->controller->shouldValidateAnnotation()) {
-            $reader = new Reader(new Parser, new FileCache(A_STORAGE));
+            $reader      = new Reader(new Parser, new FileCache(A_STORAGE));
             $annotations = $reader->getMethodAnnotations(get_class($this->controller), $this->method);
 
             $methods = RequestMethod::methods();
