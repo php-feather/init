@@ -87,17 +87,6 @@ class ParameterBag extends Bag
     }
 
     /**
-     *
-     * @param \Feather\Init\Http\Parameters\ParameterBag $bag
-     * @return \Feather\Init\Http\Parameters\ParameterBag
-     */
-    public function merge(ParameterBag $bag)
-    {
-        $this->items = array_merge($this->items, $bag->getItems());
-        return $this;
-    }
-
-    /**
      * Get string value of parameter name
      * @param string $name
      * @return string
