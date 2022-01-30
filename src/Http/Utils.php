@@ -38,21 +38,21 @@ class Utils
     public static function createCookieFromString($cookieStr)
     {
         $cookieData = [
-            'name' => '',
-            'value' => '',
-            'expires' => 0,
-            'path' => '/',
-            'domain' => null,
-            'secure' => false,
+            'name'     => '',
+            'value'    => '',
+            'expires'  => 0,
+            'path'     => '/',
+            'domain'   => null,
+            'secure'   => false,
             'HttpOnly' => true,
-            'raw' => false,
+            'raw'      => false,
             'SameSite' => 'lax'
         ];
 
-        $tempStr = preg_replace('/set-cookie:\s/i', '', $cookieStr);
-        $cookieParts = explode('; ', $tempStr);
-        $namePart = explode('=', array_shift($cookieParts));
-        $cookieData['name'] = $namePart[0];
+        $tempStr             = preg_replace('/set-cookie:\s/i', '', $cookieStr);
+        $cookieParts         = explode('; ', $tempStr);
+        $namePart            = explode('=', array_shift($cookieParts));
+        $cookieData['name']  = $namePart[0];
         $cookieData['value'] = $namePart[1] ?? '';
 
         return static::createCookie($cookieData, $cookieParts);
@@ -80,7 +80,8 @@ class Utils
      */
     public static function isXML(?string $str)
     {
-        if ($str) {
+        if ($str && stripos(trim($str), '<?xml') === 0) {
+            libxml_use_internal_errors(true);
             $xml = simplexml_load_string($str, 'SimpleXmlElement', LIBXML_NOERROR + LIBXML_ERR_FATAL + LIBXML_ERR_NONE);
             return $xml != false;
         }
