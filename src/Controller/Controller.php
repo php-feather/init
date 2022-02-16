@@ -57,8 +57,8 @@ abstract class Controller
 
     public function __construct()
     {
-        $this->input = Input::getInstance();
-        $this->request = Request::getInstance();
+        $this->input    = Input::getInstance();
+        $this->request  = Request::getInstance();
         $this->response = Response::getInstance();
     }
 
@@ -87,7 +87,7 @@ abstract class Controller
             $res->withInput();
         }
 
-        $this->saveSession($redirectData);
+        $this->saveSession($data);
 
         return $res->redirect($location);
     }
@@ -215,7 +215,7 @@ abstract class Controller
     protected function populateOldInput()
     {
         if ($this->oldData) {
-            $get = isset($this->oldData['get']) ? $this->oldData['get'] : array();
+            $get  = isset($this->oldData['get']) ? $this->oldData['get'] : array();
             $post = isset($this->oldData['post']) ? $this->oldData['post'] : array();
             Input::fill($get, $post);
         }
