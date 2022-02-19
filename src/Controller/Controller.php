@@ -1,17 +1,10 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 namespace Feather\Init\Controller;
 
-use Feather\Session\Session;
 use Feather\Init\Http\Input;
 use Feather\Init\Http\Request;
 use Feather\Init\Http\Response;
-use Feather\View\IView;
 use Feather\Support\Container\IContainer;
 
 /**
@@ -87,7 +80,7 @@ abstract class Controller
             $res->withInput();
         }
 
-        $this->saveSession($data);
+        $this->response->saveSession($data);
 
         return $res->redirect($location);
     }
@@ -111,21 +104,12 @@ abstract class Controller
     protected function appendData(array $data = array())
     {
 
-        $this->__init();
+        $this->init();
 
         if ($this->oldData) {
             $data = array_merge($data, $this->oldData['data'] ?? []);
         }
         return $data;
-    }
-
-    /**
-     * Populate data from session
-     */
-    protected function __init()
-    {
-        $this->oldData = $this->response->retrieveFromSession();
-        $this->populateOldInput();
     }
 
     /**
@@ -184,17 +168,24 @@ abstract class Controller
     }
 
     /**
-     *
-     * @param string $template template file
-     * @param array $data
-     * @param int $status
-     * @param array $headers
-     * @return \Feather\Init\Http\Response
+     * Populate data from session
      */
-    protected function renderView($template, array $data = [], int $status = 200, array $headers = [])
+    protected function init()
     {
-        $data = $this->appendData($data);
-        return $this->response->renderView(view($template, $data, $this->viewEngine), $headers, $status);
+        $this->oldData = $this->response->retrieveFromSession();
+        $this->populateOldInput();
+    }
+
+    /**
+     * Fill input with data from session
+     */
+    protected function populateOldInput()
+    {
+        if ($this->oldData) {
+            $get  = isset($this->oldData['get']) ? $this->oldData['get'] : array();
+            $post = isset($this->oldData['post']) ? $this->oldData['post'] : array();
+            Input::fill($get, $post);
+        }
     }
 
     /**
@@ -210,15 +201,17 @@ abstract class Controller
     }
 
     /**
-     * Fill input with data from session
+     *
+     * @param string $template template file
+     * @param array $data
+     * @param int $status
+     * @param array $headers
+     * @return \Feather\Init\Http\Response
      */
-    protected function populateOldInput()
+    protected function renderView($template, array $data = [], int $status = 200, array $headers = [])
     {
-        if ($this->oldData) {
-            $get  = isset($this->oldData['get']) ? $this->oldData['get'] : array();
-            $post = isset($this->oldData['post']) ? $this->oldData['post'] : array();
-            Input::fill($get, $post);
-        }
+        $data = $this->appendData($data);
+        return $this->response->renderView(view($template, $data, $this->viewEngine), $headers, $status);
     }
 
 }
