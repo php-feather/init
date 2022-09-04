@@ -54,10 +54,10 @@ class Input
     private function __construct(array $get = [], array $post = [], array $files = [], array $cookies = [])
     {
 
-        $this->get = new ParameterBag;
-        $this->post = new ParameterBag;
-        $this->cookies = new ParameterBag;
-        $this->files = new ParameterBag;
+        $this->get          = new ParameterBag;
+        $this->post         = new ParameterBag;
+        $this->cookies      = new ParameterBag;
+        $this->files        = new ParameterBag;
         $this->invalidFiles = new ParameterBag;
 
         $this->setFiles($files);
@@ -371,7 +371,7 @@ class Input
             return FILTER_SANITIZE_NUMBER_INT;
         }
 
-        if (is_string($value)) {
+        if (is_string($value) && defined('FILTER_SANITIZE_STRING')) {
             return FILTER_SANITIZE_STRING;
         }
 
@@ -387,16 +387,16 @@ class Input
     protected function setFileArray($key, $files)
     {
 
-        $valid = [];
+        $valid   = [];
         $invalid = [];
 
         foreach ($files['name'] as $indx => $val) {
             $tmpFile = [
-                'error' => $files['error'][$indx],
+                'error'    => $files['error'][$indx],
                 'tmp_name' => $files['tmp_name'][$indx],
-                'name' => $val,
-                'type' => $files['type'][$indx],
-                'size' => $files['size'][$indx]
+                'name'     => $val,
+                'type'     => $files['type'][$indx],
+                'size'     => $files['size'][$indx]
             ];
 
             $file = $this->getFile($tmpFile);
@@ -406,7 +406,7 @@ class Input
                 $valid[] = $file;
             } else {
                 $tmpFile['errors'] = $file;
-                $invalid[] = new InvalidUploadedFile($tmpFile);
+                $invalid[]         = new InvalidUploadedFile($tmpFile);
             }
         }
 
@@ -445,7 +445,7 @@ class Input
                     $file->setUploadInfo($data);
                     $this->files->{$key} = $file;
                 } else {
-                    $data['errors'] = $file;
+                    $data['errors']             = $file;
                     $this->invalidFiles->{$key} = new InvalidUploadedFile($data);
                 }
             }
@@ -460,12 +460,12 @@ class Input
     protected function setRequestParams(array $get, array $post)
     {
         foreach ($post as $key => $data) {
-            $filter = $this->getRequestParamFilterType($data);
+            $filter           = $this->getRequestParamFilterType($data);
             $this->post[$key] = is_array($data) ? filter_var_array($data, $filter) : filter_var($data, $filter);
         }
 
         foreach ($get as $key => $data) {
-            $filter = $this->getRequestParamFilterType($data);
+            $filter          = $this->getRequestParamFilterType($data);
             $this->get[$key] = is_array($data) ? filter_var_array($data, $filter) : filter_var($data, $filter);
         }
 

@@ -431,7 +431,7 @@ class Request implements IRequestParamBag
      */
     protected function setContentType()
     {
-        $contentType = $this->server->get('CONTENT_TYPE');
+        $contentType = $this->server->get('CONTENT_TYPE', '');
 
         $mimeType = null;
 
