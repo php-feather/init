@@ -371,7 +371,7 @@ class Input
             return FILTER_SANITIZE_NUMBER_INT;
         }
 
-        if (is_string($value) && defined('FILTER_SANITIZE_STRING')) {
+        if (is_string($value) && !version_compare(PHP_VERSION, '8.1.0', '>=')) {
             return FILTER_SANITIZE_STRING;
         }
 
